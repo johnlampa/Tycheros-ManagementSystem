@@ -71,18 +71,47 @@ export default function InventoryManagementPage() {
   const [stockInData, setStockInData] = useState<MultiItemStockInData>({
     supplierName: "",
     employeeID: "",
-    stockInDate: "",
+    stockInDateTime: "",
     inventoryItems: [
       {
         inventoryID: 0,
         quantityOrdered: 0,
-        actualQuantity: 0,
-        pricePerUnit: 0,
-        poUoM: "",
+        pricePerPOUoM: 0,
+        unitOfMeasurementID: 0,
         expiryDate: "",
       },
     ],
   });
+
+  const [uomOptions, setUomOptions] = useState<{ [key: number]: any[] }>({});
+
+ // Fetches UoMs based on the category of the selected inventory item
+const fetchUoMsByCategory = async (inventoryID: number, itemIndex: number) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8081/inventoryManagement/getUoMsByCategory/${inventoryID}`
+    );
+    console.log(`Fetched UoMs for inventoryID ${inventoryID}:`, response.data); // Log fetched data
+
+    setUomOptions((prevOptions) => ({
+      ...prevOptions,
+      [itemIndex]: response.data, // Update UoMs for the specific item index
+    }));
+  } catch (error) {
+    console.error("Error fetching UoMs by category:", error);
+  }
+};
+
+// Updates inventory item and fetches UoMs if the item changes
+const handleInventoryChange = (inventoryID: number, index: number) => {
+  console.log(`handleInventoryChange called with inventoryID ${inventoryID} for index ${index}`);
+  const updatedItems = stockInData.inventoryItems.map((item, idx) =>
+    idx === index ? { ...item, inventoryID, unitOfMeasurementID: 0 } : item
+  );
+  setStockInData({ ...stockInData, inventoryItems: updatedItems });
+  fetchUoMsByCategory(inventoryID, index); // Fetch UoMs by category for this item
+  console.log("Updated uomOptions after fetching:", uomOptions);
+};
 
   const handleStockIn = async () => {
     try {
@@ -112,20 +141,19 @@ export default function InventoryManagementPage() {
       setStockInData({
         supplierName: "",
         employeeID: "",
-        stockInDate: "",
+        stockInDateTime: "",
         inventoryItems: [
           {
             inventoryID: 0,
             quantityOrdered: 0,
-            actualQuantity: 0,
-            pricePerUnit: 0,
-            poUoM: "",
+            pricePerPOUoM: 0,
+            unitOfMeasurementID: 0,
             expiryDate: "",
           },
         ],
       });
     } catch (error) {
-      console.error("Error stocking in subitem:", error);
+      console.error("Error stocking in inventory:", error);
     }
   };
 
@@ -173,7 +201,7 @@ export default function InventoryManagementPage() {
   const handleUpdateStockSubmit = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/updateSubitemQuantity",
+        "http://localhost:8081/inventoryManagement/updateSubinventoryQuantity",
         {
           method: "PUT",
           headers: {
@@ -462,10 +490,10 @@ export default function InventoryManagementPage() {
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-[360px] flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Inventory" color={"tealGreen"} type={"orders"}>
-          <Link href={"/employee-home"} className="z-100">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
+          <Link href={"/employee-home"} className="z-10">
+              <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+              </button>
           </Link>
         </Header>
         <div className="p-4">
@@ -559,28 +587,34 @@ export default function InventoryManagementPage() {
         )}
 
         {showStockInOverlay && (
-          <StockInModal
-            stockInData={stockInData}
-            setStockInData={(data) => {
-              setStockInData((prevData) => ({
-                ...prevData,
-                ...data,
-                inventoryItems: data.inventoryItems.map((item) => ({
-                  ...item,
-                  expiryDate: item.expiryDate
-                    ? format(new Date(item.expiryDate), "yyyy-MM-dd")
-                    : "",
-                })),
-              }));
-            }}
-            employees={employees}
-            inventoryNames={inventoryNames}
-            handleStockIn={handleStockIn}
-            onClose={() => {
-              setShowStockInOverlay(false);
-            }}
-          />
+          <>
+            {console.log("Passing uomOptions to StockInModal:", uomOptions)}
+            <StockInModal
+              stockInData={stockInData}
+              setStockInData={(data) => {
+                setStockInData((prevData) => ({
+                  ...prevData,
+                  ...data,
+                  inventoryItems: data.inventoryItems.map((item) => ({
+                    ...item,
+                    expiryDate: item.expiryDate
+                      ? format(new Date(item.expiryDate), "yyyy-MM-dd")
+                      : "",
+                  })),
+                }));
+              }}
+              employees={employees}
+              inventoryNames={inventoryNames}
+              handleStockIn={handleStockIn}
+              onClose={() => {
+                setShowStockInOverlay(false);
+              }}
+              handleInventoryChange={handleInventoryChange}
+              uomOptions={uomOptions} // Ensure this prop is passed
+            />
+          </>
         )}
+
 
         {showStockOutOverlay && (
           <StockOutModal

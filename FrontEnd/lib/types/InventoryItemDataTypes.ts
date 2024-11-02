@@ -19,13 +19,12 @@ export type InventoryItem = {
   export type MultiItemStockInData = {
     supplierName: string;
     employeeID: string;
-    stockInDate: string;
+    stockInDateTime: string;
     inventoryItems: {
       inventoryID: number;
       quantityOrdered: number;
-      actualQuantity: number;
-      pricePerUnit: number;
-      poUoM: string;
+      pricePerPOUoM: number;
+      unitOfMeasurementID: number;
       expiryDate: string;
     }[];
   };

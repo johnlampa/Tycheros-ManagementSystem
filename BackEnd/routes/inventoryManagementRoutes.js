@@ -172,6 +172,30 @@ router.put('/putInventoryItem/:inventoryID', async (req, res) => {
 
 // STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT 
 
+// Endpoint to get UoMs in the same category as the specified inventory item's UoM
+router.get('/getUoMsByCategory/:inventoryID', async (req, res) => {
+  const { inventoryID } = req.params;
+
+  const query = `
+    SELECT uom.*
+    FROM unitofmeasurement uom
+    WHERE uom.category = (
+        SELECT uom2.category
+        FROM unitofmeasurement uom2
+        JOIN inventory inv ON inv.unitOfMeasurementID = uom2.unitOfMeasurementID
+        WHERE inv.inventoryID = ?
+    );
+  `;
+
+  try {
+    const [rows] = await pool.query(query, [inventoryID]);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching UoMs by category:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // STOCK IN ENDPOINT (Adjusted for New One-to-One Relationship)
 router.post('/stockInInventoryItem', async (req, res) => {
   const {
@@ -309,8 +333,8 @@ router.post('/stockOutSubitem', async (req, res) => {
   }
 });
 
-// UPDATE SUBITEM QUANTITY Configured
-router.put('/updateSubitemQuantity', async (req, res) => {
+// UPDATE SUBINVENTORY ITEM QUANTITY Configured
+router.put('/updateSubinventoryQuantity', async (req, res) => {
   const { inventoryID, quantity } = req.body;
 
   const connection = await pool.getConnection();
@@ -414,5 +438,7 @@ router.get('/getReferenceUnits', async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
 
 module.exports = router;

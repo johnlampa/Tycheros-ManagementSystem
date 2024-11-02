@@ -11,6 +11,8 @@ interface StockInModalProps {
   inventoryNames: { inventoryID: number; inventoryName: string }[];
   handleStockIn: () => Promise<void>;
   onClose: () => void;
+  handleInventoryChange: (inventoryID: number, index: number) => void;
+  uomOptions: { [key: number]: any[] };
 }
 
 const StockInModal: React.FC<StockInModalProps> = ({
@@ -20,7 +22,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
   inventoryNames,
   handleStockIn,
   onClose,
+  handleInventoryChange,
+  uomOptions,
 }) => {
+  console.log("uomOptions in StockInModal:", uomOptions);
   const [inventoryItems, setInventoryItems] = useState(
     stockInData.inventoryItems.map((item) => ({
       ...item,
@@ -42,8 +47,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
       {
         inventoryID: 0,
         quantityOrdered: 0,
-        actualQuantity: 0,
-        pricePerUnit: 0,
+        pricePerPOUoM: 0,
+        unitOfMeasurementID: 0,
         expiryDate: format(new Date(), "yyyy-MM-dd"),
         expanded: true,
       },
@@ -76,7 +81,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
     const missingFields: string[] = [];
 
     // Validate stockInData fields
-    if (!stockInData.stockInDate || stockInData.stockInDate.trim() === "") {
+    if (!stockInData.stockInDateTime || stockInData.stockInDateTime.trim() === "") {
       missingFields.push("Stock In Date");
     }
 
@@ -102,12 +107,12 @@ const StockInModal: React.FC<StockInModalProps> = ({
         missingFields.push(`Quantity Ordered for ${inventoryName}`);
       }
 
-      if (item.actualQuantity <= 0) {
-        missingFields.push(`Actual Quantity for ${inventoryName}`);
+      if (!item.unitOfMeasurementID || item.unitOfMeasurementID === 0) {
+        missingFields.push(`UoM for ${inventoryName}`);
       }
 
-      if (!item.pricePerUnit || item.pricePerUnit <= 0) {
-        missingFields.push(`Price Per Unit for ${inventoryName}`);
+      if (!item.pricePerPOUoM || item.pricePerPOUoM <= 0) {
+        missingFields.push(`Price Per PO UoM for ${inventoryName}`);
       }
 
       if (!item.expiryDate || item.expiryDate.trim() === "") {
@@ -135,7 +140,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-black">Stock In</h2>
@@ -146,11 +151,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <input
               type="date"
               id="stockInDate"
-              value={stockInData.stockInDate ? stockInData.stockInDate : ""}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                setStockInData({ ...stockInData, stockInDate: newValue });
-              }}
+              defaultValue={new Date().toISOString().split("T")[0]} // Sets to current date in 'YYYY-MM-DD' format
+              readOnly // Makes the input uneditable
               className="p-2 text-black border border-black"
             />
           </div>
@@ -166,6 +168,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
             }}
             className="mb-2 p-2 w-full text-black border border-black"
           />
+          
           <select
             value={stockInData.employeeID}
             onChange={(e) => {
@@ -195,11 +198,11 @@ const StockInModal: React.FC<StockInModalProps> = ({
               <div className="flex justify-between items-center">
                 <select
                   value={item.inventoryID}
-                  onChange={(e) =>
-                    updateInventoryItem(index, {
-                      inventoryID: parseInt(e.target.value),
-                    })
-                  }
+                  onChange={(e) => {
+                    const newInventoryID = parseInt(e.target.value);
+                    updateInventoryItem(index, { inventoryID: newInventoryID });
+                    handleInventoryChange(newInventoryID, index); // Call handleInventoryChange after updating
+                  }}
                   className="mb-2 mt-2 p-2 w-full text-black border border-black"
                 >
                   <option value="0" disabled>
@@ -214,6 +217,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     </option>
                   ))}
                 </select>
+
                 <button
                   onClick={() => toggleExpandItem(index)}
                   className="ml-2"
@@ -227,41 +231,42 @@ const StockInModal: React.FC<StockInModalProps> = ({
               </div>
               {item.expanded && (
                 <div>
-                  <div className="flex gap-2 mb-2">
+                  <div className="flex gap-2 mb-2 items-center">
                     <input
                       type="number"
                       placeholder="Quantity Ordered"
-                      value={
-                        item.quantityOrdered === 0 ? "" : item.quantityOrdered
-                      }
+                      value={item.quantityOrdered === 0 ? "" : item.quantityOrdered}
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
                           quantityOrdered: parseInt(e.target.value),
                         })
                       }
-                      className="p-2 w-1/2 text-black border border-black"
+                      className="p-2 text-black border border-black h-10 flex-grow" // Takes remaining space
                     />
-                    <input
-                      type="number"
-                      placeholder="Actual Quantity"
-                      value={
-                        item.actualQuantity === 0 ? "" : item.actualQuantity
-                      }
-                      min="0"
+
+                    <select
+                      value={item.unitOfMeasurementID}
                       onChange={(e) =>
-                        updateInventoryItem(index, {
-                          actualQuantity: parseInt(e.target.value),
-                        })
+                        updateInventoryItem(index, { unitOfMeasurementID: parseInt(e.target.value) })
                       }
-                      className="p-2 w-1/2 text-black border border-black"
-                    />
+                      className="p-2 text-black border border-black h-10 w-7/12" // Adjusted to 1/4 of the container
+                    >
+                      <option value="0" disabled>
+                        UoM
+                      </option>
+                      {(uomOptions[index] || []).map((uom) => (
+                        <option key={uom.unitOfMeasurementID} value={uom.unitOfMeasurementID}>
+                          {uom.UoM}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <input
                     type="number"
-                    placeholder="Price Per Unit"
-                    value={item.pricePerUnit === 0 ? "" : item.pricePerUnit}
+                    placeholder="Price Per PO UoM"
+                    value={item.pricePerPOUoM === 0 ? "" : item.pricePerPOUoM}
                     min="0"
                     onChange={(e) =>
                       updateInventoryItem(index, {
