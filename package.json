@@ -1,0 +1,25 @@
+{
+  "name": "tycheros_managementsystem",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+  "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@edgestore/react": "^0.2.2",
+    "@edgestore/server": "^0.2.2",
+    "axios": "^1.7.5",
+    "next": "^15.0.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "husky": "^8.0.0"
+  }
+}
