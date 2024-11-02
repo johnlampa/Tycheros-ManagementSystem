@@ -4,6 +4,7 @@ export type InventoryItem = {
     inventoryCategory : string;
     reorderPoint: number;
     unitOfMeasure: string;
+    unitOfMeasurementID: number;
     purchaseOrderID: number;
     totalQuantity: number;
     inventoryStatus: number;
@@ -24,6 +25,7 @@ export type InventoryItem = {
       quantityOrdered: number;
       actualQuantity: number;
       pricePerUnit: number;
+      poUoM: string;
       expiryDate: string;
     }[];
   };

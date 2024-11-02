@@ -5,7 +5,7 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "Fifteen15", // Change pw
+  password: "AdDU2202201425196", // Change pw
   database: "tycherosdb"
 });
 
@@ -14,22 +14,29 @@ router.get('/getOrders', (req, res) => {
   const ordersQuery = `
     SELECT
       o.orderID,
-      o.paymentID,
-      o.employeeID,
-      o.date,
-      o.status,
+      p.paymentID,
+      os.employeeID,
+      MAX(os.statusDateTime) AS date,  -- Latest status change date as the order date
+      os.orderStatus AS status,        -- Latest status of the order
       SUM(pr.sellingPrice * oi.quantity) AS Total
     FROM
       \`order\` o
     JOIN orderitem oi ON o.orderID = oi.orderID
     JOIN price pr ON oi.productID = pr.productID
+    JOIN orderstatus os ON o.orderID = os.orderID
+    LEFT JOIN payment p ON o.orderID = p.orderID
     WHERE
       pr.priceID = (
         SELECT MAX(pr2.priceID)
         FROM price pr2
         WHERE pr2.productID = oi.productID
       )
-    GROUP BY o.orderID, o.paymentID, o.employeeID, o.date, o.status;
+      AND os.statusDateTime = (
+        SELECT MAX(os2.statusDateTime)
+        FROM orderstatus os2
+        WHERE os2.orderID = o.orderID
+      )  -- Ensure we only get the latest status for each order
+    GROUP BY o.orderID, p.paymentID, os.employeeID, os.orderStatus;
   `;
 
   db.query(ordersQuery, (err, ordersResult) => {
