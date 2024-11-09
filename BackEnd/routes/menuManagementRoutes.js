@@ -46,17 +46,35 @@ router.get('/getProduct', (req, res) => {
 
 router.get('/getAllInventoryItems', (req, res) => {
   const query = `
-    SELECT * FROM inventory;
+    SELECT 
+      i.inventoryID,
+      i.inventoryName,
+      i.inventoryCategory,
+      i.reorderPoint,
+      i.inventoryStatus,
+      i.unitOfMeasurementID,
+      u.category AS uomCategory,
+      u.UoM AS unitOfMeasure,
+      u.type AS uomType,
+      u.ratio,
+      u.status AS uomStatus
+    FROM 
+      inventory i
+    JOIN 
+      unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
+	  ORDER BY
+	    inventoryName ASC;
   `;
 
   db.query(query, (err, result) => {
     if (err) {
-      console.error("Error fetching subitem data:", err);
+      console.error("Error fetching inventory data:", err);
       return res.status(500).json({ error: "Internal Server Error" });
     }
     res.json(result);
-  })
-})
+  });
+});
+
 
 
   
@@ -124,11 +142,13 @@ router.get('/getSpecificSubitems/:productID', (req, res) => {
         si.inventoryID, 
         si.quantityNeeded,
         i.inventoryName,
-        i.unitOfMeasure
+        u.UoM AS unitOfMeasurement
     FROM 
         subitem si
     JOIN 
         inventory i ON si.inventoryID = i.inventoryID
+    JOIN 
+        unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
     WHERE 
         si.productID = ?
   `;

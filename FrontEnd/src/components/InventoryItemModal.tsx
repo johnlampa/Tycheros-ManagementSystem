@@ -3,83 +3,55 @@ import React, { useEffect, useState } from "react";
 import Toggle from "react-toggle";
 import { InventoryItem } from "../../lib/types/InventoryItemDataTypes";
 
-interface SubitemModalProps {
+interface InventoryItemModalProps {
   modalTitle: string;
-  subitemData: {
+  inventoryItemData: {
     inventoryName: string;
     inventoryCategory: string;
     reorderPoint: number;
-    unitOfMeasure: string;
+    unitOfMeasurementID: number;
+    inventoryStatus: number;
   };
+  unitOfMeasurements: { unitOfMeasurementID: number; UoM: string }[];
   itemToEditID?: number;
-  setSubitemData: (newData: any) => void;
+  setInventoryItemData: (newData: any) => void;
   onSave: () => void;
   onCancel: () => void;
-
-  handleStatusToggle?: Function;
-
+  handleStatusToggle?: (inventoryID: number, newStatus: boolean) => void;
   inventoryData?: InventoryItem[];
 }
 
-const SubitemModal: React.FC<SubitemModalProps> = ({
+const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
   modalTitle,
-  subitemData,
-  setSubitemData,
+  inventoryItemData,
+  unitOfMeasurements,
+  setInventoryItemData,
   onSave,
   onCancel,
   handleStatusToggle,
   inventoryData,
   itemToEditID,
 }) => {
-  const [validationMessage, setValidationMessage] = useState<string | null>(
-    null
-  );
-
-  const [handleStatusToggleParams, setHandleStatusToggleParams] = useState<{
-    inventoryID: number | undefined;
-    checked: boolean;
-  }>();
-
-  const [subitemDataFromInventoryData, setSubitemDataFromInventoryData] =
-    useState<InventoryItem>();
-
-  const [isChecked, setIsChecked] = useState(
-    subitemDataFromInventoryData?.inventoryStatus === 1
-  );
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [isChecked, setIsChecked] = useState(inventoryItemData.inventoryStatus === 1);
 
   useEffect(() => {
-    setIsChecked(subitemDataFromInventoryData?.inventoryStatus === 1);
-  }, [subitemDataFromInventoryData]);
-
-  useEffect(() => {
-    const matchingItem = inventoryData?.find(
-      (item) => item.inventoryID === itemToEditID
-    );
-
-    if (matchingItem) {
-      setSubitemDataFromInventoryData(matchingItem);
-    } else {
-      setSubitemDataFromInventoryData(undefined);
-    }
-
-    console.log("inventoryData: ", inventoryData);
-    console.log("itemToEditID: ", itemToEditID);
-    console.log("subitemDataFromInventoryData:", subitemDataFromInventoryData);
-  }, [inventoryData, itemToEditID]);
+    setIsChecked(inventoryItemData.inventoryStatus === 1);
+  }, [inventoryItemData.inventoryStatus]);
 
   const validateForm = () => {
     const missingFields: string[] = [];
 
-    if (!subitemData.inventoryName.trim()) {
+    if (!inventoryItemData.inventoryName.trim()) {
       missingFields.push("Inventory Name");
     }
-    if (!subitemData.inventoryCategory.trim()) {
+    if (!inventoryItemData.inventoryCategory.trim()) {
       missingFields.push("Inventory Category");
     }
-    if (subitemData.reorderPoint <= 0) {
+    if (inventoryItemData.reorderPoint <= 0) {
       missingFields.push("Reorder Point");
     }
-    if (!subitemData.unitOfMeasure.trim()) {
+    if (!inventoryItemData.unitOfMeasurementID) {
       missingFields.push("Unit of Measure");
     }
 
@@ -97,12 +69,9 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
   const handleSave = () => {
     if (validateForm()) {
       onSave();
-    }
-    if (handleStatusToggle && handleStatusToggleParams) {
-      handleStatusToggle(
-        handleStatusToggleParams.inventoryID,
-        handleStatusToggleParams.checked
-      );
+      if (handleStatusToggle && itemToEditID !== undefined) {
+        handleStatusToggle(itemToEditID, isChecked);
+      }
     }
   };
 
@@ -114,17 +83,17 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
           <input
             type="text"
             placeholder="Inventory Name"
-            value={subitemData.inventoryName}
+            value={inventoryItemData.inventoryName}
             onChange={(e) =>
-              setSubitemData({ ...subitemData, inventoryName: e.target.value })
+              setInventoryItemData({ ...inventoryItemData, inventoryName: e.target.value })
             }
             className="mb-2 p-2 w-full text-black"
           />
           <select
-            value={subitemData.inventoryCategory}
+            value={inventoryItemData.inventoryCategory}
             onChange={(e) =>
-              setSubitemData({
-                ...subitemData,
+              setInventoryItemData({
+                ...inventoryItemData,
                 inventoryCategory: e.target.value,
               })
             }
@@ -146,29 +115,36 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
           <input
             type="number"
             placeholder="Reorder Point"
-            value={
-              subitemData.reorderPoint === 0 ? "" : subitemData.reorderPoint
-            }
+            value={inventoryItemData.reorderPoint === 0 ? "" : inventoryItemData.reorderPoint}
             onChange={(e) =>
-              setSubitemData({
-                ...subitemData,
-                reorderPoint:
-                  e.target.value === "" ? 0 : Number(e.target.value),
+              setInventoryItemData({
+                ...inventoryItemData,
+                reorderPoint: e.target.value === "" ? 0 : Number(e.target.value),
               })
             }
             className="mb-2 p-2 w-full text-black"
             min="0"
           />
 
-          <input
-            type="text"
-            placeholder="Unit of Measure"
-            value={subitemData.unitOfMeasure}
+          <select
+            value={inventoryItemData.unitOfMeasurementID || 0} 
             onChange={(e) =>
-              setSubitemData({ ...subitemData, unitOfMeasure: e.target.value })
+              setInventoryItemData({
+                ...inventoryItemData,
+                unitOfMeasurementID: e.target.value ? Number(e.target.value) : undefined,
+              })
             }
             className="mb-2 p-2 w-full text-black"
-          />
+          >
+            <option value="0" disabled>
+              Select Unit of Measure
+            </option>
+            {unitOfMeasurements.map((uom) => (
+              <option key={uom.unitOfMeasurementID} value={uom.unitOfMeasurementID}>
+                {uom.UoM}
+              </option>
+            ))}
+          </select>
 
           <div className="flex gap-x-2 text-black mb-5">
             <p>Status: </p>
@@ -176,16 +152,12 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
               checked={isChecked}
               icons={false}
               onChange={(e) => {
-                const newChecked = e.target.checked;
-                setIsChecked(newChecked);
-
-                console.log(e);
-                if (handleStatusToggle) {
-                  setHandleStatusToggleParams({
-                    inventoryID: subitemDataFromInventoryData?.inventoryID,
-                    checked: e.target.checked,
-                  });
-                }
+                const newStatus = e.target.checked ? 1 : 0;
+                setIsChecked(e.target.checked);
+                setInventoryItemData({
+                  ...inventoryItemData,
+                  inventoryStatus: newStatus,
+                });
               }}
             />
           </div>
@@ -217,4 +189,4 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
   );
 };
 
-export default SubitemModal;
+export default InventoryItemModal;

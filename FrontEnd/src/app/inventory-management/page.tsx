@@ -6,7 +6,7 @@ import {
   MultiItemStockInData,
   InventoryItem,
 } from "../../../lib/types/InventoryItemDataTypes";
-import SubitemModal from "@/components/SubitemModal";
+import InventoryItemModal from "@/components/InventoryItemModal";
 import StockInModal from "@/components/StockInModal";
 import StockOutModal from "@/components/StockOutModal";
 import UpdateStockModal from "@/components/UpdateStockModal";
@@ -15,6 +15,7 @@ import axios from "axios";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
 import InventoryManagementCard from "@/components/ui/InventoryManagementCard";
+import Notification from "@/components/Notification";
 
 import Header from "@/components/Header";
 import Link from "next/link";
@@ -39,7 +40,7 @@ export default function InventoryManagementPage() {
     inventoryName: "",
     inventoryCategory: "",
     reorderPoint: 0,
-    unitOfMeasure: "",
+    unitOfMeasurementID: 0,
     inventoryStatus: 1,
   };
 
@@ -50,16 +51,16 @@ export default function InventoryManagementPage() {
   const [newItem, setNewItem] = useState<{
     inventoryName: string;
     inventoryCategory: string;
-    unitOfMeasure: string;
+    unitOfMeasurementID: number; // Define as number here
     reorderPoint: number;
     inventoryStatus: number;
   }>({
     inventoryName: "",
     inventoryCategory: "",
-    unitOfMeasure: "",
+    unitOfMeasurementID: 0, // or null if optional
     reorderPoint: 0,
     inventoryStatus: 1,
-  });
+  });  
 
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
   const [itemToEditID, setItemToEditID] = useState<number>(-1);
@@ -70,17 +71,47 @@ export default function InventoryManagementPage() {
   const [stockInData, setStockInData] = useState<MultiItemStockInData>({
     supplierName: "",
     employeeID: "",
-    stockInDate: "",
+    stockInDateTime: "",
     inventoryItems: [
       {
         inventoryID: 0,
         quantityOrdered: 0,
-        actualQuantity: 0,
-        pricePerUnit: 0,
+        pricePerPOUoM: 0,
+        unitOfMeasurementID: 0,
         expiryDate: "",
       },
     ],
   });
+
+  const [uomOptions, setUomOptions] = useState<{ [key: number]: any[] }>({});
+
+ // Fetches UoMs based on the category of the selected inventory item
+const fetchUoMsByCategory = async (inventoryID: number, itemIndex: number) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8081/inventoryManagement/getUoMsByCategory/${inventoryID}`
+    );
+    console.log(`Fetched UoMs for inventoryID ${inventoryID}:`, response.data); // Log fetched data
+
+    setUomOptions((prevOptions) => ({
+      ...prevOptions,
+      [itemIndex]: response.data, // Update UoMs for the specific item index
+    }));
+  } catch (error) {
+    console.error("Error fetching UoMs by category:", error);
+  }
+};
+
+// Updates inventory item and fetches UoMs if the item changes
+const handleInventoryChange = (inventoryID: number, index: number) => {
+  console.log(`handleInventoryChange called with inventoryID ${inventoryID} for index ${index}`);
+  const updatedItems = stockInData.inventoryItems.map((item, idx) =>
+    idx === index ? { ...item, inventoryID, unitOfMeasurementID: 0 } : item
+  );
+  setStockInData({ ...stockInData, inventoryItems: updatedItems });
+  fetchUoMsByCategory(inventoryID, index); // Fetch UoMs by category for this item
+  console.log("Updated uomOptions after fetching:", uomOptions);
+};
 
   const handleStockIn = async () => {
     try {
@@ -110,19 +141,19 @@ export default function InventoryManagementPage() {
       setStockInData({
         supplierName: "",
         employeeID: "",
-        stockInDate: "",
+        stockInDateTime: "",
         inventoryItems: [
           {
             inventoryID: 0,
             quantityOrdered: 0,
-            actualQuantity: 0,
-            pricePerUnit: 0,
+            pricePerPOUoM: 0,
+            unitOfMeasurementID: 0,
             expiryDate: "",
           },
         ],
       });
     } catch (error) {
-      console.error("Error stocking in subitem:", error);
+      console.error("Error stocking in inventory:", error);
     }
   };
 
@@ -170,7 +201,7 @@ export default function InventoryManagementPage() {
   const handleUpdateStockSubmit = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/updateSubitemQuantity",
+        "http://localhost:8081/inventoryManagement/updateSubinventoryQuantity",
         {
           method: "PUT",
           headers: {
@@ -288,10 +319,12 @@ export default function InventoryManagementPage() {
     fetchInventory();
   }, []);
 
-  const handleAddItem = async () => {
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+   const handleAddItem = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/postSubitem",
+        "http://localhost:8081/inventoryManagement/postInventoryItem",
         {
           method: "POST",
           headers: {
@@ -300,27 +333,19 @@ export default function InventoryManagementPage() {
           body: JSON.stringify(newItem),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to add inventory item");
       }
+  
+      setSuccessMessage(`Successfully added: ${newItem.inventoryName}`);
 
-      setNewItem({
-        inventoryName: "",
-        inventoryCategory: "",
-        unitOfMeasure: "",
-        reorderPoint: 0,
-        inventoryStatus: 1,
-      });
-
+      // Fetch updated inventory data as before
+      setNewItem(initialItemState);
       const updatedInventory = await fetch(
         "http://localhost:8081/inventoryManagement/getInventoryItem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
-      setShowAddOverlay(false);
-
-      alert("Inventory item added successfully");
-      window.location.reload();
     } catch (error) {
       console.error("Error adding inventory item:", error);
     }
@@ -342,56 +367,32 @@ export default function InventoryManagementPage() {
     if (itemToEdit) {
       try {
         const response = await fetch(
-          `http://localhost:8081/inventoryManagement/putSubitem/${itemToEdit.inventoryID}`,
+          `http://localhost:8081/inventoryManagement/putInventoryItem/${itemToEdit.inventoryID}`,
           {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(itemToEdit),
+            body: JSON.stringify({
+              ...itemToEdit,
+              inventoryStatus: itemToEdit.inventoryStatus ? 1 : 0, // Save status as 1 (active) or 0 (inactive)
+            }),
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Failed to update subitem");
         }
-
+  
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setInventoryData(updatedInventory);
-
+  
         setShowEditOverlay(false);
         alert("Subitem updated successfully");
       } catch (error) {
         console.error("Error updating subitem:", error);
-      }
-    }
-  };
-
-  const handleDeleteItem = async () => {
-    if (itemToDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:8081/inventoryManagement/deleteSubitem/${itemToDelete.inventoryID}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to delete subitem");
-        }
-
-        const updatedInventory = await fetch(
-          "http://localhost:8081/inventoryManagement/getInventoryItem"
-        ).then((res) => res.json());
-        setInventoryData(updatedInventory);
-
-        setShowDeleteOverlay(false);
-        alert("Subitem deleted successfully");
-      } catch (error) {
-        console.error("Error deleting subitem:", error);
       }
     }
   };
@@ -460,6 +461,23 @@ export default function InventoryManagementPage() {
     }
   };
 
+  const [unitOfMeasurements, setUnitOfMeasurements] = useState<{ unitOfMeasurementID: number; UoM: string }[]>([]);
+  useEffect(() => {
+    // Fetch UoM data
+    const fetchUnitOfMeasurements = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8081/inventoryManagement/getReferenceUnits"
+        );
+        setUnitOfMeasurements(response.data);
+      } catch (error) {
+        console.error("Error fetching units of measurement:", error);
+      }
+    };
+
+    fetchUnitOfMeasurements();
+  }, []);
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -472,10 +490,10 @@ export default function InventoryManagementPage() {
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-[360px] flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Inventory" color={"tealGreen"} type={"orders"}>
-          <Link href={"/employee-home"} className="z-100">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
+          <Link href={"/employee-home"} className="z-10">
+              <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+              </button>
           </Link>
         </Header>
         <div className="p-4">
@@ -535,26 +553,28 @@ export default function InventoryManagementPage() {
         )}
 
         {showAddOverlay && (
-          <SubitemModal
+          <InventoryItemModal
             modalTitle="Add Inventory Item"
-            subitemData={newItem}
-            setSubitemData={setNewItem}
+            inventoryItemData={newItem}
+            setInventoryItemData={setNewItem}
             onSave={async () => {
               await handleAddItem();
               resetNewItem();
+              setShowAddOverlay(false);
             }}
             onCancel={() => {
               setShowAddOverlay(false);
               resetNewItem();
             }}
+            unitOfMeasurements={unitOfMeasurements} // Pass the fetched data here
           />
         )}
 
         {showEditOverlay && itemToEdit && (
-          <SubitemModal
+          <InventoryItemModal
             modalTitle="Edit Inventory Item"
-            subitemData={itemToEdit}
-            setSubitemData={setItemToEdit}
+            inventoryItemData={itemToEdit}
+            setInventoryItemData={setItemToEdit}
             onSave={async () => {
               await handleSaveChanges();
             }}
@@ -562,75 +582,39 @@ export default function InventoryManagementPage() {
             handleStatusToggle={handleStatusToggle}
             inventoryData={inventoryData}
             itemToEditID={itemToEditID}
+            unitOfMeasurements={unitOfMeasurements} // Pass the fetched data here
           />
-        )}
-
-        {showDeleteOverlay && itemToDelete && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-4 rounded-lg w-72">
-              <h2 className="text-black text-sm">Delete Inventory Item</h2>
-              <p className="text-black text-xs">
-                Are you sure you want to delete the following item?
-              </p>
-              <p className="text-black text-xs">
-                <strong>ID:</strong> {itemToDelete.inventoryID}
-              </p>
-              <p className="text-black text-xs">
-                <strong>Name:</strong> {itemToDelete.inventoryName}
-              </p>
-              <p className="text-black text-xs">
-                <strong>Category:</strong> {itemToDelete.inventoryCategory}
-              </p>
-              <p className="text-black text-xs">
-                <strong>Reorder Point:</strong> {itemToDelete.reorderPoint}
-              </p>
-              <p className="text-black text-xs">
-                <strong>Unit:</strong> {itemToDelete.unitOfMeasure}
-              </p>
-              <div className="flex justify-between">
-                <button
-                  onClick={async () => {
-                    await handleDeleteItem();
-                    setShowDeleteOverlay(false);
-                  }}
-                  className="bg-black text-white py-1 px-2 text-xs rounded"
-                >
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setShowDeleteOverlay(false)}
-                  className="bg-black text-white py-1 px-2 text-xs rounded"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
         )}
 
         {showStockInOverlay && (
-          <StockInModal
-            stockInData={stockInData}
-            setStockInData={(data) => {
-              setStockInData((prevData) => ({
-                ...prevData,
-                ...data,
-                inventoryItems: data.inventoryItems.map((item) => ({
-                  ...item,
-                  expiryDate: item.expiryDate
-                    ? format(new Date(item.expiryDate), "yyyy-MM-dd")
-                    : "",
-                })),
-              }));
-            }}
-            employees={employees}
-            inventoryNames={inventoryNames}
-            handleStockIn={handleStockIn}
-            onClose={() => {
-              setShowStockInOverlay(false);
-            }}
-          />
+          <>
+            {console.log("Passing uomOptions to StockInModal:", uomOptions)}
+            <StockInModal
+              stockInData={stockInData}
+              setStockInData={(data) => {
+                setStockInData((prevData) => ({
+                  ...prevData,
+                  ...data,
+                  inventoryItems: data.inventoryItems.map((item) => ({
+                    ...item,
+                    expiryDate: item.expiryDate
+                      ? format(new Date(item.expiryDate), "yyyy-MM-dd")
+                      : "",
+                  })),
+                }));
+              }}
+              employees={employees}
+              inventoryNames={inventoryNames}
+              handleStockIn={handleStockIn}
+              onClose={() => {
+                setShowStockInOverlay(false);
+              }}
+              handleInventoryChange={handleInventoryChange}
+              uomOptions={uomOptions} // Ensure this prop is passed
+            />
+          </>
         )}
+
 
         {showStockOutOverlay && (
           <StockOutModal
@@ -657,6 +641,14 @@ export default function InventoryManagementPage() {
             onClose={handleValidationDialogClose}
           />
         )}
+
+        {successMessage && (
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}
+
       </div>
     </div>
   );

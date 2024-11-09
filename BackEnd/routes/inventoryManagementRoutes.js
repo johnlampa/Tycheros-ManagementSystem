@@ -14,7 +14,7 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 
 // INVENTORY MANAGEMENT ROUTES :3
-
+// Configured
 router.get('/getInventoryName', async (req, res) => {
   const query = `SELECT * FROM inventory`;
   try {
@@ -26,37 +26,42 @@ router.get('/getInventoryName', async (req, res) => {
   }
 });
 
-// GET INVENTORY DATA ENDPOINT
+// GET INVENTORY DATA ENDPOINT Configured
 router.get('/getInventoryItem', async (req, res) => {
   const query = `
-    WITH InventoryData AS (
+    WITH InventoryTotals AS (
         SELECT 
             inv.inventoryID,
             inv.inventoryName,
             inv.inventoryCategory,
             inv.reorderPoint,
-            inv.unitOfMeasure,
-            inv.inventoryStatus,  -- Include status attribute
-            SUM(CASE WHEN si.quantityRemaining > 0 THEN si.quantityRemaining ELSE 0 END) 
-                OVER (PARTITION BY inv.inventoryID) AS totalQuantity  -- Total positive quantityRemaining for each inventoryID
+            inv.unitOfMeasurementID, 
+            uom.UoM AS unitOfMeasure,
+            inv.inventoryStatus, 
+            COALESCE(SUM(CASE WHEN si.quantityRemaining > 0 THEN si.quantityRemaining ELSE 0 END), 0) AS totalQuantity  -- Total positive quantityRemaining for each inventoryID
         FROM 
             inventory inv
         LEFT JOIN 
             subinventory si ON inv.inventoryID = si.inventoryID AND si.quantityRemaining > 0 -- Include only positive quantities
+        LEFT JOIN
+            unitofmeasurement uom ON inv.unitOfMeasurementID = uom.unitOfMeasurementID  -- Join with unitofmeasurement table
+        GROUP BY 
+            inv.inventoryID, inv.inventoryName, inv.inventoryCategory, inv.reorderPoint, inv.unitOfMeasurementID, uom.UoM, inv.inventoryStatus
     )
-    SELECT DISTINCT
-        inventoryID,  -- Always retain inventoryID for each row
+    SELECT 
+        inventoryID,  
         inventoryName,
         inventoryCategory,
         reorderPoint,
+        unitOfMeasurementID,
         unitOfMeasure,
         totalQuantity,
-        inventoryStatus  -- Include status in final result
+        inventoryStatus 
     FROM 
-        InventoryData
+        InventoryTotals
     ORDER BY 
-        inventoryName ASC,  -- Order by inventoryName alphabetically
-        inventoryID ASC;     -- Group all entries with the same inventoryID together
+        inventoryName ASC,  
+        inventoryID ASC;
   `;
 
   try {
@@ -68,21 +73,21 @@ router.get('/getInventoryItem', async (req, res) => {
   }
 });
 
-// GET Subitem Details by Inventory ID (Adjusted for new one-to-one relationship)
+// GET Subitem Details by Inventory ID Configured
 router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
 
   const query = `
     SELECT 
-      si.subinventoryID AS purchaseOrderItemID, 
+      si.subinventoryID, 
       si.quantityRemaining,
       poi.quantityOrdered,
-      poi.actualQuantity,
-      poi.pricePerUnit,
+      poi.pricePerPOUoM AS pricePerUnit,
       poi.expiryDate,
-      po.stockInDate,
+      po.stockInDateTime AS stockInDate,
       s.supplierName,
-      CONCAT(e.firstName, ' ', e.lastName) AS employeeName
+      CONCAT(e.firstName, ' ', e.lastName) AS employeeName,
+      uom.UoM as poUoM -- Fetch the UoM from the unitofmeasurement table
     FROM 
       subinventory si
     LEFT JOIN 
@@ -93,6 +98,8 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
       supplier s ON po.supplierID = s.supplierID
     LEFT JOIN 
       employees e ON po.employeeID = e.employeeID
+    LEFT JOIN 
+      unitofmeasurement uom ON poi.unitOfMeasurementID = uom.unitOfMeasurementID  -- Join with unitofmeasurement table
     WHERE 
       si.inventoryID = ?
       AND si.quantityRemaining > 0
@@ -109,15 +116,16 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   }
 });
 
-// ADD SUBITEM ENDPOINT
-router.post('/postSubitem', async (req, res) => {
-  const { inventoryName, inventoryCategory, unitOfMeasure, reorderPoint } = req.body;
+// ADD INVENTORY ITEM ENDPOINT Configured
+router.post('/postInventoryItem', async (req, res) => {
+  const { inventoryName, inventoryCategory, unitOfMeasure, reorderPoint, inventoryStatus } = req.body;
 
   const newInventoryItem = {
     inventoryName,
     inventoryCategory,
-    unitOfMeasure,
+    unitOfMeasurementID: unitOfMeasure,
     reorderPoint,
+    inventoryStatus,
   };
 
   try {
@@ -130,7 +138,7 @@ router.post('/postSubitem', async (req, res) => {
 });
 
 // UPDATE SUBITEM ENDPOINT
-router.put('/putSubitem/:inventoryID', async (req, res) => {
+router.put('/putInventoryItem/:inventoryID', async (req, res) => {
   const inventoryID = req.params.inventoryID;
   const updatedData = req.body;
 
@@ -138,16 +146,18 @@ router.put('/putSubitem/:inventoryID', async (req, res) => {
     UPDATE inventory
     SET inventoryName = COALESCE(?, inventoryName),
         inventoryCategory = COALESCE(?, inventoryCategory),
-        unitOfMeasure = COALESCE(?, unitOfMeasure),
-        reorderPoint = COALESCE(?, reorderPoint)
+        unitOfMeasurementID = COALESCE(?, unitOfMeasurementID),
+        reorderPoint = COALESCE(?, reorderPoint),
+        inventoryStatus = COALESCE(?, inventoryStatus)
     WHERE inventoryID = ?
   `;
 
   const updateValues = [
     updatedData.inventoryName || null,
     updatedData.inventoryCategory || null,
-    updatedData.unitOfMeasure || null,
+    updatedData.unitOfMeasurementID || null,
     updatedData.reorderPoint || null,
+    updatedData.inventoryStatus || null,
     inventoryID
   ];
 
@@ -160,32 +170,31 @@ router.put('/putSubitem/:inventoryID', async (req, res) => {
   }
 });
 
- // DELETE SUBITEM ENDPOINT
- /*
-router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
-  const inventoryID = req.params.inventoryID;
+// STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT 
 
-  const deleteQuery = `
-    DELETE FROM inventory
-    WHERE inventoryID = ?
+// Endpoint to get UoMs in the same category as the specified inventory item's UoM
+router.get('/getUoMsByCategory/:inventoryID', async (req, res) => {
+  const { inventoryID } = req.params;
+
+  const query = `
+    SELECT uom.*
+    FROM unitofmeasurement uom
+    WHERE uom.category = (
+        SELECT uom2.category
+        FROM unitofmeasurement uom2
+        JOIN inventory inv ON inv.unitOfMeasurementID = uom2.unitOfMeasurementID
+        WHERE inv.inventoryID = ?
+    );
   `;
 
   try {
-    const [result] = await pool.query(deleteQuery, [inventoryID]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Subitem not found" });
-    }
-
-    res.json({ message: "Subitem deleted successfully" });
-  } catch (err) {
-    console.error("Error deleting subitem:", err);
-    res.status(500).json({ error: "Internal Server Error" });
+    const [rows] = await pool.query(query, [inventoryID]);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching UoMs by category:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-*/
-
-// STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT 
 
 // STOCK IN ENDPOINT (Adjusted for New One-to-One Relationship)
 router.post('/stockInInventoryItem', async (req, res) => {
@@ -324,8 +333,8 @@ router.post('/stockOutSubitem', async (req, res) => {
   }
 });
 
-// UPDATE SUBITEM QUANTITY
-router.put('/updateSubitemQuantity', async (req, res) => {
+// UPDATE SUBINVENTORY ITEM QUANTITY Configured
+router.put('/updateSubinventoryQuantity', async (req, res) => {
   const { inventoryID, quantity } = req.body;
 
   const connection = await pool.getConnection();
@@ -370,7 +379,8 @@ router.put('/updateSubitemQuantity', async (req, res) => {
 router.put('/updateStatus/:inventoryID', async (req, res) => {
   const { inventoryStatus } = req.body;
   const { inventoryID } = req.params; // Get inventoryID from URL
-
+  console.log("InventoryID: ", inventoryID);
+  
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
@@ -401,6 +411,31 @@ router.put('/updateStatus/:inventoryID', async (req, res) => {
     res.status(500).send(`Error updating inventory status: ${err.message}`);
   } finally {
     connection.release();
+  }
+});
+
+// GET all Unit of Measurements where type is "reference"
+router.get('/getReferenceUnits', async (req, res) => {
+  const query = `
+    SELECT 
+      unitOfMeasurementID, 
+      category, 
+      UoM, 
+      type, 
+      ratio, 
+      status
+    FROM 
+      unitofmeasurement
+    WHERE 
+      type = 'reference' AND status = 1
+  `;
+
+  try {
+    const [result] = await pool.query(query);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error fetching reference units:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

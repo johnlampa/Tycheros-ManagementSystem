@@ -4,6 +4,7 @@ export type InventoryItem = {
     inventoryCategory : string;
     reorderPoint: number;
     unitOfMeasure: string;
+    unitOfMeasurementID: number;
     purchaseOrderID: number;
     totalQuantity: number;
     inventoryStatus: number;
@@ -18,12 +19,12 @@ export type InventoryItem = {
   export type MultiItemStockInData = {
     supplierName: string;
     employeeID: string;
-    stockInDate: string;
+    stockInDateTime: string;
     inventoryItems: {
       inventoryID: number;
       quantityOrdered: number;
-      actualQuantity: number;
-      pricePerUnit: number;
+      pricePerPOUoM: number;
+      unitOfMeasurementID: number;
       expiryDate: string;
     }[];
   };

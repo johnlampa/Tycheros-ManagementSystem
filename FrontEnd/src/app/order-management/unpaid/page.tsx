@@ -75,19 +75,25 @@ export default function Page() {
           </Link>
         </Header>
 
-        {unpaidOrders.map((order, orderIndex) => (
-          <div key={orderIndex} className="mt-7">
-            <OrderManagementCard
-              order={order}
-              menuData={menuData}
-              orders={orders}
-              setOrders={setOrders}
-              type="management"
-              setCancelOrderModalVisibility={setCancelOrderModalVisibility}
-              setOrderToEdit={setOrderToEdit}
-            />
+        {unpaidOrders.length === 0 ? (
+          <div className="text-center text-black mt-7">
+            No unpaid orders yet.
           </div>
-        ))}
+        ) : (
+          unpaidOrders.map((order, orderIndex) => (
+            <div key={orderIndex} className="mt-7">
+              <OrderManagementCard
+                order={order}
+                menuData={menuData}
+                orders={orders}
+                setOrders={setOrders}
+                type="management"
+                setCancelOrderModalVisibility={setCancelOrderModalVisibility}
+                setOrderToEdit={setOrderToEdit}
+              />
+            </div>
+          ))
+        )}
 
         {/* Include the CancelOrderModal and pass the necessary props */}
         <CancelOrderModal

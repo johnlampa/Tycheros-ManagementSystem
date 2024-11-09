@@ -116,9 +116,9 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                             <li className="w-full">
                               <div>
                                 Date:{" "}
-                                {detail.expiryDate
+                                {detail.stockInDate
                                   ? format(
-                                      new Date(detail.expiryDate),
+                                      new Date(detail.stockInDate),
                                       "yyyy-MM-dd"
                                     )
                                   : "N/A"}{" "}
@@ -149,7 +149,7 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                                 </div>
                                 <div className="flex justify-center items-center text-sm font-semibold">
                                   &#8369; {detail.pricePerUnit} /{" "}
-                                  {inventoryItem.unitOfMeasure}
+                                  {detail.poUoM}
                                 </div>
                               </div>
                             </li>

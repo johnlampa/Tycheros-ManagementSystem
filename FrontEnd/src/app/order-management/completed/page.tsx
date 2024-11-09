@@ -62,7 +62,7 @@ export default function Page() {
     return <div>{error}</div>;
   }
 
-  const unpaidOrders = orders.filter((order) => order.status === "Completed");
+  const completedOrders = orders.filter((order) => order.status === "Completed");
 
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
@@ -75,19 +75,25 @@ export default function Page() {
           </Link>
         </Header>
 
-        {unpaidOrders.map((order, orderIndex) => (
-          <div key={orderIndex} className="mt-7">
-            <OrderManagementCard
-              order={order}
-              menuData={menuData}
-              orders={orders}
-              setOrders={setOrders}
-              type={"management"}
-              setCancelOrderModalVisibility={setCancelOrderModalVisibility}
-              setOrderToEdit={setOrderToEdit}
-            />
+        {completedOrders.length === 0 ? (
+          <div className="text-center text-black mt-7">
+            No completed orders yet.
           </div>
-        ))}
+        ) : (
+          completedOrders.map((order, orderIndex) => (
+            <div key={orderIndex} className="mt-7">
+              <OrderManagementCard
+                order={order}
+                menuData={menuData}
+                orders={orders}
+                setOrders={setOrders}
+                type={"management"}
+                setCancelOrderModalVisibility={setCancelOrderModalVisibility}
+                setOrderToEdit={setOrderToEdit}
+              />
+            </div>
+          ))
+        )}
 
         <CancelOrderModal
           cancelOrderModalIsVisible={cancelOrderModalIsVisible}
