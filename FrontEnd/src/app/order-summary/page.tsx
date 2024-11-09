@@ -356,7 +356,7 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center min-h-screen">
-      <div className="w-[360px] flex flex-col items-center gap-3 bg-white min-h-screen">
+      <div className="w-full flex flex-col items-center gap-3 bg-white min-h-screen">
         <Header text="Order Summary" color={"tealGreen"} type={"order_summary"}>
           <Link href={"/"}>
             <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -375,7 +375,7 @@ function OrderSummaryPage() {
           setSubtotal={setSubtotal}
           type={"summary"}
         />
-        <div className="fixed bottom-0">
+        <div className="fixed bottom-0 w-full">
           <OrderButtonSection
             subtotal={subtotal}
             handleClick={handleClick}
