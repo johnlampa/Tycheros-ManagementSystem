@@ -472,16 +472,21 @@ router.get('/getPaymentDetails', (req, res) => {
       p.amount,
       p.method,
       p.referenceNumber,
-      p.discountType,
-      p.discountAmount,
+      d.discountType,
+      d.discountAmount,
       o.orderID,
-      o.status
+      os.orderStatus,
+      os.statusDateTime
     FROM 
       \`order\` o
     JOIN 
-      payment p ON o.paymentID = p.paymentID
+      payment p ON o.orderID = p.orderID
+    LEFT JOIN 
+      discount d ON p.paymentID = d.discountID
+    JOIN 
+      orderstatus os ON o.orderID = os.orderID
     WHERE 
-      o.status != 'Unpaid';
+      os.orderStatus != 'Unpaid';
   `;
 
   db.query(query, (err, result) => {

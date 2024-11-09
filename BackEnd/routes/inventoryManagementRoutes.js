@@ -427,7 +427,7 @@ router.get('/getReferenceUnits', async (req, res) => {
     FROM 
       unitofmeasurement
     WHERE 
-      type = 'reference'
+      type = 'reference' AND status = 1
   `;
 
   try {

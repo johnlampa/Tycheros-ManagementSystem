@@ -54,12 +54,28 @@ export default function Page() {
         const response = await axios.get(
           "http://localhost:8081/orderManagement/getPaymentDetails"
         );
-        setPayments(response.data);
-      } catch (error) {
-        console.error("Error fetching payment details:", error);
-        setError("Error fetching payment details");
+        if (response.data && response.data.length > 0) {
+          setPayments(response.data);
+        } else {
+          setPayments([]); // Set payments as an empty array if no results
+          console.warn("No payment details found");
+        }
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          if (error.response && error.response.status === 404) {
+            // Handle 404 case without setting an error message
+            setPayments([]); // Treat as empty result
+            console.warn("No payment details found for orders with status other than Unpaid");
+          } else {
+            console.error("Error fetching payment details:", error);
+            setError("Error fetching payment details"); // For other types of errors
+          }
+        } else {
+          console.error("Unexpected error:", error);
+          setError("An unexpected error occurred");
+        }
       }
-    };
+    };    
 
     fetchOrders();
     fetchMenuData();
@@ -127,20 +143,26 @@ export default function Page() {
             </Link>
           </div>
         </div>
-        {orders.toReversed().map((order, orderIndex) => (
-          <div key={orderIndex} className="mt-7">
-            <OrderManagementCard
-              order={order}
-              menuData={menuData}
-              orders={orders}
-              setOrders={setOrders}
-              type={"management"}
-              setCancelOrderModalVisibility={() => handleCancelOrder(order)}
-              setOrderToEdit={setOrderToEdit}
-              payments={payments}
-            />
+        {orders.length === 0 ? (
+          <div className="text-center text-black mt-7">
+            No orders available.
           </div>
-        ))}
+        ) : (
+          orders.toReversed().map((order, orderIndex) => (
+            <div key={orderIndex} className="mt-7">
+              <OrderManagementCard
+                order={order}
+                menuData={menuData}
+                orders={orders}
+                setOrders={setOrders}
+                type={"management"}
+                setCancelOrderModalVisibility={() => handleCancelOrder(order)}
+                setOrderToEdit={setOrderToEdit}
+                payments={payments}
+              />
+            </div>
+          ))
+        )}
         <CancelOrderModal
           cancelOrderModalIsVisible={cancelOrderModalIsVisible}
           setCancelOrderModalVisibility={setCancelOrderModalVisibility}
