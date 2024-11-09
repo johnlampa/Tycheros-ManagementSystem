@@ -33,7 +33,15 @@ module.exports = {
       lightRed: '#FF6961',
       darkRed: '#C21807',
       red: '#D11A2A'
-    }
+    }, 
+    screens: {
+      xsm: '0px',
+      sm: '576px',
+      md: '768px',
+      lg: '992px',
+      xl: '1200px',
+      '2xl': '1400px',
+    },
   },
   plugins: [],
 };
