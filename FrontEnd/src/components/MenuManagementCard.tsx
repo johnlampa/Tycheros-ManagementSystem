@@ -63,7 +63,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
                 {item.productName}
               </p>
               <p className="flex ml-auto items-center text-black text-sm">
-                &#8369; {item.sellingPrice.toFixed(2)}
+                &#8369; {item.sellingPrice}
               </p>
               <div className="ml-3">
                 <button
