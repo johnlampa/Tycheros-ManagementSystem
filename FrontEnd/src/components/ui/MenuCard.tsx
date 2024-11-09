@@ -72,7 +72,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
   }, [subitems, inventoryData]);
 
   return (
-    <div className="flex flex-col bg-cream border border-gray-300 rounded-md shadow-2xl overflow-hidden h-[280px]">
+    <div className="w-36 flex flex-col bg-cream border border-gray-300 rounded-md shadow-2xl overflow-hidden h-[280px]">
       {/* Image Section */}
       <div className="w-full h-[150px] relative">
         <Image
@@ -95,7 +95,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
 
         {/* Button at the bottom */}
         <button
-          className={`mt-auto enabled:bg-tealGreen disabled:bg-gray text-white py-2 rounded-md enabled:hover:bg-[#30594f] duration-200 enabled:font-semibold disabled:font-normal disabled:text-xs`}
+          className={`mt-auto enabled:bg-tealGreen disabled:bg-gray text-white py-2 rounded-md enabled:hover:bg-[#30594f] duration-200 enabled:font-semibold disabled:font-normal text-xs`}
           disabled={!availability}
           onClick={() => {
             setQuantityModalVisibility(true);
