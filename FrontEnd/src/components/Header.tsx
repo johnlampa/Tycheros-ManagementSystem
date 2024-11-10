@@ -10,7 +10,7 @@ const headerStyles = cva("w-full h-[90px] flex justify-center items-center", {
     type: {
       home: "text-3xl ml-[-25px] sm:ml-0",
       order_summary: "text-3xl ml-[-25px]",
-      checkout: "text-3xl ml-[-60px]",
+      checkout: "text-3xl ml-[-60px] sm: ml-0",
       orders: "text-4xl ml-[-60px]",
       payment_details: "text-3xl ml-[-25px]",
       menu: "text-5xl ml-[-25px] sm:ml-0",

@@ -52,9 +52,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
   return (
     <>
-      <div className="md:w-[620px] lg:w-[745px] flex flex-col justify-center items-center rounded-lg mt-[25px] bg-cream p-2 md:p-4">
+      <div
+        className={`md:w-[620px] ${type === "summary" ? "lg:w-[745px]" : "lg:w-[620px]"} ${type === "summary" ? "h-min" : "lg:h-[200px]"}  lg: flex flex-col items-center rounded-lg bg-cream p-2 md:p-4`}
+      >
         <div
-          className={`w-[303.75px] md:w-[580px] lg:w-[698px] md:h-12 rounded-md p-2 grid text-[13px] md:text-sm ${
+          className={`w-[303.75px] md:w-[580px] ${type === "summary" ? "lg:w-[698px]" : "lg:w-[580px]"} md:h-12 rounded-md p-2 grid text-[13px] md:text-sm ${
             type === "summary" && cart.length > 0
               ? "grid-cols-[1fr_2fr_1fr_1fr]"
               : "grid-cols-[1fr_2fr_1fr]"
@@ -85,7 +87,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     type === "summary"
                       ? "grid-cols-[1fr_2fr_1fr_1fr]"
                       : "grid-cols-[1fr_2fr_1fr]"
-                  } w-[303.75px] md:w-[580px] lg:w-[698px] rounded-sm p-2 h-[50px]`}
+                  } w-[303.75px] md:w-[580px] ${type === "summary" ? "lg:w-[698px]" : "lg:w-[580px]"} rounded-sm p-2 h-[50px]`}
                 >
                   {type === "summary" ? (
                     <div className="flex items-center justify-center">

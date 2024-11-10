@@ -88,7 +88,7 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center min-h-screen">
-      <div className="w-[360px] flex flex-col items-center gap-3 bg-white min-h-screen">
+      <div className="w-full flex flex-col items-center gap-3 bg-white min-h-screen">
         <Header text="Checkout" color={"tealGreen"} type={"checkout"}>
           <Link
             href={{
@@ -100,23 +100,29 @@ function OrderSummaryPage() {
             </button>
           </Link>
         </Header>
-        <OrderCard
-          cart={order.orderItems || cart}
-          setOrder={setOrder}
-          menuData={menuData}
-          quantityModalIsVisible={quantityModalVisibility}
-          setQuantityModalVisibility={setQuantityModalVisibility}
-          subtotal={subtotal}
-          setSubtotal={setSubtotal}
-          type={"checkout"}
-        />
-        <OrderDetailsSection
-          orderID={order.orderID || -1}
-          date={order.date}
-          subtotal={subtotal}
-        ></OrderDetailsSection>
-        <div className="w-[360px] h-[105px] p-5  bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] fixed bottom-0">
-          <div className="flex justify-center items-center w-[315px] ml-[2.5px] mb-2">
+        <div className="lg:flex justify-center items-center gap-14 xl:gap-32 duration-150 h-min mt-6">
+          <OrderCard
+            cart={order.orderItems || cart}
+            setOrder={setOrder}
+            menuData={menuData}
+            quantityModalIsVisible={quantityModalVisibility}
+            setQuantityModalVisibility={setQuantityModalVisibility}
+            subtotal={subtotal}
+            setSubtotal={setSubtotal}
+            type={"checkout"}
+          />
+          <div className="h-full">
+            <div></div>
+            <OrderDetailsSection
+              orderID={order.orderID || -1}
+              date={order.date}
+              subtotal={subtotal}
+            ></OrderDetailsSection>
+          </div>
+        </div>
+
+        <div className="w-full h-[105px] flex justify-center items-center p-8  bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] fixed bottom-0">
+          <div className="w-full flex justify-center items-center ml-[2.5px] mb-2">
             <span className="text-[20px] text-black font-semibold text-center">
               Please proceed to counter to finalize payment
             </span>
