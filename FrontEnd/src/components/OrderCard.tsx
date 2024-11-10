@@ -52,24 +52,24 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
   return (
     <>
-      <div className="rounded-lg mt-[25px] bg-cream p-2">
+      <div
+        className={`md:w-[620px] ${type === "summary" ? "lg:w-[745px]" : "lg:w-[620px]"} ${type === "summary" ? "h-min" : "lg:h-[200px]"}  lg: flex flex-col items-center rounded-lg bg-cream p-2 md:p-4`}
+      >
         <div
-          className={`w-[303.75px] rounded-md p-2 grid ${
+          className={`w-[303.75px] md:w-[580px] ${type === "summary" ? "lg:w-[698px]" : "lg:w-[580px]"} md:h-12 rounded-md p-2 grid text-[13px] md:text-sm ${
             type === "summary" && cart.length > 0
               ? "grid-cols-[1fr_2fr_1fr_1fr]"
               : "grid-cols-[1fr_2fr_1fr]"
           } bg-[#59988D] `}
         >
-          <div className="flex items-center justify-center">
-            <span className="text-[15px] text-white font-semibold">
-              Quantity
-            </span>
+          <div className="flex items-center justify-center ">
+            <span className=" text-white font-semibold">Quantity</span>
           </div>
           <div className="flex items-center justify-center">
-            <span className="text-[15px] text-white font-semibold">Name</span>
+            <span className="text-white font-semibold">Name</span>
           </div>
           <div className="flex items-center justify-center">
-            <span className="text-[15px] text-white font-semibold text-center">
+            <span className="text-white font-semibold text-center">
               Product Total
             </span>
           </div>
@@ -87,7 +87,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     type === "summary"
                       ? "grid-cols-[1fr_2fr_1fr_1fr]"
                       : "grid-cols-[1fr_2fr_1fr]"
-                  } w-[303.75px] rounded-sm p-2 h-[50px]`}
+                  } w-[303.75px] md:w-[580px] ${type === "summary" ? "lg:w-[698px]" : "lg:w-[580px]"} rounded-sm p-2 h-[50px]`}
                 >
                   {type === "summary" ? (
                     <div className="flex items-center justify-center">
@@ -161,9 +161,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
           })}
         </div>
         {type === "summary" ? (
-          <div className="grid grid-cols-[1fr_1fr_1fr] w-[303.75px] mt-[10px]">
+          <div className="md:w-[580px] w-[303.75px] mt-[10px]">
             <Link href={"/"}>
-              <div className="flex justify-center items-center text-black">
+              <div className=" text-black">
                 <span className="text-[11px] font-bold underline">
                   Add more items
                 </span>
