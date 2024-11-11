@@ -81,7 +81,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
     const missingFields: string[] = [];
 
     // Validate stockInData fields
-    if (!stockInData.stockInDateTime || stockInData.stockInDateTime.trim() === "") {
+    if (
+      !stockInData.stockInDateTime ||
+      stockInData.stockInDateTime.trim() === ""
+    ) {
       missingFields.push("Stock In Date");
     }
 
@@ -151,8 +154,11 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <input
               type="date"
               id="stockInDate"
+              onChange={(e) => {
+                const newValue = e.target.value;
+                setStockInData({ ...stockInData, stockInDateTime: newValue });
+              }}
               defaultValue={new Date().toISOString().split("T")[0]} // Sets to current date in 'YYYY-MM-DD' format
-              readOnly // Makes the input uneditable
               className="p-2 text-black border border-black"
             />
           </div>
@@ -168,7 +174,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
             }}
             className="mb-2 p-2 w-full text-black border border-black"
           />
-          
+
           <select
             value={stockInData.employeeID}
             onChange={(e) => {
@@ -235,7 +241,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Quantity Ordered"
-                      value={item.quantityOrdered === 0 ? "" : item.quantityOrdered}
+                      value={
+                        item.quantityOrdered === 0 ? "" : item.quantityOrdered
+                      }
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -248,7 +256,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <select
                       value={item.unitOfMeasurementID}
                       onChange={(e) =>
-                        updateInventoryItem(index, { unitOfMeasurementID: parseInt(e.target.value) })
+                        updateInventoryItem(index, {
+                          unitOfMeasurementID: parseInt(e.target.value),
+                        })
                       }
                       className="p-2 text-black border border-black h-10 w-7/12" // Adjusted to 1/4 of the container
                     >
@@ -256,7 +266,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
                         UoM
                       </option>
                       {(uomOptions[index] || []).map((uom) => (
-                        <option key={uom.unitOfMeasurementID} value={uom.unitOfMeasurementID}>
+                        <option
+                          key={uom.unitOfMeasurementID}
+                          value={uom.unitOfMeasurementID}
+                        >
                           {uom.UoM}
                         </option>
                       ))}
@@ -270,19 +283,18 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     min="0"
                     onChange={(e) =>
                       updateInventoryItem(index, {
-                        pricePerUnit: parseFloat(e.target.value),
+                        pricePerPOUoM: parseFloat(e.target.value),
                       })
                     }
                     className="mb-2 p-2 w-full text-black border border-black"
                   />
-                  <text className="text-black">Expiry Date </text>
+                  <label className="text-black">Expiry Date </label>
                   <input
                     type="date"
                     placeholder="Expiry Date"
                     value={
                       item.expiryDate === "dd/mm/yyyy" ? "" : item.expiryDate
                     }
-                    defaultValue="dd/mm/yyyy"
                     onChange={(e) =>
                       updateInventoryItem(index, {
                         expiryDate: e.target.value,

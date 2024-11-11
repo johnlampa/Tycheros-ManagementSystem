@@ -16,16 +16,26 @@ export type InventoryItem = {
     employeeName: string;
   }
 
-  export type MultiItemStockInData = {
-    supplierName: string;
-    employeeID: string;
-    stockInDateTime: string;
-    inventoryItems: {
-      inventoryID: number;
-      quantityOrdered: number;
-      pricePerPOUoM: number;
-      unitOfMeasurementID: number;
-      expiryDate: string;
-    }[];
-  };
+export type MultiItemStockInData = {
+  supplierName: string;
+  employeeID: string;
+  stockInDateTime: string;
+  inventoryItems: {
+    inventoryID: number;
+    quantityOrdered: number;
+    pricePerPOUoM: number;
+    unitOfMeasurementID: number;
+    expiryDate: string;
+  }[];
+};
+
+export type MultiItemStockOutData = {
+  stockOutDateTime: string;
+  inventoryItems: {
+    inventoryID: number;
+    quantityToStockOut: number
+    reason: string;
+  }[];
+
+}
   

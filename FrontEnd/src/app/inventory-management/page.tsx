@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
   MultiItemStockInData,
+  MultiItemStockOutData,
   InventoryItem,
 } from "../../../lib/types/InventoryItemDataTypes";
 import InventoryItemModal from "@/components/InventoryItemModal";
@@ -60,7 +61,7 @@ export default function InventoryManagementPage() {
     unitOfMeasurementID: 0, // or null if optional
     reorderPoint: 0,
     inventoryStatus: 1,
-  });  
+  });
 
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
   const [itemToEditID, setItemToEditID] = useState<number>(-1);
@@ -83,78 +84,54 @@ export default function InventoryManagementPage() {
     ],
   });
 
+  const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
+  const [stockOutData, setStockOutData] = useState<MultiItemStockOutData>({
+    stockOutDateTime: "",
+    inventoryItems: [
+      {
+        inventoryID: 0,
+        quantityToStockOut: 0,
+        reason: "",
+      },
+    ],
+  });
+
   const [uomOptions, setUomOptions] = useState<{ [key: number]: any[] }>({});
 
- // Fetches UoMs based on the category of the selected inventory item
-const fetchUoMsByCategory = async (inventoryID: number, itemIndex: number) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:8081/inventoryManagement/getUoMsByCategory/${inventoryID}`
-    );
-    console.log(`Fetched UoMs for inventoryID ${inventoryID}:`, response.data); // Log fetched data
-
-    setUomOptions((prevOptions) => ({
-      ...prevOptions,
-      [itemIndex]: response.data, // Update UoMs for the specific item index
-    }));
-  } catch (error) {
-    console.error("Error fetching UoMs by category:", error);
-  }
-};
-
-// Updates inventory item and fetches UoMs if the item changes
-const handleInventoryChange = (inventoryID: number, index: number) => {
-  console.log(`handleInventoryChange called with inventoryID ${inventoryID} for index ${index}`);
-  const updatedItems = stockInData.inventoryItems.map((item, idx) =>
-    idx === index ? { ...item, inventoryID, unitOfMeasurementID: 0 } : item
-  );
-  setStockInData({ ...stockInData, inventoryItems: updatedItems });
-  fetchUoMsByCategory(inventoryID, index); // Fetch UoMs by category for this item
-  console.log("Updated uomOptions after fetching:", uomOptions);
-};
-
-  const handleStockIn = async () => {
+  // Fetches UoMs based on the category of the selected inventory item
+  const fetchUoMsByCategory = async (
+    inventoryID: number,
+    itemIndex: number
+  ) => {
     try {
-      const response = await fetch(
-        "http://localhost:8081/inventoryManagement/stockInInventoryItem",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(stockInData),
-        }
+      const response = await axios.get(
+        `http://localhost:8081/inventoryManagement/getUoMsByCategory/${inventoryID}`
       );
+      console.log(
+        `Fetched UoMs for inventoryID ${inventoryID}:`,
+        response.data
+      ); // Log fetched data
 
-      if (!response.ok) {
-        throw new Error("Failed to stock in item");
-      }
-
-      const updatedInventory = await fetch(
-        "http://localhost:8081/inventoryManagement/getInventoryItem"
-      ).then((res) => res.json());
-      setInventoryData(updatedInventory);
-
-      alert("Item stocked in successfully");
-
-      // Reset data only after successful stock-in
-      setStockInData({
-        supplierName: "",
-        employeeID: "",
-        stockInDateTime: "",
-        inventoryItems: [
-          {
-            inventoryID: 0,
-            quantityOrdered: 0,
-            pricePerPOUoM: 0,
-            unitOfMeasurementID: 0,
-            expiryDate: "",
-          },
-        ],
-      });
+      setUomOptions((prevOptions) => ({
+        ...prevOptions,
+        [itemIndex]: response.data, // Update UoMs for the specific item index
+      }));
     } catch (error) {
-      console.error("Error stocking in inventory:", error);
+      console.error("Error fetching UoMs by category:", error);
     }
+  };
+
+  // Updates inventory item and fetches UoMs if the item changes
+  const handleInventoryChange = (inventoryID: number, index: number) => {
+    console.log(
+      `handleInventoryChange called with inventoryID ${inventoryID} for index ${index}`
+    );
+    const updatedItems = stockInData.inventoryItems.map((item, idx) =>
+      idx === index ? { ...item, inventoryID, unitOfMeasurementID: 0 } : item
+    );
+    setStockInData({ ...stockInData, inventoryItems: updatedItems });
+    fetchUoMsByCategory(inventoryID, index); // Fetch UoMs by category for this item
+    console.log("Updated uomOptions after fetching:", uomOptions);
   };
 
   const [employees, setEmployees] = useState<
@@ -246,33 +223,52 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
     fetchInventoryNames();
   }, []);
 
-  const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
-  const [stockOutData, setStockOutData] = useState({
-    inventoryID: 0,
-    quantity: 0,
-    reason: "",
-    stockOutDate: "",
-  });
+  const handleStockIn = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/stockInInventoryItem",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(stockInData),
+        }
+      );
 
-  const handleStockOut = (inventoryID: number) => {
-    // Find the item in inventoryData based on the entered inventoryID
-    const item = inventoryData.find((item) => item.inventoryID === inventoryID);
+      if (!response.ok) {
+        throw new Error("Failed to stock in item");
+      }
 
-    if (item) {
-      // If the item is found, proceed with setting stock out data
-      setStockOutData({
-        ...stockOutData,
-        inventoryID,
-        stockOutDate: new Date().toISOString().split("T")[0], // Initialize with today's date
+      const updatedInventory = await fetch(
+        "http://localhost:8081/inventoryManagement/getInventoryItem"
+      ).then((res) => res.json());
+      setInventoryData(updatedInventory);
+
+      alert("Item stocked in successfully");
+
+      // Reset data only after successful stock-in
+      setStockInData({
+        supplierName: "",
+        employeeID: "",
+        stockInDateTime: "",
+        inventoryItems: [
+          {
+            inventoryID: 0,
+            quantityOrdered: 0,
+            pricePerPOUoM: 0,
+            unitOfMeasurementID: 0,
+            expiryDate: "",
+          },
+        ],
       });
-      setShowStockOutOverlay(true);
-    } else {
-      // If the item is not found, alert the user
-      alert("Item not found");
+    } catch (error) {
+      console.error("Error stocking in inventory:", error);
     }
   };
 
-  const handleStockOutSubmit = async () => {
+  //TO EDIT
+  const handleStockOut = async () => {
     try {
       const response = await fetch(
         "http://localhost:8081/inventoryManagement/stockOutSubitem",
@@ -321,7 +317,7 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-   const handleAddItem = async () => {
+  const handleAddItem = async () => {
     try {
       const response = await fetch(
         "http://localhost:8081/inventoryManagement/postInventoryItem",
@@ -333,11 +329,11 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
           body: JSON.stringify(newItem),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to add inventory item");
       }
-  
+
       setSuccessMessage(`Successfully added: ${newItem.inventoryName}`);
 
       // Fetch updated inventory data as before
@@ -379,16 +375,16 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
             }),
           }
         );
-  
+
         if (!response.ok) {
           throw new Error("Failed to update subitem");
         }
-  
+
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setInventoryData(updatedInventory);
-  
+
         setShowEditOverlay(false);
         alert("Subitem updated successfully");
       } catch (error) {
@@ -461,7 +457,9 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
     }
   };
 
-  const [unitOfMeasurements, setUnitOfMeasurements] = useState<{ unitOfMeasurementID: number; UoM: string }[]>([]);
+  const [unitOfMeasurements, setUnitOfMeasurements] = useState<
+    { unitOfMeasurementID: number; UoM: string }[]
+  >([]);
   useEffect(() => {
     // Fetch UoM data
     const fetchUnitOfMeasurements = async () => {
@@ -491,9 +489,9 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
       <div className="w-[360px] flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Inventory" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-10">
-              <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-              </button>
+            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
           </Link>
         </Header>
         <div className="p-4">
@@ -514,17 +512,7 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
               </button>
 
               <button
-                onClick={() => {
-                  if (selectedInventoryID !== null) {
-                    handleStockOut(selectedInventoryID);
-                  } else {
-                    // Show validation dialog when no item is selected
-                    setValidationMessage(
-                      "Please select an inventory item to stock out."
-                    );
-                    setValidationDialogVisible(true);
-                  }
-                }}
+                onClick={() => setShowStockOutOverlay(true)}
                 className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
               >
                 Stock Out
@@ -615,15 +603,19 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
           </>
         )}
 
-
         {showStockOutOverlay && (
-          <StockOutModal
-            stockOutData={stockOutData}
-            setStockOutData={setStockOutData}
-            handleStockOutSubmit={handleStockOutSubmit}
-            onClose={() => setShowStockOutOverlay(false)}
-            inventoryNames={inventoryNames}
-          />
+          <>
+            <StockOutModal
+              stockOutData={stockOutData}
+              setStockOutData={setStockOutData}
+              inventoryNames={inventoryNames}
+              handleStockOut={handleStockOut}
+              onClose={() => {
+                setShowStockOutOverlay(false);
+              }}
+              handleInventoryChange={handleInventoryChange}
+            />
+          </>
         )}
 
         {showUpdateStockOverlay && (
@@ -648,7 +640,6 @@ const handleInventoryChange = (inventoryID: number, index: number) => {
             onClose={() => setSuccessMessage(null)}
           />
         )}
-
       </div>
     </div>
   );

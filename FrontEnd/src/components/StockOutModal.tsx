@@ -1,49 +1,90 @@
-import ValidationDialog from "@/components/ValidationDialog";
 import React, { useState } from "react";
+import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { MultiItemStockOutData } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
+import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 
 interface StockOutModalProps {
-  stockOutData: {
-    inventoryID: number;
-    quantity: number;
-    reason: string;
-    stockOutDate: string;
-  };
-  setStockOutData: (data: any) => void;
-  handleStockOutSubmit: () => Promise<void>;
+  stockOutData: MultiItemStockOutData;
+  setStockOutData: (data: MultiItemStockOutData) => void;
+  handleStockOut: () => Promise<void>;
   onClose: () => void;
   inventoryNames: { inventoryID: number; inventoryName: string }[];
+  handleInventoryChange: (inventoryID: number, index: number) => void;
 }
 
 const StockOutModal: React.FC<StockOutModalProps> = ({
   stockOutData,
   setStockOutData,
-  handleStockOutSubmit,
+  handleStockOut,
   onClose,
   inventoryNames,
+  handleInventoryChange,
 }) => {
+  const [inventoryItems, setInventoryItems] = useState(
+    stockOutData.inventoryItems.map((item) => ({
+      ...item,
+      expanded: true, // Expanding item details by default
+    }))
+  );
+
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
 
-  const inventoryName =
-    inventoryNames.find((inv) => inv.inventoryID === stockOutData.inventoryID)
-      ?.inventoryName || "Unknown Item";
+  const addInventoryItem = () => {
+    setInventoryItems([
+      ...inventoryItems,
+      {
+        inventoryID: 0,
+        quantityToStockOut: 0,
+        reason: "",
+        expanded: true,
+      },
+    ]);
+  };
+
+  const toggleExpandItem = (index: number) => {
+    const newInventoryItems = [...inventoryItems];
+    newInventoryItems[index].expanded = !newInventoryItems[index].expanded;
+    setInventoryItems(newInventoryItems);
+  };
+
+  const updateInventoryItem = (index: number, updatedItem: any) => {
+    const newInventoryItems = [...inventoryItems];
+    newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
+    setInventoryItems(newInventoryItems);
+    setStockOutData({ ...stockOutData, inventoryItems: newInventoryItems });
+  };
 
   const validateForm = () => {
     const missingFields: string[] = [];
 
-    // Validate stockOutData fields
-    if (!stockOutData.stockOutDate || stockOutData.stockOutDate.trim() === "") {
+    // Validate general fields
+    if (
+      !stockOutData.stockOutDateTime ||
+      stockOutData.stockOutDateTime.trim() === ""
+    ) {
       missingFields.push("Stock Out Date");
     }
 
-    if (stockOutData.quantity <= 0) {
-      missingFields.push("Quantity");
-    }
+    // Validate each inventory item
+    inventoryItems.forEach((item, index) => {
+      const inventoryName =
+        inventoryNames.find((inv) => inv.inventoryID === item.inventoryID)
+          ?.inventoryName || `Item ${index + 1}`;
 
-    if (!stockOutData.reason || stockOutData.reason.trim() === "") {
-      missingFields.push("Reason");
-    }
+      if (!item.inventoryID || item.inventoryID === 0) {
+        missingFields.push(`Inventory Name for ${inventoryName}`);
+      }
+
+      if (item.quantityToStockOut <= 0) {
+        missingFields.push(`Quantity for ${inventoryName}`);
+      }
+
+      if (!item.reason || item.reason.trim() === "") {
+        missingFields.push(`Reason for ${inventoryName}`);
+      }
+    });
 
     if (missingFields.length > 0) {
       setValidationMessage(
@@ -58,13 +99,14 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      await handleStockOutSubmit();
-      onClose();
+      console.log("Stock Out Data:", inventoryItems);
+      await handleStockOut();
+      onClose(); // Close the modal after submission
     }
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-black">Stock Out</h2>
@@ -75,80 +117,106 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
             <input
               type="date"
               id="stockOutDate"
-              value={stockOutData.stockOutDate ? stockOutData.stockOutDate : ""}
               onChange={(e) => {
                 const newValue = e.target.value;
-                setStockOutData({ ...stockOutData, stockOutDate: newValue });
+                setStockOutData({
+                  ...stockOutData,
+                  stockOutDateTime: newValue,
+                });
               }}
+              defaultValue={new Date().toISOString().split("T")[0]} // Sets to current date in 'YYYY-MM-DD' format
               className="p-2 text-black border border-black"
             />
           </div>
         </div>
 
-        {/* Inventory Name */}
-        <div className="mb-2">
-          <label className="text-black">Inventory Item:</label>
-          <div className="p-2 border border-black text-black">
-            {inventoryName}
+        {inventoryItems.map((item, index) => (
+          <div key={index} className="mb-4 p-2 border border-black bg-cream">
+            <div className="flex justify-between items-center">
+              <select
+                value={item.inventoryID}
+                onChange={(e) => {
+                  const newInventoryID = parseInt(e.target.value);
+                  handleInventoryChange(newInventoryID, index); // Update the inventory item selection
+                  updateInventoryItem(index, { inventoryID: newInventoryID });
+                }}
+                className="mb-2 mt-2 p-2 w-full text-black border border-black"
+              >
+                <option value="0" disabled>
+                  Select Inventory Item
+                </option>
+                {inventoryNames.map((inv) => (
+                  <option key={inv.inventoryID} value={inv.inventoryID}>
+                    {inv.inventoryName}
+                  </option>
+                ))}
+              </select>
+
+              <button onClick={() => toggleExpandItem(index)}>
+                {item.expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
+              </button>
+            </div>
+
+            {item.expanded && (
+              <div>
+                <div className="mb-2">
+                  <input
+                    type="number"
+                    placeholder="Quantity"
+                    value={
+                      item.quantityToStockOut === 0
+                        ? ""
+                        : item.quantityToStockOut
+                    }
+                    min="0"
+                    onChange={(e) =>
+                      updateInventoryItem(index, {
+                        quantityToStockOut: parseInt(e.target.value) || 0, // Ensure it updates correctly
+                      })
+                    }
+                    className="p-2 w-full text-black border border-black"
+                  />
+                </div>
+
+                <div className="mb-2">
+                  <input
+                    type="text"
+                    placeholder="Reason"
+                    value={item.reason}
+                    onChange={(e) =>
+                      updateInventoryItem(index, { reason: e.target.value })
+                    }
+                    className="p-2 w-full text-black border border-black"
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        ))}
 
-        {/* Quantity Input */}
-        <div className="mb-2">
-          <label htmlFor="quantity" className="text-black">
-            Quantity:
-          </label>
-          <input
-            type="number"
-            id="quantity"
-            placeholder="Quantity"
-            value={stockOutData.quantity === 0 ? "" : stockOutData.quantity}
-            min="0"
-            onChange={(e) =>
-              setStockOutData({
-                ...stockOutData,
-                quantity: e.target.value === "" ? 0 : Number(e.target.value),
-              })
-            }
-            className="p-2 w-full text-black border border-black"
-          />
-        </div>
+        <button
+          onClick={addInventoryItem}
+          className="bg-tealGreen text-black py-2 px-4 rounded mb-4 w-full"
+        >
+          Add Inventory Item
+        </button>
 
-        {/* Reason Input */}
-        <div className="mb-2">
-          <label htmlFor="reason" className="text-black">
-            Reason:
-          </label>
-          <input
-            type="text"
-            id="reason"
-            placeholder="Reason"
-            value={stockOutData.reason}
-            onChange={(e) =>
-              setStockOutData({ ...stockOutData, reason: e.target.value })
-            }
-            className="p-2 w-full text-black border border-black"
-          />
-        </div>
-
-        {/* Save and Cancel Buttons */}
         <div className="flex justify-between">
           <button
             onClick={handleSubmit}
-            className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
+            className="bg-tealGreen text-black py-2 px-4 rounded"
           >
-            Save
+            Stock Out
           </button>
           <button
             onClick={onClose}
-            className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
+            className="bg-tealGreen text-black py-2 px-4 rounded"
           >
             Cancel
           </button>
         </div>
       </div>
 
-      {/* Validation Dialog */}
       {validationMessage && (
         <ValidationDialog
           message={validationMessage}
