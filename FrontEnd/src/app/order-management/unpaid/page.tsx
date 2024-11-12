@@ -16,7 +16,8 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
 
   // State for modal visibility and the order to edit
-  const [cancelOrderModalVisible, setCancelOrderModalVisibility] = useState<boolean>(false);
+  const [cancelOrderModalVisible, setCancelOrderModalVisibility] =
+    useState<boolean>(false);
   const [orderToEdit, setOrderToEdit] = useState<Order | undefined>(undefined); // You can use `undefined`
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen">
+      <div className="w-full flex flex-col items-center bg-white min-h-screen">
         <Header text="Unpaid" color={"tealGreen"} type={"orders"}>
           <Link href={"/order-management"} className="z-100">
             <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -80,19 +81,21 @@ export default function Page() {
             No unpaid orders yet.
           </div>
         ) : (
-          unpaidOrders.map((order, orderIndex) => (
-            <div key={orderIndex} className="mt-7">
-              <OrderManagementCard
-                order={order}
-                menuData={menuData}
-                orders={orders}
-                setOrders={setOrders}
-                type="management"
-                setCancelOrderModalVisibility={setCancelOrderModalVisibility}
-                setOrderToEdit={setOrderToEdit}
-              />
-            </div>
-          ))
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
+            {unpaidOrders.map((order, orderIndex) => (
+              <div key={orderIndex} className="mt-8 lg:mt-0">
+                <OrderManagementCard
+                  order={order}
+                  menuData={menuData}
+                  orders={orders}
+                  setOrders={setOrders}
+                  type="management"
+                  setCancelOrderModalVisibility={setCancelOrderModalVisibility}
+                  setOrderToEdit={setOrderToEdit}
+                />
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Include the CancelOrderModal and pass the necessary props */}

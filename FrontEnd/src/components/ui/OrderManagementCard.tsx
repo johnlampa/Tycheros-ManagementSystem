@@ -252,7 +252,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                   </div>
                   <div>
                     <button
-                      className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
+                      className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
                       onClick={handleCancelOrder}
                     >
                       Cancel Order
@@ -271,7 +271,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                   </button>
 
                   <button
-                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
+                    className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
                     onClick={handleCancelOrder}
                   >
                     Cancel Order
@@ -282,7 +282,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               {order.status === "Completed" && (
                 <div>
                   <button
-                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
+                    className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
                     onClick={handleCancelOrder}
                   >
                     Cancel Order

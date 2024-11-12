@@ -7,7 +7,7 @@ export default function MenuSelection() {
   return (
     <>
       <div className="w-full flex justify-center items-center min-h-screen">
-        <div className="flex flex-col items-center w-[360px] h-screen relative bg-white">
+        <div className="flex flex-col items-center w-full h-screen relative bg-white">
           {/* Header with the FaArrowLeft button included */}
           <Header text="Menu" color="tealGreen" type="orders">
             <Link href={"/employee-home"} className="absolute left-[29px] mb-1">
@@ -21,7 +21,7 @@ export default function MenuSelection() {
           </Header>
 
           {/* Center content vertically */}
-          <div className="flex flex-col justify-center flex-grow">
+          <div className="flex flex-col justify-center flex-grow sm:gap-8">
             <Link href="/food-menu-management">
               <div className="w-[220px] h-[100px] text-[25px] font-bold rounded-3xl border border-2 bg-tealGreen flex justify-center items-center mb-[15px]">
                 Food Menu
