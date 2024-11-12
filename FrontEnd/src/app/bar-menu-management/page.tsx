@@ -15,12 +15,12 @@ export default function Page() {
     useState<ProductDataTypes | null>(null);
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([
-    { categoryID: 7, categoryName: "Milk Tea" },
-    { categoryID: 8, categoryName: "Beer" },
-    { categoryID: 9, categoryName: "Coffee" },
-    { categoryID: 10, categoryName: "Whiskey" },
-    { categoryID: 11, categoryName: "Frappe" },
-    { categoryID: 12, categoryName: "Tea" },
+    { categoryID: 7, categoryName: "Milk Tea", status: 1 },
+    { categoryID: 8, categoryName: "Beer", status: 1 },
+    { categoryID: 9, categoryName: "Coffee", status: 1 },
+    { categoryID: 10, categoryName: "Whiskey", status: 1 },
+    { categoryID: 11, categoryName: "Frappe", status: 1 },
+    { categoryID: 12, categoryName: "Tea", status: 1 },
   ]);
 
   useEffect(() => {

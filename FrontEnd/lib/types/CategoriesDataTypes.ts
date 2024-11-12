@@ -1,4 +1,5 @@
 export type CategoriesDataTypes = {
     categoryID?: number;
-    categoryName: string
+    categoryName: string,
+    status: number,
 }
