@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { MultiItemStockOutData } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
@@ -10,6 +10,7 @@ interface StockOutModalProps {
   onClose: () => void;
   inventoryNames: { inventoryID: number; inventoryName: string }[];
   handleInventoryChange: (inventoryID: number, index: number) => void;
+  employees: { employeeID: number; firstName: string; lastName: string }[];
 }
 
 const StockOutModal: React.FC<StockOutModalProps> = ({
@@ -19,6 +20,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
   onClose,
   inventoryNames,
   handleInventoryChange,
+  employees,
 }) => {
   const [inventoryItems, setInventoryItems] = useState(
     stockOutData.inventoryItems.map((item) => ({
@@ -105,6 +107,35 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
     }
   };
 
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  const [loggedInEmployeeName, setLoggedInEmployeeName] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+
+    if (loggedInEmployeeID) {
+      setStockOutData({
+        ...stockOutData,
+        employeeID: loggedInEmployeeID.toString(),
+      });
+
+      // Find employee with matching ID
+      const employee = employees.find(
+        (emp) => emp.employeeID === loggedInEmployeeID
+      );
+
+      if (employee) {
+        // Set the employee's name in state
+        setLoggedInEmployeeName(employee.lastName + ", " + employee.firstName);
+      }
+    }
+  }, [employees, loggedInEmployeeID]);
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
@@ -128,6 +159,10 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
               className="p-2 text-black border border-black"
             />
           </div>
+        </div>
+
+        <div className="mb-3">
+          Employee: {loggedInEmployeeName || "No employee found."}
         </div>
 
         {inventoryItems.map((item, index) => (

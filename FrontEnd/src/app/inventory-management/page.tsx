@@ -86,6 +86,7 @@ export default function InventoryManagementPage() {
 
   const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
   const [stockOutData, setStockOutData] = useState<MultiItemStockOutData>({
+    employeeID: "",
     stockOutDateTime: "",
     inventoryItems: [
       {
@@ -614,6 +615,7 @@ export default function InventoryManagementPage() {
                 setShowStockOutOverlay(false);
               }}
               handleInventoryChange={handleInventoryChange}
+              employees={employees}
             />
           </>
         )}

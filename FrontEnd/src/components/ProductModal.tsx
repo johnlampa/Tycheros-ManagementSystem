@@ -51,6 +51,23 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [uploadingMessage, setUploadingMessage] = useState<string | null>(null); // Upload message state
   const { edgestore } = useEdgeStore();
 
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+
+    console.log("loggedInEmployeeID: ", loggedInEmployeeID);
+  }, []);
+
+  useEffect(() => {
+    console.log("loggedInEmployeeID: ", loggedInEmployeeID);
+  }, [loggedInEmployeeID]);
+
   useEffect(() => {
     if (type === "edit" && menuProductToEdit?.productID) {
       axios
@@ -165,6 +182,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           formJson[`quantityNeeded-${index}`] as string
         ),
       })),
+      //employeeID: loggedInEmployeeID
     };
 
     try {
