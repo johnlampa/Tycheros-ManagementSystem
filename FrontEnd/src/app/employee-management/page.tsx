@@ -206,7 +206,7 @@ export default function Home() {
 
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
+      <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Employees" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-100">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -234,12 +234,11 @@ export default function Home() {
         {employees.length === 0 ? (
           <p className="text-center text-black">No employees found</p>
         ) : (
-          <div className="space-y-4 w-[310px]">
-            {/* Employee Cards */}
+          <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-9 md:mt-5">
             {employees.map((employee) => (
               <div
                 key={employee.employeeID}
-                className="border border-black p-4 rounded-md bg-gray-100"
+                className="mt-8 md:mt-0 border border-black p-4 rounded-md bg-gray-100 w-[310px]"
               >
                 <div className="flex justify-between bg-gray-300 p-2 mb-2 rounded">
                   <span className="font-semibold text-black">

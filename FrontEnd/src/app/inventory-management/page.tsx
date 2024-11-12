@@ -487,7 +487,7 @@ export default function InventoryManagementPage() {
 
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
+      <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Inventory" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-10">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -525,20 +525,22 @@ export default function InventoryManagementPage() {
         {inventoryData.length === 0 ? (
           <p className="text-sm text-black">No inventory items found</p>
         ) : (
-          inventoryData.map((item) => (
-            <div className="mb-3" key={item.inventoryID}>
-              <InventoryManagementCard
-                inventoryItem={item}
-                handleEditItem={handleEditItem}
-                handleUpdateStock={handleUpdateStock}
-                expandedRow={expandedRow}
-                setExpandedRow={setExpandedRow}
-                toggleRow={toggleRow}
-                detailedData={detailedData}
-                setDetailedData={setDetailedData}
-              />
-            </div>
-          ))
+          <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-9 md:mt-5">
+            {inventoryData.map((item) => (
+              <div key={item.inventoryID} className="mt-8 md:mt-0">
+                <InventoryManagementCard
+                  inventoryItem={item}
+                  handleEditItem={handleEditItem}
+                  handleUpdateStock={handleUpdateStock}
+                  expandedRow={expandedRow}
+                  setExpandedRow={setExpandedRow}
+                  toggleRow={toggleRow}
+                  detailedData={detailedData}
+                  setDetailedData={setDetailedData}
+                />
+              </div>
+            ))}
+          </div>
         )}
 
         {showAddOverlay && (
