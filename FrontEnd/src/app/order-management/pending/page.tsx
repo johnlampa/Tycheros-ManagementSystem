@@ -66,7 +66,7 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen">
+      <div className="w-full flex flex-col items-center bg-white min-h-screen">
         <Header text="Pending" color={"tealGreen"} type={"orders"}>
           <Link href={"/order-management"} className="z-100">
             <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -80,19 +80,21 @@ export default function Page() {
             No pending orders yet.
           </div>
         ) : (
-          pendingOrders.map((order, orderIndex) => (
-            <div key={orderIndex} className="mt-7">
-              <OrderManagementCard
-                order={order}
-                menuData={menuData}
-                orders={orders}
-                setOrders={setOrders} 
-                type={"management"}
-                setCancelOrderModalVisibility={setCancelOrderModalVisibility}
-                setOrderToEdit={setOrderToEdit}
-              />
-            </div>
-          ))
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
+            {pendingOrders.map((order, orderIndex) => (
+              <div key={orderIndex} className="mt-8 lg:mt-0">
+                <OrderManagementCard
+                  order={order}
+                  menuData={menuData}
+                  orders={orders}
+                  setOrders={setOrders}
+                  type={"management"}
+                  setCancelOrderModalVisibility={setCancelOrderModalVisibility}
+                  setOrderToEdit={setOrderToEdit}
+                />
+              </div>
+            ))}
+          </div>
         )}
         <CancelOrderModal
           cancelOrderModalIsVisible={cancelOrderModalIsVisible}

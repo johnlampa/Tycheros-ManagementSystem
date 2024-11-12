@@ -65,7 +65,9 @@ export default function Page() {
           if (error.response && error.response.status === 404) {
             // Handle 404 case without setting an error message
             setPayments([]); // Treat as empty result
-            console.warn("No payment details found for orders with status other than Unpaid");
+            console.warn(
+              "No payment details found for orders with status other than Unpaid"
+            );
           } else {
             console.error("Error fetching payment details:", error);
             setError("Error fetching payment details"); // For other types of errors
@@ -75,7 +77,7 @@ export default function Page() {
           setError("An unexpected error occurred");
         }
       }
-    };    
+    };
 
     fetchOrders();
     fetchMenuData();
@@ -101,7 +103,7 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen">
+      <div className="w-full flex flex-col items-center bg-white min-h-screen">
         <Header text="Orders" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-100">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -110,7 +112,7 @@ export default function Page() {
           </Link>
         </Header>
         <div className="pb-3 w-full bg-tealGreen flex justify-center items-center">
-          <div className="w-max grid grid-cols-3 gap-x-5 gap-y-5">
+          <div className="w-max grid grid-cols-3 sm:grid-cols-4 gap-x-5 gap-y-5 sm:pb-3">
             {/* Status Links */}
             <Link href={"/order-management/unpaid"}>
               <div
@@ -133,7 +135,7 @@ export default function Page() {
                 Completed
               </div>
             </Link>
-            <div></div>
+            <div className="sm:hidden"></div>
             <Link href={"/order-management/cancelled"}>
               <div
                 className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
@@ -143,25 +145,28 @@ export default function Page() {
             </Link>
           </div>
         </div>
+
         {orders.length === 0 ? (
           <div className="text-center text-black mt-7">
             No orders available.
           </div>
         ) : (
-          orders.toReversed().map((order, orderIndex) => (
-            <div key={orderIndex} className="mt-7">
-              <OrderManagementCard
-                order={order}
-                menuData={menuData}
-                orders={orders}
-                setOrders={setOrders}
-                type={"management"}
-                setCancelOrderModalVisibility={() => handleCancelOrder(order)}
-                setOrderToEdit={setOrderToEdit}
-                payments={payments}
-              />
-            </div>
-          ))
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
+            {orders.toReversed().map((order, orderIndex) => (
+              <div key={orderIndex} className="mt-8 lg:mt-0">
+                <OrderManagementCard
+                  order={order}
+                  menuData={menuData}
+                  orders={orders}
+                  setOrders={setOrders}
+                  type={"management"}
+                  setCancelOrderModalVisibility={() => handleCancelOrder(order)}
+                  setOrderToEdit={setOrderToEdit}
+                  payments={payments}
+                />
+              </div>
+            ))}
+          </div>
         )}
         <CancelOrderModal
           cancelOrderModalIsVisible={cancelOrderModalIsVisible}

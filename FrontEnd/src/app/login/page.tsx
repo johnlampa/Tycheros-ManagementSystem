@@ -5,15 +5,10 @@ import { FaArrowLeft } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
-  const [showOverlay, setShowOverlay] = useState(false);
   const [employeeID, setEmployeeID] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
-
-  const handleLoginClick = () => {
-    setShowOverlay(true);
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,7 +45,7 @@ export default function Login() {
   return (
     <div className="w-full flex justify-center items-center min-h-screen">
       {/* Main Container */}
-      <div className="flex flex-col items-center w-[360px] min-h-screen bg-white">
+      <div className="flex flex-col items-center w-full min-h-screen bg-white">
         {/* Header with Back Button */}
         <div className="w-full">
           <div className="w-full h-[90px] flex justify-center items-center bg-[#59988D] text-white">
@@ -65,73 +60,45 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Initial Login Button */}
-        {!showOverlay && (
-          <div className="mt-10">
-            <button
-              onClick={handleLoginClick}
-              className="text-white bg-tealGreen hover:bg-teal-700 font-bold py-3 px-8 rounded-full"
-            >
-              Login
-            </button>
-          </div>
-        )}
+        <div className="flex justify-center items-center mt-10">
+          <div className="bg-white p-8 rounded w-[360px] relative">
+            <form onSubmit={handleSubmit}>
+              <label htmlFor="employeeID" className="text-tealGreen block mb-2">
+                Employee ID
+              </label>
+              <input
+                type="text"
+                name="employeeID"
+                value={employeeID}
+                onChange={(e) => setEmployeeID(e.target.value)}
+                className="w-full mb-4 p-2 border border-gray-300 rounded text-tealGreen"
+                required
+              />
+              <label htmlFor="password" className="text-tealGreen block mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full mb-4 p-2 border border-gray-300 rounded text-tealGreen"
+                required
+              />
 
-        {/* Login Overlay */}
-        {showOverlay && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white p-8 rounded shadow-md w-[360px] relative">
+              {errorMessage && (
+                <p className="text-red-500 text-sm">{errorMessage}</p>
+              )}
+
               <button
-                onClick={() => setShowOverlay(false)} // Close overlay when clicked
-                className="absolute top-7 left-4 border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group"
+                type="submit"
+                className="w-full py-2 mt-4 text-white bg-tealGreen rounded hover:bg-teal-700"
               >
-                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+                LOGIN
               </button>
-
-              <h2 className="text-2xl font-bold text-tealGreen mb-6 text-center">
-                Admin Login
-              </h2>
-              <form onSubmit={handleSubmit}>
-                <label
-                  htmlFor="employeeID"
-                  className="text-tealGreen block mb-2"
-                >
-                  Employee ID
-                </label>
-                <input
-                  type="text"
-                  name="employeeID"
-                  value={employeeID}
-                  onChange={(e) => setEmployeeID(e.target.value)}
-                  className="w-full mb-4 p-2 border border-gray-300 rounded text-tealGreen"
-                  required
-                />
-                <label htmlFor="password" className="text-tealGreen block mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full mb-4 p-2 border border-gray-300 rounded text-tealGreen"
-                  required
-                />
-
-                {errorMessage && (
-                  <p className="text-red-500 text-sm">{errorMessage}</p>
-                )}
-
-                <button
-                  type="submit"
-                  className="w-full py-2 mt-4 text-white bg-tealGreen rounded hover:bg-teal-700"
-                >
-                  LOGIN
-                </button>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

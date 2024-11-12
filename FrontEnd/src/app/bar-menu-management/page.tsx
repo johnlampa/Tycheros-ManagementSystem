@@ -48,7 +48,7 @@ export default function Page() {
   return (
     <>
       <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-        <div className="w-[360px] flex flex-col items-center justify-center bg-white min-h-screen text-black">
+        <div className="w-full flex flex-col items-center justify-center bg-white min-h-screen text-black">
           <Header text="Bar Menu" color={"tealGreen"} type={"orders"}>
             <Link href={"/menu-selection"} className="z-100">
               <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -58,24 +58,26 @@ export default function Page() {
           </Header>
 
           <div className="mt-5">
-            {categories.map((category) => (
-              <div key={category.categoryName} className="mb-8">
-                <p className="font-semibold text-lg mb-2">
-                  {category.categoryName}
-                </p>
-                <div>
-                  <MenuManagementCard
-                    categoryName={category.categoryName}
-                    menuData={MenuData}
-                    setMenuData={setMenuData}
-                    inventoryData={InventoryData}
-                    setInventoryData={setInventoryData}
-                    menuProductHolder={menuProductHolder}
-                    setMenuProductHolder={setMenuProductHolder}
-                  />
+            <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-5">
+              {categories.map((category, categoryIndex) => (
+                <div key={categoryIndex} className="mt-5 lg:mt-0">
+                  <p className="font-semibold text-lg mb-2">
+                    {category.categoryName}
+                  </p>
+                  <div>
+                    <MenuManagementCard
+                      categoryName={category.categoryName}
+                      menuData={MenuData}
+                      setMenuData={setMenuData}
+                      inventoryData={InventoryData}
+                      setInventoryData={setInventoryData}
+                      menuProductHolder={menuProductHolder}
+                      setMenuProductHolder={setMenuProductHolder}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
