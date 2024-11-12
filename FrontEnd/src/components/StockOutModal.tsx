@@ -82,10 +82,6 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
       if (item.quantityToStockOut <= 0) {
         missingFields.push(`Quantity for ${inventoryName}`);
       }
-
-      if (!item.reason || item.reason.trim() === "") {
-        missingFields.push(`Reason for ${inventoryName}`);
-      }
     });
 
     if (missingFields.length > 0) {
@@ -107,7 +103,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
     }
   };
 
-  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(1);
   const [loggedInEmployeeName, setLoggedInEmployeeName] = useState("");
 
   useEffect(() => {
