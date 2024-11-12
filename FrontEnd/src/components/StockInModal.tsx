@@ -37,7 +37,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
     }))
   );
 
-  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(1);
   const [loggedInEmployeeName, setLoggedInEmployeeName] = useState("");
 
   useEffect(() => {
@@ -110,10 +110,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
     const missingFields: string[] = [];
 
     // Validate stockInData fields
-    if (
-      !stockInData.stockInDateTime ||
-      stockInData.stockInDateTime.trim() === ""
-    ) {
+    if (!stockInData.stockInDateTime) {
       missingFields.push("Stock In Date");
     }
 
@@ -166,6 +163,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
   const handleSubmit = async () => {
     if (validateForm()) {
       console.log("Stock In Data:", inventoryItems);
+      console.log("Stock In DateTime:", stockInData.stockInDateTime)
       await handleStockIn();
       onClose();
     }
