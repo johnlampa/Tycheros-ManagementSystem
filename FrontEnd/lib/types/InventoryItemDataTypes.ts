@@ -30,6 +30,7 @@ export type MultiItemStockInData = {
 };
 
 export type MultiItemStockOutData = {
+  employeeID: string;
   stockOutDateTime: string;
   inventoryItems: {
     inventoryID: number;

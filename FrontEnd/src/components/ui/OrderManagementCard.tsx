@@ -18,6 +18,20 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
     setOrderToEdit,
   }) => {
     const [total, setTotal] = useState(0);
+    const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+        if (loggedInEmployeeID) {
+          setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+        }
+      }
+    }, []);
+
+    useEffect(() => {
+      console.log("loggedInEmployeeID: ", loggedInEmployeeID);
+    }, [loggedInEmployeeID]);
 
     useEffect(() => {
       // Calculate total price first without applying discount
@@ -51,6 +65,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             body: JSON.stringify({
               orderID: order.orderID,
               newStatus,
+              //employeeID: loggedInEmployeeID
             }),
           }
         );

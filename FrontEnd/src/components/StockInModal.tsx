@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { format } from "date-fns";
 import { MultiItemStockInData } from "../../lib/types/InventoryItemDataTypes";
@@ -36,6 +36,35 @@ const StockInModal: React.FC<StockInModalProps> = ({
       expanded: true,
     }))
   );
+
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  const [loggedInEmployeeName, setLoggedInEmployeeName] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+
+    if (loggedInEmployeeID) {
+      setStockInData({
+        ...stockInData,
+        employeeID: loggedInEmployeeID.toString(),
+      });
+
+      // Find employee with matching ID
+      const employee = employees.find(
+        (emp) => emp.employeeID === loggedInEmployeeID
+      );
+
+      if (employee) {
+        // Set the employee's name in state
+        setLoggedInEmployeeName(employee.lastName + ", " + employee.firstName);
+      }
+    }
+  }, [employees, loggedInEmployeeID]);
 
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
@@ -164,6 +193,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
           </div>
         </div>
         <div>
+          <div className="mb-3">
+            Employee: {loggedInEmployeeName || "No employee found."}
+          </div>
           <input
             type="text"
             placeholder="Supplier Name"
@@ -174,27 +206,6 @@ const StockInModal: React.FC<StockInModalProps> = ({
             }}
             className="mb-2 p-2 w-full text-black border border-black"
           />
-
-          <select
-            value={stockInData.employeeID}
-            onChange={(e) => {
-              const newValue = e.target.value;
-              setStockInData({ ...stockInData, employeeID: newValue });
-            }}
-            className="mb-2 p-2 w-full text-black border border-black"
-          >
-            <option value="" disabled>
-              Select Employee
-            </option>
-            {employees.map((employee) => (
-              <option
-                key={employee.employeeID}
-                value={employee.employeeID.toString()}
-              >
-                {`${employee.firstName} ${employee.lastName}`}
-              </option>
-            ))}
-          </select>
 
           {inventoryItems.map((item, index) => (
             <div
