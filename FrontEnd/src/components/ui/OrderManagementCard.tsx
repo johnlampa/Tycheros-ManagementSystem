@@ -20,6 +20,10 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
     const [total, setTotal] = useState(0);
     const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
 
+    const payment = payments?.find(
+      (p: Payment) => p.paymentID === order.paymentID
+    );
+
     useEffect(() => {
       if (typeof window !== "undefined") {
         const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
@@ -44,12 +48,10 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
       );
 
       // Apply the discount to the final total once
-      setTotal(calculatedTotal ? calculatedTotal - (discountAmount || 0) : 0);
-    }, [order, menuData, discountAmount]);
-
-    const payment = payments?.find(
-      (p: Payment) => p.paymentID === order.paymentID
-    );
+      setTotal(
+        calculatedTotal ? calculatedTotal - (payment?.discountAmount || 0) : 0
+      );
+    }, [order, menuData, payment?.discountAmount]);
 
     const updateOrderStatus = async (
       newStatus: "Unpaid" | "Pending" | "Completed" | "Cancelled"
