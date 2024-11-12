@@ -15,26 +15,32 @@ const categories: CategoriesDataTypes[] = [
   {
     categoryID: 1,
     categoryName: "Appetizers",
+    status: 1,
   },
   {
     categoryID: 2,
     categoryName: "Entrees",
+    status: 1,
   },
   {
     categoryID: 3,
     categoryName: "Snacks",
+    status: 0,
   },
   {
     categoryID: 4,
     categoryName: "Combo Meals",
+    status: 1,
   },
   {
     categoryID: 5,
     categoryName: "Wings",
+    status: 1,
   },
   {
     categoryID: 6,
     categoryName: "Salads",
+    status: 1,
   },
 ];
 
@@ -76,31 +82,37 @@ export default function Page() {
         </div>
 
         <div className="p-6 flex flex-col justify-center items-center">
-          {categories.map((category) => (
-            <div
-              key={category.categoryName}
-              id={category.categoryName}
-              className="mb-8"
-            >
-              <p className="font-pattaya text-2xl mb-3 align-left">
-                {category.categoryName}
-              </p>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-12 content-center duration-150">
-                {menuData
-                  .filter((item) => item.categoryName === category.categoryName)
-                  .map((item, index) => (
-                    <div key={index}>
-                      <MenuCard
-                        product={item}
-                        setProductToAdd={setProductToAdd}
-                        quantityModalIsVisible={quantityModalVisibility}
-                        setQuantityModalVisibility={setQuantityModalVisibility}
-                      />
-                    </div>
-                  ))}
+          {categories
+            .filter((item) => item.status === 1)
+            .map((category) => (
+              <div
+                key={category.categoryName}
+                id={category.categoryName}
+                className="mb-8"
+              >
+                <p className="font-pattaya text-2xl mb-3 align-left">
+                  {category.categoryName}
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-12 content-center duration-150">
+                  {menuData
+                    .filter(
+                      (item) => item.categoryName === category.categoryName
+                    )
+                    .map((item, index) => (
+                      <div key={index}>
+                        <MenuCard
+                          product={item}
+                          setProductToAdd={setProductToAdd}
+                          quantityModalIsVisible={quantityModalVisibility}
+                          setQuantityModalVisibility={
+                            setQuantityModalVisibility
+                          }
+                        />
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
         {/* Check Order Button with a smaller circle containing a larger image */}
         <Link
