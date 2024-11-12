@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import MenuManagementCard from "@/components/MenuManagementCard";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
@@ -8,6 +9,8 @@ import axios from "axios";
 import { FaArrowLeft } from "react-icons/fa";
 import Link from "next/link";
 import Header from "@/components/Header";
+import AddCategoryModal from "@/components/AddCategoryModal";
+import EditCategoryModal from "@/components/EditCategoryModal";
 
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -15,13 +18,21 @@ export default function Page() {
     useState<ProductDataTypes | null>(null);
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([
-    { categoryID: 1, categoryName: "Appetizers" },
-    { categoryID: 2, categoryName: "Entrees" },
-    { categoryID: 3, categoryName: "Snacks" },
-    { categoryID: 4, categoryName: "Combo Meals" },
-    { categoryID: 5, categoryName: "Wings" },
-    { categoryID: 6, categoryName: "Salads" },
+    { categoryID: 1, categoryName: "Appetizers", status: 1 },
+    { categoryID: 2, categoryName: "Entrees", status: 1 },
+    { categoryID: 3, categoryName: "Snacks", status: 1 },
+    { categoryID: 4, categoryName: "Combo Meals", status: 1 },
+    { categoryID: 5, categoryName: "Wings", status: 1 },
+    { categoryID: 6, categoryName: "Salads", status: 1 },
   ]);
+
+  const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
+    useState(false);
+  const [editCategoryModalIsVisible, setEditCategoryModalIsVisible] =
+    useState(false);
+  const [categoryToEdit, setCategoryToEdit] = useState<
+    CategoriesDataTypes | undefined
+  >(undefined);
 
   useEffect(() => {
     // Fetch Inventory Data
@@ -34,7 +45,7 @@ export default function Page() {
         console.error("Error fetching inventory data:", error);
       });
 
-    // Fetch Menu Data (you might need to implement this endpoint)
+    // Fetch Menu Data
     axios
       .get("http://localhost:8081/menuManagement/getProduct")
       .then((response) => {
@@ -57,13 +68,32 @@ export default function Page() {
             </Link>
           </Header>
 
+          <button
+            onClick={() => setAddCategoryModalIsVisible(true)}
+            className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-[360px] mt-4"
+          >
+            Add Category
+          </button>
+
           <div className="mt-5">
             <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-5">
               {categories.map((category, categoryIndex) => (
                 <div key={categoryIndex} className="mt-5 lg:mt-0">
-                  <p className="font-semibold text-lg mb-2">
-                    {category.categoryName}
-                  </p>
+                  <div className="flex items-center mb-2 gap-x-4">
+                    <p className="font-semibold text-lg ">
+                      {category.categoryName}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setCategoryToEdit(category);
+                        setEditCategoryModalIsVisible(true);
+                      }}
+                      className="text-black px-3 text-xs rounded-full border border-black "
+                    >
+                      Edit
+                    </button>
+                  </div>
+
                   <div>
                     <MenuManagementCard
                       categoryName={category.categoryName}
@@ -79,6 +109,20 @@ export default function Page() {
               ))}
             </div>
           </div>
+
+          <EditCategoryModal
+            editCategoryModalIsVisible={editCategoryModalIsVisible}
+            setEditCategoryModalIsVisible={setEditCategoryModalIsVisible}
+            modalTitle={"Edit Category"}
+            categoryToEdit={categoryToEdit}
+          />
+
+          <AddCategoryModal
+            addCategoryModalIsVisible={addCategoryModalIsVisible}
+            setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
+            setCategories={setCategories} // Pass setCategories here
+            modalTitle="Add Category"
+          />
         </div>
       </div>
     </>

@@ -384,16 +384,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
           Save
         </button>
 
-        {type === "edit" && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="bg-white hover:bg-red hover:text-white text-red border-2 border-red font-semibold py-2 px-4 rounded w-full mt-2"
-          >
-            Delete Product
-          </button>
-        )}
-
         {/* Message indicating the upload status */}
         {uploadingMessage && (
           <p className="text-black text-center mt-4">{uploadingMessage}</p>
