@@ -99,7 +99,7 @@ function OrderSummaryPage() {
   ) => {
     try {
       const response = await axios.post(
-        "http://localhost:8081/orderManagement/getSubinventoryID",
+        "http://localhost:8081/ordering/getSubinventoryID",
         {
           inventoryID: inventoryID,
           totalInventoryQuantityNeeded: totalNeeded,
@@ -109,10 +109,6 @@ function OrderSummaryPage() {
       if (response.status === 200) {
         const { necessarySubinventoryIDs, totalQuantityRemaining } =
           response.data;
-        console.log(
-          `Necessary subinventoryIDs for inventoryID ${inventoryID}:`,
-          necessarySubinventoryIDs
-        );
         return necessarySubinventoryIDs;
       } else {
         console.error(
@@ -132,7 +128,7 @@ function OrderSummaryPage() {
     try {
       // Make a single POST request to the new endpoint
       const response = await axios.post(
-        "http://localhost:8081/orderManagement/getSubinventoryDetails",
+        "http://localhost:8081/ordering/getSubinventoryDetails",
         { productIDs }
       );
 
@@ -233,7 +229,7 @@ function OrderSummaryPage() {
 
       // Send the updates to the backend
       const response = await fetch(
-        "http://localhost:8081/orderManagement/updateMultipleSubitemQuantities",
+        "http://localhost:8081/ordering/updateMultipleSubitemQuantities",
         {
           method: "PUT",
           headers: {
