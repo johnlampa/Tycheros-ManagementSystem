@@ -73,7 +73,7 @@ router.get('/getInventoryItem', async (req, res) => {
   }
 });
 
-// GET Subitem Details by Inventory ID Configured
+// GET INVENTORY Details by Inventory ID Configured
 router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
 
@@ -111,7 +111,7 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
     const [result] = await pool.query(query, [inventoryID]);
     res.json(result);
   } catch (err) {
-    console.error("Error fetching subitem details:", err);
+    console.error("Error fetching inventory item details:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -137,7 +137,7 @@ router.post('/postInventoryItem', async (req, res) => {
   }
 });
 
-// UPDATE SUBITEM ENDPOINT
+// UPDATE SUBINVENTORY ENDPOINT
 router.put('/putInventoryItem/:inventoryID', async (req, res) => {
   const inventoryID = req.params.inventoryID;
   const updatedData = req.body;
@@ -163,7 +163,7 @@ router.put('/putInventoryItem/:inventoryID', async (req, res) => {
 
   try {
     await pool.query(updateQuery, updateValues);
-    res.json({ message: "Subitem updated successfully" });
+    res.json({ message: "Inventory item updated successfully" });
   } catch (err) {
     console.error("Error updating inventory:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -196,6 +196,7 @@ router.get('/getUoMsByCategory/:inventoryID', async (req, res) => {
   }
 });
 
+// STOCK IN ENDPOINT CONFIGURED
 router.post('/stockInInventoryItem', async (req, res) => {
   const {
     supplierName,
@@ -279,61 +280,62 @@ router.post('/stockInInventoryItem', async (req, res) => {
     });
   } catch (err) {
     await connection.rollback();
-    console.error('Error stocking in subitems:', err);
+    console.error('Error stocking in items:', err);
     res.status(500).send(err);
   } finally {
     connection.release();
   }
 });
 
-// STOCK OUT SUBITEM ENDPOINT
-router.post('/stockOutSubitem', async (req, res) => {
-  const { inventoryID, quantity, reason } = req.body; // Assume inventoryID is provided
-  const date = new Date();
+router.post('/stockOutInventoryItem', async (req, res) => {
+  const { inventoryItems, stockOutDateTime, employeeID } = req.body; // Assume an array of inventory items with quantities and reasons
 
   const connection = await pool.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    // Find the subinventory entries for the given inventoryID, ordered by the oldest expiry date
-    const [subinventoryEntries] = await connection.query(`
-      SELECT si.subinventoryID, si.quantityRemaining, poi.expiryDate
-      FROM subinventory si
-      JOIN purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
-      WHERE si.inventoryID = ? AND si.quantityRemaining > 0
-      ORDER BY poi.expiryDate ASC
-    `, [inventoryID]);
+    for (const item of inventoryItems) {
+      const { inventoryID, quantityToStockOut, reason } = item;
+      let remainingQuantity = quantityToStockOut;
 
-    let remainingQuantity = quantity;
-    
-    for (const entry of subinventoryEntries) {
-      if (remainingQuantity <= 0) break;
+      // Find subinventory entries for the given inventoryID, ordered by the oldest expiry date
+      const [subinventoryEntries] = await connection.query(`
+        SELECT si.subinventoryID, si.quantityRemaining, poi.expiryDate
+        FROM subinventory si
+        JOIN purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
+        WHERE si.inventoryID = ? AND si.quantityRemaining > 0
+        ORDER BY poi.expiryDate ASC
+      `, [inventoryID]);
 
-      const deductQuantity = Math.min(entry.quantityRemaining, remainingQuantity);
+      for (const entry of subinventoryEntries) {
+        if (remainingQuantity <= 0) break;
 
-      // Update the quantityRemaining
-      await connection.query(`
-        UPDATE subinventory
-        SET quantityRemaining = quantityRemaining - ?
-        WHERE subinventoryID = ?
-      `, [deductQuantity, entry.subinventoryID]);
+        const deductQuantity = Math.min(entry.quantityRemaining, remainingQuantity);
 
-      remainingQuantity -= deductQuantity;
+        // Update the quantityRemaining in subinventory
+        await connection.query(`
+          UPDATE subinventory
+          SET quantityRemaining = quantityRemaining - ?
+          WHERE subinventoryID = ?
+        `, [deductQuantity, entry.subinventoryID]);
 
-      // Insert the stock-out record
-      await connection.query(`
-        INSERT INTO stockout (subinventoryID, quantity, reason, date)
-        VALUES (?, ?, ?, ?)
-      `, [entry.subinventoryID, deductQuantity, reason, date]);
-    }
+        remainingQuantity -= deductQuantity;
 
-    if (remainingQuantity > 0) {
-      throw new Error('Not enough stock available to complete the stock-out.');
+        // Insert a record into the stockout table
+        await connection.query(`
+          INSERT INTO stockout (subinventoryID, quantity, reason, stockOutDateTime, employeeID)
+          VALUES (?, ?, ?, ?, ?)
+        `, [entry.subinventoryID, deductQuantity, reason, stockOutDateTime, employeeID]);
+      }
+
+      if (remainingQuantity > 0) {
+        throw new Error(`Not enough stock available in inventoryID ${inventoryID} to complete the stock-out.`);
+      }
     }
 
     await connection.commit();
-    res.status(201).send('Stock-out recorded successfully');
+    res.status(201).send('Stock-out recorded successfully for all items');
   } catch (err) {
     await connection.rollback();
     console.error("Error processing stock-out:", err);
