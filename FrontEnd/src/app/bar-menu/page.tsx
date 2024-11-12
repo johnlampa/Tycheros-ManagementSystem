@@ -15,26 +15,32 @@ const categories: CategoriesDataTypes[] = [
   {
     categoryID: 7,
     categoryName: "Milk Tea",
+    status: 1,
   },
   {
     categoryID: 8,
     categoryName: "Beer",
+    status: 1,
   },
   {
     categoryID: 9,
     categoryName: "Coffee",
+    status: 1,
   },
   {
     categoryID: 10,
     categoryName: "Whiskey",
+    status: 1,
   },
   {
     categoryID: 11,
     categoryName: "Frappe",
+    status: 1,
   },
   {
     categoryID: 12,
     categoryName: "Tea",
+    status: 1,
   },
 ];
 
