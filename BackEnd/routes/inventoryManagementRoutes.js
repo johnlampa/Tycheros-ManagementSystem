@@ -196,12 +196,11 @@ router.get('/getUoMsByCategory/:inventoryID', async (req, res) => {
   }
 });
 
-// STOCK IN ENDPOINT (Adjusted for New One-to-One Relationship)
 router.post('/stockInInventoryItem', async (req, res) => {
   const {
     supplierName,
     employeeID,
-    stockInDate,
+    stockInDateTime,
     inventoryItems,
   } = req.body;
   const connection = await pool.getConnection();
@@ -218,10 +217,8 @@ router.post('/stockInInventoryItem', async (req, res) => {
 
     let supplierID;
     if (existingSupplier.length > 0) {
-      // Supplier exists, use the existing supplierID
       supplierID = existingSupplier[0].supplierID;
     } else {
-      // Supplier does not exist, insert a new one
       const [supplierResult] = await connection.query(
         'INSERT INTO supplier (supplierName) VALUES (?)',
         [supplierName]
@@ -231,8 +228,8 @@ router.post('/stockInInventoryItem', async (req, res) => {
 
     // 2. Insert into the purchaseorder table
     const [purchaseOrderResult] = await connection.query(
-      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDate) VALUES (?, ?, ?)`,
-      [supplierID, employeeID, stockInDate]
+      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDateTime) VALUES (?, ?, ?)`,
+      [supplierID, employeeID, stockInDateTime]
     );
     const purchaseOrderID = purchaseOrderResult.insertId;
 
@@ -241,23 +238,36 @@ router.post('/stockInInventoryItem', async (req, res) => {
       const {
         inventoryID,
         quantityOrdered,
-        actualQuantity,
-        pricePerUnit,
+        pricePerPOUoM,
         expiryDate,
+        unitOfMeasurementID,
       } = item;
+
+      // Retrieve the unit conversion ratio from `unitofmeasurement` table
+      const [unitResult] = await connection.query(
+        `SELECT ratio FROM unitofmeasurement WHERE unitOfMeasurementID = ?`,
+        [unitOfMeasurementID]
+      );
+
+      if (unitResult.length === 0) {
+        throw new Error(`Unit of Measurement ID ${unitOfMeasurementID} not found`);
+      }
+
+      const conversionRatio = unitResult[0].ratio;
+      const convertedQuantity = quantityOrdered * conversionRatio;
 
       // Insert into the purchaseorderitem table
       const [purchaseOrderItemResult] = await connection.query(
-        `INSERT INTO purchaseorderitem (quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID) 
+        `INSERT INTO purchaseorderitem (quantityOrdered, pricePerPOUoM, expiryDate, unitOfMeasurementID, purchaseOrderID) 
          VALUES (?, ?, ?, ?, ?)`,
-        [quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID]
+        [quantityOrdered, pricePerPOUoM, expiryDate, unitOfMeasurementID, purchaseOrderID]
       );
       const purchaseOrderItemID = purchaseOrderItemResult.insertId;
 
       // Insert into the subinventory table, using purchaseOrderItemID as the primary key
       await connection.query(
         'INSERT INTO subinventory (subinventoryID, inventoryID, quantityRemaining) VALUES (?, ?, ?)',
-        [purchaseOrderItemID, inventoryID, actualQuantity]
+        [purchaseOrderItemID, inventoryID, convertedQuantity]
       );
     }
 
