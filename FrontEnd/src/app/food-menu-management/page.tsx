@@ -11,6 +11,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import AddCategoryModal from "@/components/AddCategoryModal";
 import EditCategoryModal from "@/components/EditCategoryModal";
+import PriceRecordsModal from "@/components/PriceRecordsModal";
 
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -35,6 +36,13 @@ export default function Page() {
   const [categoryToEdit, setCategoryToEdit] = useState<
     CategoriesDataTypes | undefined
   >(undefined);
+
+  const [priceRecordsModalIsVisible, setPriceRecordsModalIsVisible] =
+    useState(false);
+
+  const [productIDForPriceRecords, setProductIDForPriceRecords] = useState<
+    number | undefined
+  >(0);
 
   useEffect(() => {
     // Fetch Inventory Data
@@ -105,6 +113,10 @@ export default function Page() {
                       setInventoryData={setInventoryData}
                       menuProductHolder={menuProductHolder}
                       setMenuProductHolder={setMenuProductHolder}
+                      setProductIDForPriceRecords={setProductIDForPriceRecords}
+                      setPriceRecordsModalIsVisible={
+                        setPriceRecordsModalIsVisible
+                      }
                     />
                   </div>
                 </div>
@@ -124,6 +136,12 @@ export default function Page() {
             setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
             modalTitle="Add Category"
           />
+
+          <PriceRecordsModal
+            productID={productIDForPriceRecords}
+            priceRecordsModalIsVisible={priceRecordsModalIsVisible}
+            setPriceRecordsModalIsVisible={setPriceRecordsModalIsVisible}
+          ></PriceRecordsModal>
         </div>
       </div>
     </>
