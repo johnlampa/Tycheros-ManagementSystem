@@ -182,6 +182,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           formJson[`quantityNeeded-${index}`] as string
         ),
       })),
+      status: 1,
       //employeeID: loggedInEmployeeID
     };
 

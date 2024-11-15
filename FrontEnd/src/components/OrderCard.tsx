@@ -23,6 +23,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
     categoryName: "Milk Tea",
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
+    status: 1,
   });
 
   // Update subtotal whenever cart or menuData changes
