@@ -147,24 +147,35 @@ router.post('/processPayment', (req, res) => {
 
     // Insert into Payment table
     const insertPaymentQuery = `
-      INSERT INTO payment (amount, method, referenceNumber, discountType, discountAmount)
-      VALUES (?, ?, ?, ?, ?)`;
-    db.query(insertPaymentQuery, [amount, method, referenceNumber, discountType, discountAmount], (err, results) => {
+      INSERT INTO payment (amount, method, referenceNumber, orderID)
+      VALUES (?, ?, ?, ?)`;
+    db.query(insertPaymentQuery, [amount, method, referenceNumber, orderID], (err, results) => {
       if (err) {
         return db.rollback(() => res.status(500).json({ error: "Failed to insert payment" }));
       }
 
       const paymentID = results.insertId;
-      console.log("discountAmount:", discountAmount);
 
-      // Update the Order table with paymentID
-      const updateOrderQuery = `
-        UPDATE \`order\` 
-        SET paymentID = ?, status = 'Pending'
-        WHERE orderID = ?`;
-      db.query(updateOrderQuery, [paymentID, orderID], (err) => {
+      // Check if a discount is applied
+      if (discountType && discountAmount) {
+        // Insert into the Discount table
+        const insertDiscountQuery = `
+          INSERT INTO discount (discountType, discountAmount)
+          VALUES (?, ?)`;
+        db.query(insertDiscountQuery, [discountType, discountAmount], (err) => {
+          if (err) {
+            return db.rollback(() => res.status(500).json({ error: "Failed to insert discount" }));
+          }
+        });
+      }
+
+      // Insert new row in the orderstatus table for tracking payment status
+      const insertOrderStatusQuery = `
+        INSERT INTO orderstatus (orderID, orderStatus, statusDateTime)
+        VALUES (?, 'Pending Payment', NOW())`;
+      db.query(insertOrderStatusQuery, [orderID], (err) => {
         if (err) {
-          return db.rollback(() => res.status(500).json({ error: "Failed to update order" }));
+          return db.rollback(() => res.status(500).json({ error: "Failed to update order status" }));
         }
 
         // Commit the transaction
@@ -181,26 +192,21 @@ router.post('/processPayment', (req, res) => {
 
 // PUT /updateOrderStatus endpoint
 router.put('/updateOrderStatus', (req, res) => {
-  const { orderID, newStatus } = req.body;
+  const { orderID, newStatus, employeeID, reason } = req.body;
 
   if (!orderID || !newStatus) {
     return res.status(400).json({ error: 'OrderID and newStatus are required' });
   }
 
-  const updateOrderQuery = `
-    UPDATE \`order\`
-    SET status = ?
-    WHERE orderID = ?
+  const insertOrderStatusQuery = `
+    INSERT INTO orderstatus (orderID, orderStatus, statusDateTime, employeeID, reason)
+    VALUES (?, ?, NOW(), ?, ?)
   `;
 
-  db.query(updateOrderQuery, [newStatus, orderID], (err, result) => {
+  db.query(insertOrderStatusQuery, [orderID, newStatus, employeeID || null, reason || null], (err, result) => {
     if (err) {
       console.error("Error updating order status:", err);
       return res.status(500).json({ error: 'Internal Server Error' });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Order not found' });
     }
 
     res.status(200).json({ message: 'Order status updated successfully' });

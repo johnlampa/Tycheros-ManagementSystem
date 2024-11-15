@@ -22,4 +22,5 @@ export type ProductDataTypes = {
   sellingPrice: number;
   imageUrl: string;
   subitems?: SubitemDataTypes[];
+  status: number;
 };

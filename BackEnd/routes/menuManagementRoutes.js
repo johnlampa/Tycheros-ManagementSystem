@@ -87,6 +87,7 @@ router.post('/postProduct', (req, res) => {
     productName: productData.productName, 
     imageUrl: productData.imageUrl,
     categoryID: productData.categoryID,
+    status: productData.status,
   };
 
   db.query("INSERT INTO product SET ?", product, (err, productResult) => {
@@ -100,7 +101,9 @@ router.post('/postProduct', (req, res) => {
     // Insert the price into the price table
     const price = {
       sellingPrice: productData.sellingPrice,
-      productID: productID
+      productID: productID,
+      priceDateTime: new Date(),
+      employeeID: 1,
     };
 
     db.query("INSERT INTO price SET ?", price, (err, priceResult) => {
