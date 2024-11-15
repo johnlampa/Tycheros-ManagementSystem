@@ -8,12 +8,16 @@ import axios from "axios";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import Header from "@/components/Header";
+import EditCategoryModal from "@/components/EditCategoryModal";
+import AddCategoryModal from "@/components/AddCategoryModal";
 
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [menuProductHolder, setMenuProductHolder] =
     useState<ProductDataTypes | null>(null);
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
+
+  //@adgramirez - add useeffect to fetch categories and populate this categories array
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([
     { categoryID: 7, categoryName: "Milk Tea", status: 1 },
     { categoryID: 8, categoryName: "Beer", status: 1 },
@@ -22,6 +26,14 @@ export default function Page() {
     { categoryID: 11, categoryName: "Frappe", status: 1 },
     { categoryID: 12, categoryName: "Tea", status: 1 },
   ]);
+
+  const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
+    useState(false);
+  const [editCategoryModalIsVisible, setEditCategoryModalIsVisible] =
+    useState(false);
+  const [categoryToEdit, setCategoryToEdit] = useState<
+    CategoriesDataTypes | undefined
+  >(undefined);
 
   useEffect(() => {
     // Fetch Inventory Data
@@ -79,6 +91,19 @@ export default function Page() {
               ))}
             </div>
           </div>
+
+          <EditCategoryModal
+            editCategoryModalIsVisible={editCategoryModalIsVisible}
+            setEditCategoryModalIsVisible={setEditCategoryModalIsVisible}
+            modalTitle={"Edit Category"}
+            categoryToEdit={categoryToEdit}
+          />
+
+          <AddCategoryModal
+            addCategoryModalIsVisible={addCategoryModalIsVisible}
+            setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
+            modalTitle="Add Category"
+          />
         </div>
       </div>
     </>

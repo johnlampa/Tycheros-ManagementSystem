@@ -17,6 +17,8 @@ export default function Page() {
   const [menuProductHolder, setMenuProductHolder] =
     useState<ProductDataTypes | null>(null);
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
+
+  //@adgramirez - add useeffect to fetch categories and populate this categories array
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([
     { categoryID: 1, categoryName: "Appetizers", status: 1 },
     { categoryID: 2, categoryName: "Entrees", status: 1 },
@@ -120,7 +122,6 @@ export default function Page() {
           <AddCategoryModal
             addCategoryModalIsVisible={addCategoryModalIsVisible}
             setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
-            setCategories={setCategories} // Pass setCategories here
             modalTitle="Add Category"
           />
         </div>

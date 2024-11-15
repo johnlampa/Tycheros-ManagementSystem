@@ -36,13 +36,16 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   }, [categoryToEdit]);
 
   const handleSave = () => {
-    if (setCategoryHolder) {
-      setCategoryHolder({
-        ...categoryToEdit,
-        categoryName,
-        status: isChecked ? 1 : 0,
-      });
-    }
+    //@adgramirez replace this code with function that edits the category in the DB
+
+    // if (setCategoryHolder) {
+    //   setCategoryHolder({
+    //     ...categoryToEdit,
+    //     categoryName,
+    //     status: isChecked ? 1 : 0,
+    //   });
+    // }
+
     setEditCategoryModalIsVisible(false);
   };
 
