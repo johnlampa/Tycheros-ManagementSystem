@@ -15,4 +15,7 @@ export type OrderManagementCardProps = {
     setOrderToEdit?: React.Dispatch<React.SetStateAction<Order | undefined>> 
 
     payments?: Payment[];
+
+    setOrderIDForStatusRecords?: React.Dispatch<React.SetStateAction<number | undefined>>;
+     setStatusRecordsModalIsVisible?: React.Dispatch<React.SetStateAction<boolean>>
 }
