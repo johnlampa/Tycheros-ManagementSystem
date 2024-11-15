@@ -11,6 +11,8 @@ import CancelOrderModal from "@/components/CancelOrderModal";
 import axios from "axios";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
 
+import StatusRecordsModal from "@/components/StatusRecords.Modal";
+
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -21,6 +23,13 @@ export default function Page() {
   const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
     useState<boolean>(false);
   const [orderToEdit, setOrderToEdit] = useState<Order>();
+
+  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] =
+    useState(false);
+
+  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<
+    number | undefined
+  >(0);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -163,6 +172,10 @@ export default function Page() {
                   setCancelOrderModalVisibility={() => handleCancelOrder(order)}
                   setOrderToEdit={setOrderToEdit}
                   payments={payments}
+                  setOrderIDForStatusRecords={setOrderIDForStatusRecords}
+                  setStatusRecordsModalIsVisible={
+                    setStatusRecordsModalIsVisible
+                  }
                 />
               </div>
             ))}
@@ -176,6 +189,12 @@ export default function Page() {
           orders={orders}
           setOrders={setOrders}
         />
+
+        <StatusRecordsModal
+          orderID={orderIDForStatusRecords}
+          statusRecordsModalIsVisible={statusRecordsModalIsVisible}
+          setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
+        ></StatusRecordsModal>
       </div>
     </div>
   );

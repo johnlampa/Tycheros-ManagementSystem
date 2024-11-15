@@ -16,6 +16,8 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
     discountAmount,
     setCancelOrderModalVisibility,
     setOrderToEdit,
+    setOrderIDForStatusRecords,
+    setStatusRecordsModalIsVisible,
   }) => {
     const [total, setTotal] = useState(0);
     const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
@@ -165,7 +167,21 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
 
           <div className="rounded-md p-3 bg-cream text-black">
             <div className="py-1 px-2 rounded-md bg-primaryBrown w-min text-xs text-white mb-2">
-              {orderStatusLabel}
+              <button
+                className="block"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (
+                    setOrderIDForStatusRecords &&
+                    setStatusRecordsModalIsVisible
+                  ) {
+                    setOrderIDForStatusRecords(order?.orderID);
+                    setStatusRecordsModalIsVisible(true);
+                  }
+                }}
+              >
+                {orderStatusLabel}
+              </button>
             </div>
             <div className="grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 font-semibold mb-3">
               <div className="text-[15px] text-black">Name</div>

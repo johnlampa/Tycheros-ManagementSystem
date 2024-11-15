@@ -8,12 +8,21 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 
+import StatusRecordsModal from "@/components/StatusRecords.Modal";
+
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [cancelledOrders, setCancelledOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] =
+    useState(false);
+
+  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<
+    number | undefined
+  >(0);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -85,11 +94,21 @@ export default function Page() {
                   orders={orders}
                   setOrders={setOrders}
                   type="management"
+                  setOrderIDForStatusRecords={setOrderIDForStatusRecords}
+                  setStatusRecordsModalIsVisible={
+                    setStatusRecordsModalIsVisible
+                  }
                 />
               </div>
             ))}
           </div>
         )}
+
+        <StatusRecordsModal
+          orderID={orderIDForStatusRecords}
+          statusRecordsModalIsVisible={statusRecordsModalIsVisible}
+          setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
+        ></StatusRecordsModal>
       </div>
     </div>
   );

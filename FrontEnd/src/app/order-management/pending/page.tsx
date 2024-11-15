@@ -9,6 +9,8 @@ import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
 
+import StatusRecordsModal from "@/components/StatusRecords.Modal";
+
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -18,6 +20,13 @@ export default function Page() {
   const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
     useState<boolean>(false);
   const [orderToEdit, setOrderToEdit] = useState<Order>();
+
+  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] =
+    useState(false);
+
+  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<
+    number | undefined
+  >(0);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -91,6 +100,10 @@ export default function Page() {
                   type={"management"}
                   setCancelOrderModalVisibility={setCancelOrderModalVisibility}
                   setOrderToEdit={setOrderToEdit}
+                  setOrderIDForStatusRecords={setOrderIDForStatusRecords}
+                  setStatusRecordsModalIsVisible={
+                    setStatusRecordsModalIsVisible
+                  }
                 />
               </div>
             ))}
@@ -104,6 +117,12 @@ export default function Page() {
           orders={orders}
           setOrders={setOrders}
         ></CancelOrderModal>
+
+        <StatusRecordsModal
+          orderID={orderIDForStatusRecords}
+          statusRecordsModalIsVisible={statusRecordsModalIsVisible}
+          setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
+        ></StatusRecordsModal>
       </div>
     </div>
   );
