@@ -60,6 +60,7 @@ export default function Page() {
     categoryName: "",
     sellingPrice: 0,
     imageUrl: "/assets/images/MilkTea.jpg",
+    status: 1,
   });
 
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
