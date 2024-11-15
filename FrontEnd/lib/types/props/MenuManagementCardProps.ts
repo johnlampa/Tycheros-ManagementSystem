@@ -10,4 +10,7 @@ export type MenuManagementCardProps = {
     
     inventoryData: InventoryDataTypes[];
     setInventoryData: React.Dispatch<React.SetStateAction<InventoryDataTypes[]>>;
+    
+    setProductIDForPriceRecords: React.Dispatch<React.SetStateAction<number | undefined>>;
+    setPriceRecordsModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>
   };

@@ -16,4 +16,8 @@ export type ProductModalProps = {
 
   menuData: ProductDataTypes[];
   setMenuData: React.Dispatch<React.SetStateAction<ProductDataTypes[]>>;
+
+  setProductIDForPriceRecords: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setPriceRecordsModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>
+
 }

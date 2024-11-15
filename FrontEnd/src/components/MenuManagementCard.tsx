@@ -14,6 +14,8 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   setMenuProductHolder,
   inventoryData,
   setInventoryData,
+  setProductIDForPriceRecords,
+  setPriceRecordsModalIsVisible,
 }) => {
   const [modalType, setModalType] = useState("");
   const [modalTitle, setModalTitle] = useState("");
@@ -68,7 +70,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
               <div className="ml-3">
                 <button
                   onClick={() => toggleEdit(item.productID)}
-                  className="w-min px-4 py-1 rounded-full text-black text-sm bg-cream border-2 border-lightTealGreen hover:text-black hover:bg-lightTealGreen"
+                  className="w-min px-4 py-1 rounded-full text-black text-sm bg-white hover:text-black hover:bg-lightTealGreen"
                 >
                   Edit
                 </button>
@@ -96,6 +98,8 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
           categoryName={categoryName}
           menuData={menuData}
           setMenuData={setMenuData}
+          setProductIDForPriceRecords={setProductIDForPriceRecords}
+          setPriceRecordsModalIsVisible={setPriceRecordsModalIsVisible}
         ></ProductModal>
       )}
     </>

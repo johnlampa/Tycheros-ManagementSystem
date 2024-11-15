@@ -22,6 +22,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
   categoryName,
   menuData,
   setMenuData,
+  setProductIDForPriceRecords,
+  setPriceRecordsModalIsVisible,
 }) => {
   const categoryMap: { [key: string]: number } = {
     Appetizers: 1,
@@ -284,9 +286,24 @@ const ProductModal: React.FC<ProductModalProps> = ({
           defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
         />
 
-        <label htmlFor="sellingPrice" className="block mb-2 text-black">
-          Price
-        </label>
+        <div className="flex justify-between">
+          <label htmlFor="sellingPrice" className="block mb-2 text-black">
+            Price
+          </label>
+          <p className="underline font-semibold text-sm pt-1">
+            <button
+              className="underline font-semibold text-sm block"
+              onClick={(e) => {
+                e.preventDefault();
+                setProductIDForPriceRecords(menuProductToEdit?.productID);
+                setPriceRecordsModalIsVisible(true);
+              }}
+            >
+              Records
+            </button>
+          </p>
+        </div>
+
         <input
           type="number"
           name="sellingPrice"
