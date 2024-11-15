@@ -11,40 +11,41 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Link from "next/link";
 import MenuHeaderSection from "@/components/section/MenuHeaderSection";
 
-const categories: CategoriesDataTypes[] = [
-  {
-    categoryID: 1,
-    categoryName: "Appetizers",
-    status: 1,
-  },
-  {
-    categoryID: 2,
-    categoryName: "Entrees",
-    status: 1,
-  },
-  {
-    categoryID: 3,
-    categoryName: "Snacks",
-    status: 0,
-  },
-  {
-    categoryID: 4,
-    categoryName: "Combo Meals",
-    status: 1,
-  },
-  {
-    categoryID: 5,
-    categoryName: "Wings",
-    status: 1,
-  },
-  {
-    categoryID: 6,
-    categoryName: "Salads",
-    status: 1,
-  },
-];
-
 export default function Page() {
+  //@adgramirez - add useeffect to fetch categories and populate this categories array
+  const categories: CategoriesDataTypes[] = [
+    {
+      categoryID: 1,
+      categoryName: "Appetizers",
+      status: 1,
+    },
+    {
+      categoryID: 2,
+      categoryName: "Entrees",
+      status: 1,
+    },
+    {
+      categoryID: 3,
+      categoryName: "Snacks",
+      status: 0,
+    },
+    {
+      categoryID: 4,
+      categoryName: "Combo Meals",
+      status: 1,
+    },
+    {
+      categoryID: 5,
+      categoryName: "Wings",
+      status: 1,
+    },
+    {
+      categoryID: 6,
+      categoryName: "Salads",
+      status: 1,
+    },
+  ];
+
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
 
   useEffect(() => {

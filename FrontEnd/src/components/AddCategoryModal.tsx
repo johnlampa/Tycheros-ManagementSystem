@@ -6,14 +6,12 @@ import React from "react";
 interface AddCategoryModalProps {
   addCategoryModalIsVisible: boolean;
   setAddCategoryModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  setCategories: React.Dispatch<React.SetStateAction<CategoriesDataTypes[]>>;
   modalTitle: string;
 }
 
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   addCategoryModalIsVisible,
   setAddCategoryModalVisibility,
-  setCategories,
   modalTitle,
 }) => {
   const [categoryName, setCategoryName] = useState("");
@@ -26,14 +24,16 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       return;
     }
 
-    setCategories((prevCategories) => [
-      ...prevCategories,
-      {
-        categoryID: prevCategories.length + 1,
-        categoryName,
-        status: 1,
-      },
-    ]);
+    //@adgramirez replace this code with function that adds the new category to the DB
+
+    // setCategories((prevCategories) => [
+    //   ...prevCategories,
+    //   {
+    //     categoryID: prevCategories.length + 1,
+    //     categoryName,
+    //     status: 1,
+    //   },
+    // ]);
 
     setCategoryName("");
     setAddCategoryModalVisibility(false);
