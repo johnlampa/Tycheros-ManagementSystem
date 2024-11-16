@@ -83,11 +83,7 @@ export default function Page() {
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
-        <Header
-          text="Units of Measurement (UOM)"
-          color={"tealGreen"}
-          type={"orders"}
-        >
+        <Header text="Units of Measurement" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-10">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
               <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
