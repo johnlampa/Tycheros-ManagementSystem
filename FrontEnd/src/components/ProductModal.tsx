@@ -10,6 +10,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import React from "react";
 import { useEdgeStore } from "../../lib/edgestore";
 import Link from "next/link";
+import ValidationDialog from "@/components/ValidationDialog";
 
 const ProductModal: React.FC<ProductModalProps> = ({
   productModalIsVisible,
@@ -111,14 +112,18 @@ const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
 
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    let validationErrors = [];
 
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
     const formJson = Object.fromEntries(formData.entries());
-
-    let validationErrors = [];
 
     // Product Name validation
     if (!formJson.productName) {
@@ -169,8 +174,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
     // If there are validation errors, display them and stop submission
     if (validationErrors.length > 0) {
-      alert(validationErrors.join("\n"));
-      return;
+      setValidationMessage(
+        `Please fill out the following:\n${validationErrors.join("\n")}`
+      );
+      return false;
     }
 
     const updatedProduct: ProductDataTypes = {
@@ -186,7 +193,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       })),
       status: 1,
       //@adgramirez modify backend
-      employeeID: loggedInEmployeeID
+      employeeID: loggedInEmployeeID,
     };
 
     try {
@@ -417,6 +424,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
           </button>
         </div>
       </form>
+      {validationMessage && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
+      )}
     </Modal>
   );
 };

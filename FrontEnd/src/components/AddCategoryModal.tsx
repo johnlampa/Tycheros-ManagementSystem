@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { CategoriesDataTypes } from "../../lib/types/CategoriesDataTypes";
 import React from "react";
+import ValidationDialog from "@/components/ValidationDialog";
 
 interface AddCategoryModalProps {
   addCategoryModalIsVisible: boolean;
@@ -16,12 +17,26 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
 }) => {
   const [categoryName, setCategoryName] = useState("");
 
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const validationErrors: string[] = [];
+
+    // Validate category name
     if (!categoryName.trim()) {
-      alert("Category name is required");
-      return;
+      validationErrors.push("Category name is required.");
+    }
+
+    // If there are validation errors, display them and stop submission
+    if (validationErrors.length > 0) {
+      setValidationMessage(
+        `Please fill out the following:\n${validationErrors.join("\n")}`
+      );
+      return false;
     }
 
     //@adgramirez replace this code with function that adds the new category to the DB
@@ -86,6 +101,12 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
           </button>
         </div>
       </form>
+      {validationMessage && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
+      )}
     </Modal>
   );
 };
