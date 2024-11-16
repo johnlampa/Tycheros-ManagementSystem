@@ -11,6 +11,7 @@ import axios from "axios";
 import EditUOMCategoryModal from "@/components/EditUOMCategoryModal";
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import AddUOMModal from "@/components/AddUOMModal";
+import EditUOMModal from "@/components/EditUOMModal";
 
 export default function Page() {
   const [addUOMCategoryModalIsVisible, setAddUOMCategoryModalIsVisible] =
@@ -24,6 +25,10 @@ export default function Page() {
 
   const [addUOMModalIsVisible, setAddUOMModalIsVisible] =
     useState<boolean>(false);
+
+  const [editUOMModalIsVisible, setEditUOMModalIsVisible] =
+    useState<boolean>(false);
+  const [UOMToEdit, setUOMToEdit] = useState<UOM | undefined>();
 
   //@adgramirez add a useEffect to populate this array with ALL the UOM Categories
   const [UOMCategory, setUOMCategory] = useState<UOMCategory[]>([
@@ -129,6 +134,8 @@ export default function Page() {
                   }
                   setCategoryToEdit={setCategoryToEdit}
                   setAddUOMModalIsVisible={setAddUOMModalIsVisible}
+                  setEditUOMModalIsVisible={setEditUOMModalIsVisible}
+                  setUOMToEdit={setUOMToEdit}
                 />
               </div>
             ))}
@@ -151,8 +158,14 @@ export default function Page() {
         <AddUOMModal
           addUOMModalIsVisible={addUOMModalIsVisible}
           setAddUOMModalVisibility={setAddUOMModalIsVisible}
-          modalTitle="Add UOM Category"
+          modalTitle="Add UOM"
         ></AddUOMModal>
+        <EditUOMModal
+          editUOMModalIsVisible={editUOMModalIsVisible}
+          setEditUOMModalVisibility={setEditUOMModalIsVisible}
+          modalTitle="Edit UOM"
+          UOMToEdit={UOMToEdit}
+        ></EditUOMModal>
       </div>
     </div>
   );

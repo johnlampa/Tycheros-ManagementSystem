@@ -35,6 +35,9 @@ export type UOMManagementCardProps = {
   >;
 
   setAddUOMModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+
+  setEditUOMModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setUOMToEdit: React.Dispatch<React.SetStateAction<UOM | undefined>>;
 };
 
 const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
@@ -48,6 +51,8 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
   setEditUOMCategoryModalIsVisible,
   setCategoryToEdit,
   setAddUOMModalIsVisible,
+  setEditUOMModalIsVisible,
+  setUOMToEdit,
 }) => {
   return (
     <>
@@ -155,7 +160,7 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
 
                     <div className="w-full">
                       {detailedData[category.categoryID]?.map(
-                        (detail: any, index: number) => (
+                        (detail: UOM, index: number) => (
                           <div key={index} className="mt-5">
                             <div className="flex items-center gap-x-3">
                               <div className="text-base font-semibold mb-1">
@@ -164,8 +169,9 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                               <div>
                                 <button
                                   onClick={() => {
-                                    //   setCategoryToEdit(category);
-                                    //   setEditCategoryModalIsVisible(true);
+                                    setUOMToEdit(detail);
+                                    console.log(detail);
+                                    setEditUOMModalIsVisible(true);
                                   }}
                                   className="text-black px-3 text-xs rounded-full border border-black "
                                 >
