@@ -55,6 +55,17 @@ export default function Page() {
       .catch((error) => console.error("Error fetching menu data:", error));
   }, []);
 
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(1);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+  }, [loggedInEmployeeID]);
+
   const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
     productID: 1,
     productName: "Matcha",
@@ -63,6 +74,7 @@ export default function Page() {
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
     status: 1,
+    employeeID: loggedInEmployeeID,
   });
 
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
