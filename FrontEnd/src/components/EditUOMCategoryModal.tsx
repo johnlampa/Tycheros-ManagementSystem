@@ -25,22 +25,11 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
   const [categoryName, setCategoryName] = useState(
     categoryToEdit?.categoryName
   );
-  const [referenceUOMName, setReferenceUOMName] = useState("");
   const [isChecked, setIsChecked] = useState<boolean>();
 
   useEffect(() => {
     // Update categoryName when categoryToEdit changes
     setCategoryName(categoryToEdit?.categoryName || "");
-
-    // Find the reference UOM where categoryID matches and ratio equals 1
-    const referenceUOM = UOM.find(
-      (uom) =>
-        uom.categoryID === categoryToEdit?.categoryID &&
-        parseInt(uom.ratio.toString()) === 1
-    );
-
-    // Update the state with the UOMName, or default to an empty string if not found
-    setReferenceUOMName(referenceUOM ? referenceUOM.UOMName : "");
 
     setIsChecked(categoryToEdit?.status === 1);
   }, [categoryToEdit, UOM]); // Dependencies include categoryToEdit and UOM
@@ -55,14 +44,11 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
 
     const newCategory = {
       categoryName,
-      referenceUOMName,
       status: isChecked ? 1 : 0,
     };
 
-    //@adgramirez add code that adds the new category to the DB
+    //@adgramirez add code that saves the details of the category to the DB
 
-    setCategoryName("");
-    setReferenceUOMName("");
     setEditUOMCategoryModalVisibility(false);
   };
 
@@ -95,22 +81,6 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
           className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
           value={categoryName}
           onChange={(e) => setCategoryName(e.target.value)}
-        />
-
-        <div className="flex justify-between items-center mb-4 text-black">
-          <label htmlFor="referenceUOMName" className="pr-4">
-            Reference UOM Name
-          </label>
-        </div>
-
-        <input
-          type="text"
-          name="referenceUOMName"
-          id="referenceUOMName"
-          placeholder="Enter reference UOM name"
-          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          value={referenceUOMName}
-          onChange={(e) => setReferenceUOMName(e.target.value)}
         />
 
         <div className="flex gap-x-2 text-black mb-5">
