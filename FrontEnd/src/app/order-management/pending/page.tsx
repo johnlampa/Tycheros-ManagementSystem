@@ -8,14 +8,16 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
-
+import { Payment } from "../../../../lib/types/PaymentDataTypes";
 import StatusRecordsModal from "@/components/StatusRecords.Modal";
+import axios from "axios";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
 
   const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
     useState<boolean>(false);
@@ -59,7 +61,38 @@ export default function Page() {
       }
     };
 
+    const fetchPayments = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8081/orderManagement/getPaymentDetails"
+        );
+        if (response.data && response.data.length > 0) {
+          setPayments(response.data);
+        } else {
+          setPayments([]); // Set payments as an empty array if no results
+          console.warn("No payment details found");
+        }
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          if (error.response && error.response.status === 404) {
+            // Handle 404 case without setting an error message
+            setPayments([]); // Treat as empty result
+            console.warn(
+              "No payment details found for orders with status other than Unpaid"
+            );
+          } else {
+            console.error("Error fetching payment details:", error);
+            setError("Error fetching payment details"); // For other types of errors
+          }
+        } else {
+          console.error("Unexpected error:", error);
+          setError("An unexpected error occurred");
+        }
+      }
+    };
+
     fetchOrders();
+    fetchPayments();
     fetchMenuData();
   }, []);
 
@@ -100,6 +133,7 @@ export default function Page() {
                   type={"management"}
                   setCancelOrderModalVisibility={setCancelOrderModalVisibility}
                   setOrderToEdit={setOrderToEdit}
+                  payments={payments}
                   setOrderIDForStatusRecords={setOrderIDForStatusRecords}
                   setStatusRecordsModalIsVisible={
                     setStatusRecordsModalIsVisible

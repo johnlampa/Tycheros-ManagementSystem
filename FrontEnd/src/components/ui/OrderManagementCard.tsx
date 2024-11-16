@@ -69,8 +69,8 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             body: JSON.stringify({
               orderID: order.orderID,
               newStatus,
-              //@adgramirez modify code or backend for employeeID
-              //employeeID: loggedInEmployeeID
+              employeeID: loggedInEmployeeID,
+              updatePayment: true
             }),
           }
         );
@@ -154,7 +154,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                 <div>
                   <span className="font-semibold">MOP: </span>
                   <span>{payment?.method}</span>
-                </div>
+                </div> 
                 {payment?.referenceNumber && (
                   <div>
                     <span className="font-semibold">Reference: </span>

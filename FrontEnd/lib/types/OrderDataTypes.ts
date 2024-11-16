@@ -15,6 +15,7 @@ export type Order = {
     date: string,
     status: "Unpaid" | "Pending" | "Completed" | "Cancelled",
     amount?: number
+    method: string,
     orderItems?: OrderItemDataTypes[]
 
     cancellationReason?: string;

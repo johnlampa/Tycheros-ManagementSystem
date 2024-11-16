@@ -18,6 +18,7 @@ function PaymentDetailsPage() {
     employeeID: 1,
     date: new Date().toISOString(),
     status: "Unpaid",
+    method: "Cash",
     orderItems: [],
   });
   const [total, setTotal] = useState(0);
@@ -38,6 +39,21 @@ function PaymentDetailsPage() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("loggedInEmployeeID: ", loggedInEmployeeID);
+  }, [loggedInEmployeeID]);
+
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -137,31 +153,13 @@ function PaymentDetailsPage() {
             referenceNumber,
             discountType: discountType,
             discountAmount: discountAmount,
+            employeeID: loggedInEmployeeID,
           }),
         }
       );
 
       if (!paymentResponse.ok) {
         throw new Error("Failed to process payment");
-      }
-
-      // Update order status
-      const statusResponse = await fetch(
-        "http://localhost:8081/orderManagement/updateOrderStatus",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            orderID: order.orderID,
-            newStatus: "Pending", // Set new status as needed
-          }),
-        }
-      );
-
-      if (!statusResponse.ok) {
-        throw new Error("Failed to update order status");
       }
 
       alert("Payment processed and order status updated successfully");
