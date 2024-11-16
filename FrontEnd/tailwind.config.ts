@@ -32,7 +32,8 @@ module.exports = {
       secondaryBrown: '#D1C198',
       lightRed: '#FF6961',
       darkRed: '#C21807',
-      red: '#D11A2A'
+      red: '#D11A2A',
+      orange: '#db9d00'
     }, 
     screens: {
       xsm: '0px',

@@ -163,7 +163,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
   const handleSubmit = async () => {
     if (validateForm()) {
       console.log("Stock In Data:", inventoryItems);
-      console.log("Stock In DateTime:", stockInData.stockInDateTime)
+      console.log("Stock In DateTime:", stockInData.stockInDateTime);
       await handleStockIn();
       onClose();
     }
@@ -215,22 +215,28 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   value={item.inventoryID}
                   onChange={(e) => {
                     const newInventoryID = parseInt(e.target.value);
+                    handleInventoryChange(newInventoryID, index); // Update the inventory item selection
                     updateInventoryItem(index, { inventoryID: newInventoryID });
-                    handleInventoryChange(newInventoryID, index); // Call handleInventoryChange after updating
                   }}
                   className="mb-2 mt-2 p-2 w-full text-black border border-black"
                 >
                   <option value="0" disabled>
-                    Select Item
+                    Select Inventory Item
                   </option>
-                  {inventoryNames.map((inventory) => (
-                    <option
-                      key={inventory.inventoryID}
-                      value={inventory.inventoryID}
-                    >
-                      {inventory.inventoryName}
-                    </option>
-                  ))}
+                  {inventoryNames
+                    .filter(
+                      (inv) =>
+                        !inventoryItems.some(
+                          (selectedItem, selectedIndex) =>
+                            selectedItem.inventoryID === inv.inventoryID &&
+                            selectedIndex !== index
+                        )
+                    )
+                    .map((inv) => (
+                      <option key={inv.inventoryID} value={inv.inventoryID}>
+                        {inv.inventoryName}
+                      </option>
+                    ))}
                 </select>
 
                 <button

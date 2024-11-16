@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import {
   MultiItemStockInData,
   MultiItemStockOutData,
+  MultiItemUpdateStockData,
   InventoryItem,
 } from "../../../lib/types/InventoryItemDataTypes";
 import InventoryItemModal from "@/components/InventoryItemModal";
@@ -155,28 +156,23 @@ export default function InventoryManagementPage() {
   }, []);
 
   const [showUpdateStockOverlay, setShowUpdateStockOverlay] = useState(false);
-  const [updateStockData, setUpdateStockData] = useState({
-    inventoryID: "",
-    quantity: 0,
-  });
 
-  const handleUpdateStock = (inventoryID: string) => {
-    // Find the item in inventoryData based on the entered inventoryID
-    const item = inventoryData.find(
-      (item) => item.inventoryID.toString() === inventoryID
-    );
+  const [updateStockData, setUpdateStockData] =
+    useState<MultiItemUpdateStockData>({
+      employeeID: "",
+      updateStockDateTime: "",
+      inventoryItems: [
+        {
+          inventoryID: 0,
+          quantityToUpdate: 0,
+        },
+      ],
+    });
 
-    if (item) {
-      // If the item is found, proceed with setting update stock data
-      setUpdateStockData({ ...updateStockData, inventoryID });
-      setShowUpdateStockOverlay(true);
-    } else {
-      // If the item is not found, alert the user
-      alert("Item not found");
-    }
-  };
-
+  //@adgramirez revise so it accommodates updating multiple stocks
   const handleUpdateStockSubmit = async () => {
+    console.log(updateStockData);
+
     try {
       const response = await fetch(
         "http://localhost:8081/inventoryManagement/updateSubinventoryQuantity",
@@ -529,6 +525,17 @@ export default function InventoryManagementPage() {
                 Stock Out
               </button>
             </div>
+            <button
+              onClick={() => {
+                setShowUpdateStockOverlay(true);
+                // if (inventoryItem?.inventoryID !== null) {
+                //   handleUpdateStock(inventoryItem.inventoryID.toString()); // Use the selected radio button's inventory ID
+                // }
+              }}
+              className="mt-2 bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
+            >
+              Update Stock
+            </button>
           </div>
         </div>
 
@@ -541,7 +548,6 @@ export default function InventoryManagementPage() {
                 <InventoryManagementCard
                   inventoryItem={item}
                   handleEditItem={handleEditItem}
-                  handleUpdateStock={handleUpdateStock}
                   expandedRow={expandedRow}
                   setExpandedRow={setExpandedRow}
                   toggleRow={toggleRow}
@@ -636,8 +642,11 @@ export default function InventoryManagementPage() {
           <UpdateStockModal
             updateStockData={updateStockData}
             setUpdateStockData={setUpdateStockData}
-            handleUpdateStockSubmit={handleUpdateStockSubmit}
+            inventoryNames={inventoryNames}
+            handleUpdateStock={handleUpdateStockSubmit}
             onClose={() => setShowUpdateStockOverlay(false)}
+            handleInventoryChange={handleInventoryChange}
+            employees={employees}
           />
         )}
 
