@@ -89,6 +89,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
   const validateForm = () => {
     const missingFields: string[] = [];
     const quantityExceedsFields: string[] = [];
+    const processedInventoryIDs = new Set<number>();
 
     // Validate general fields
     if (
@@ -97,6 +98,18 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
     ) {
       missingFields.push("Stock Out Date");
     }
+
+    // Aggregate quantities for each inventoryID
+    const aggregatedQuantities = inventoryItems.reduce(
+      (acc, item) => {
+        if (item.inventoryID) {
+          acc[item.inventoryID] =
+            (acc[item.inventoryID] || 0) + item.quantityToStockOut;
+        }
+        return acc;
+      },
+      {} as { [key: number]: number }
+    );
 
     // Validate each inventory item
     inventoryItems.forEach((item, index) => {
@@ -115,10 +128,16 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
         missingFields.push(`Quantity for ${inventoryName}`);
       }
 
-      if (inventory && item.quantityToStockOut > inventory.totalQuantity) {
+      // Check if aggregated quantity exceeds the available total and avoid duplicate messages
+      if (
+        inventory &&
+        aggregatedQuantities[item.inventoryID] > inventory.totalQuantity &&
+        !processedInventoryIDs.has(item.inventoryID)
+      ) {
         quantityExceedsFields.push(
-          `Quantity for ${inventoryName} exceeds available total (${inventory.totalQuantity}).`
+          `Total quantity for ${inventoryName} exceeds available total (${inventory.totalQuantity}).`
         );
+        processedInventoryIDs.add(item.inventoryID); // Mark this inventoryID as processed
       }
     });
 
@@ -216,20 +235,11 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
                 <option value="0" disabled>
                   Select Inventory Item
                 </option>
-                {inventoryNames
-                  .filter(
-                    (inv) =>
-                      !inventoryItems.some(
-                        (selectedItem, selectedIndex) =>
-                          selectedItem.inventoryID === inv.inventoryID &&
-                          selectedIndex !== index
-                      )
-                  )
-                  .map((inv) => (
-                    <option key={inv.inventoryID} value={inv.inventoryID}>
-                      {inv.inventoryName}
-                    </option>
-                  ))}
+                {inventoryNames.map((inv) => (
+                  <option key={inv.inventoryID} value={inv.inventoryID}>
+                    {inv.inventoryName}
+                  </option>
+                ))}
               </select>
 
               <button onClick={() => toggleExpandItem(index)}>
@@ -289,7 +299,10 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
             Stock Out
           </button>
           <button
-            onClick={onClose}
+            onClick={() => {
+              onClose;
+              window.location.reload();
+            }}
             className="bg-tealGreen text-black py-2 px-4 rounded"
           >
             Cancel
