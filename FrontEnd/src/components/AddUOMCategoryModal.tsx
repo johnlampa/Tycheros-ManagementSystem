@@ -17,7 +17,7 @@ const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
   modalTitle,
 }) => {
   const [categoryName, setCategoryName] = useState("");
-  const [referenceName, setReferenceName] = useState("");
+  const [referenceUOMName, setReferenceUOMName] = useState("");
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,19 +27,16 @@ const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
       return;
     }
 
-    //@adgramirez replace this code with function that adds the new category to the DB
+    const newCategory = {
+      categoryName,
+      referenceUOMName,
+      status: 1,
+    };
 
-    // setCategories((prevCategories) => [
-    //   ...prevCategories,
-    //   {
-    //     categoryID: prevCategories.length + 1,
-    //     categoryName,
-    //     status: 1,
-    //   },
-    // ]);
+    //@adgramirez add code that adds the new category to the DB
 
     setCategoryName("");
-    setReferenceName("");
+    setReferenceUOMName("");
     setAddUOMCategoryModalVisibility(false);
   };
 
@@ -86,8 +83,8 @@ const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
           id="referenceUOMName"
           placeholder="Enter reference UOM name"
           className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          value={categoryName}
-          onChange={(e) => setReferenceName(e.target.value)}
+          value={referenceUOMName}
+          onChange={(e) => setReferenceUOMName(e.target.value)}
         />
 
         <button
