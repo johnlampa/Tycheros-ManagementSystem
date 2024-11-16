@@ -18,13 +18,14 @@ router.get('/getOrders', (req, res) => {
       os.employeeID,
       MAX(os.statusDateTime) AS date,  -- Latest status change date as the order date
       os.orderStatus AS status,        -- Latest status of the order
-      SUM(pr.sellingPrice * oi.quantity) AS Total
+      SUM(pr.sellingPrice * oi.quantity) AS Total,
+      p.method                          -- Payment method from the payment table
     FROM
       \`order\` o
     JOIN orderitem oi ON o.orderID = oi.orderID
     JOIN price pr ON oi.productID = pr.productID
     JOIN orderstatus os ON o.orderID = os.orderID
-    LEFT JOIN payment p ON o.orderID = p.orderID
+    LEFT JOIN payment p ON os.orderStatusID = p.orderStatusID  -- Adjusted to reference orderstatusID
     WHERE
       pr.priceID = (
         SELECT MAX(pr2.priceID)
@@ -36,7 +37,7 @@ router.get('/getOrders', (req, res) => {
         FROM orderstatus os2
         WHERE os2.orderID = o.orderID
       )  -- Ensure we only get the latest status for each order
-    GROUP BY o.orderID, p.paymentID, os.employeeID, os.orderStatus
+    GROUP BY o.orderID, p.paymentID, os.employeeID, os.orderStatus, p.method
     ORDER BY date DESC;
   `;
 
@@ -58,6 +59,7 @@ router.get('/getOrders', (req, res) => {
         date: row.date,
         status: row.status,
         amount: row.Total,
+        method: row.method,
         orderItems: []
       });
     });
@@ -137,50 +139,58 @@ router.get('/getMenuData', (req, res) => {
   });
 });
 
-// POST /processPayment endpoint
 router.post('/processPayment', (req, res) => {
-  const { orderID, amount, method, referenceNumber, discountType, discountAmount } = req.body;
+  const { orderID, amount, method, referenceNumber, discountType, discountAmount, employeeID } = req.body;
+  console.log("Request Body:", req.body);
 
   // Start a transaction
   db.beginTransaction(err => {
     if (err) return res.status(500).json({ error: "Transaction error" });
 
-    // Insert into Payment table
-    const insertPaymentQuery = `
-      INSERT INTO payment (amount, method, referenceNumber, orderID)
-      VALUES (?, ?, ?, ?)`;
-    db.query(insertPaymentQuery, [amount, method, referenceNumber, orderID], (err, results) => {
+    // Step 1: Insert a new row into the `orderstatus` table to reflect the payment status
+    const insertOrderStatusQuery = `
+      INSERT INTO orderstatus (orderID, orderStatus, statusDateTime, employeeID)
+      VALUES (?, 'Pending', NOW(), ?)
+    `;
+    db.query(insertOrderStatusQuery, [orderID, employeeID], (err, results) => {
       if (err) {
-        return db.rollback(() => res.status(500).json({ error: "Failed to insert payment" }));
+        console.error("Error inserting into orderstatus:", err);
+        return db.rollback(() => res.status(500).json({ error: "Failed to update order status" }));
       }
 
-      const paymentID = results.insertId;
+      const orderStatusID = results.insertId; // Get the newly created orderstatus ID
 
-      // Check if a discount is applied
-      if (discountType && discountAmount) {
-        // Insert into the Discount table
-        const insertDiscountQuery = `
-          INSERT INTO discount (discountType, discountAmount)
-          VALUES (?, ?)`;
-        db.query(insertDiscountQuery, [discountType, discountAmount], (err) => {
-          if (err) {
-            return db.rollback(() => res.status(500).json({ error: "Failed to insert discount" }));
-          }
-        });
-      }
-
-      // Insert new row in the orderstatus table for tracking payment status
-      const insertOrderStatusQuery = `
-        INSERT INTO orderstatus (orderID, orderStatus, statusDateTime)
-        VALUES (?, 'Pending Payment', NOW())`;
-      db.query(insertOrderStatusQuery, [orderID], (err) => {
+      // Step 2: Insert into the `payment` table, referencing the `orderstatus` ID
+      const insertPaymentQuery = `
+        INSERT INTO payment (amount, method, referenceNumber, orderStatusID)
+        VALUES (?, ?, ?, ?)
+      `;
+      db.query(insertPaymentQuery, [amount, method, referenceNumber, orderStatusID], (err, payment) => {
         if (err) {
-          return db.rollback(() => res.status(500).json({ error: "Failed to update order status" }));
+          console.error("Error inserting into payment:", err);
+          return db.rollback(() => res.status(500).json({ error: "Failed to insert payment" }));
         }
 
-        // Commit the transaction
+        const paymentID = payment.insertId; // Get the newly created orderstatus ID
+
+        // Step 3: Check if a discount is applied, then insert into the `discount` table
+        if (discountType && discountAmount) {
+          const insertDiscountQuery = `
+            INSERT INTO discount (discountID, discountType, discountAmount)
+            VALUES (?, ?, ?)
+          `;
+          db.query(insertDiscountQuery, [paymentID, discountType, discountAmount], (err) => {
+            if (err) {
+              console.error("Error inserting into discount:", err);
+              return db.rollback(() => res.status(500).json({ error: "Failed to insert discount" }));
+            }
+          });
+        }
+
+        // Step 4: Commit the transaction after successful inserts
         db.commit(err => {
           if (err) {
+            console.error("Error committing transaction:", err);
             return db.rollback(() => res.status(500).json({ error: "Failed to commit transaction" }));
           }
           res.status(200).json({ message: "Payment processed successfully" });
@@ -192,7 +202,7 @@ router.post('/processPayment', (req, res) => {
 
 // PUT /updateOrderStatus endpoint
 router.put('/updateOrderStatus', (req, res) => {
-  const { orderID, newStatus, employeeID, reason } = req.body;
+  const { orderID, newStatus, employeeID, reason, updatePayment, cancellationReason } = req.body;
 
   if (!orderID || !newStatus) {
     return res.status(400).json({ error: 'OrderID and newStatus are required' });
@@ -205,22 +215,66 @@ router.put('/updateOrderStatus', (req, res) => {
 
   db.query(insertOrderStatusQuery, [orderID, newStatus, employeeID || null, reason || null], (err, result) => {
     if (err) {
-      console.error("Error updating order status:", err);
+      console.error("Error inserting order status:", err);
       return res.status(500).json({ error: 'Internal Server Error' });
     }
 
-    res.status(200).json({ message: 'Order status updated successfully' });
+    const orderStatusID = result.insertId; // Retrieve the newly inserted orderstatusID
+    console.log("OrderStatusIDCompleted: ", orderStatusID, orderID);
+
+    // If the payment table needs to be updated
+    if (updatePayment) {
+      const fetchPaymentsQuery = `
+        SELECT paymentID
+        FROM payment
+        WHERE orderStatusID IN (
+          SELECT orderStatusID
+          FROM orderstatus
+          WHERE orderID = ?
+        )
+      `;
+
+      db.query(fetchPaymentsQuery, [orderID], (err, paymentsResult) => {
+        if (err) {
+          console.error("Error fetching payments associated with the orderID:", err);
+          return res.status(500).json({ error: 'Failed to fetch payments' });
+        }
+
+        const paymentIDs = paymentsResult.map(payment => payment.paymentID);
+
+        if (paymentIDs.length === 0) {
+          console.log("No associated payments found to update.");
+          return res.status(200).json({ message: 'Order status updated, no payments found to update.' });
+        }
+
+        const updatePaymentsQuery = `
+          UPDATE payment
+          SET orderStatusID = ?
+          WHERE paymentID IN (?)
+        `;
+
+        db.query(updatePaymentsQuery, [orderStatusID, paymentIDs], (err) => {
+          if (err) {
+            console.error("Error updating payment table:", err);
+            return res.status(500).json({ error: 'Failed to update payment table' });
+          }
+
+          res.status(200).json({ message: 'Order status and associated payments updated successfully' });
+        });
+      });
+    } else {
+      res.status(200).json({ message: 'Order status updated successfully' });
+    }
   });
 });
 
 router.post('/cancelOrder', (req, res) => {
-  const { orderID, cancellationReason, cancellationType, subitemsUsed } = req.body;
+  const { orderID, cancellationReason, employeeID } = req.body;
 
   console.log("Request received for cancelling order:", {
     orderID,
     cancellationReason,
-    cancellationType, // The order's original status before cancellation
-    subitemsUsed,
+    employeeID,
   });
 
   // Start transaction
@@ -230,72 +284,56 @@ router.post('/cancelOrder', (req, res) => {
       return res.status(500).send("Error starting transaction");
     }
 
-    // Insert into cancelledOrders table with the cancellationType
-    const insertCancelledOrderQuery = `
-      INSERT INTO cancelledOrders (orderID, cancellationReason, cancellationType)
-      VALUES (?, ?, ?)
+    // Check if the order status is 'Unpaid'
+    const checkOrderStatusQuery = `
+      SELECT orderStatus
+      FROM orderstatus
+      WHERE orderID = ?
+      ORDER BY statusDateTime DESC
+      LIMIT 1
     `;
-    db.query(insertCancelledOrderQuery, [orderID, cancellationReason, cancellationType], (err, result) => {
+
+    db.query(checkOrderStatusQuery, [orderID], (err, result) => {
       if (err) {
-        console.error("Error inserting into cancelledOrders:", err);
-        return db.rollback(() => res.status(500).send("Error inserting into cancelledOrders"));
+        console.error("Error checking order status:", err);
+        return db.rollback(() => res.status(500).send("Error checking order status"));
       }
 
-      const cancelledOrderID = result.insertId;
-      console.log("Cancelled order inserted with ID:", cancelledOrderID);
+      if (result.length === 0) {
+        console.error("Order not found:", orderID);
+        return db.rollback(() => res.status(404).send("Order not found"));
+      }
 
-      // Validate if all subitemsUsed exist in subitem table
-      const subitemIDs = subitemsUsed.map(subitem => subitem.subitemID);
+      const currentStatus = result[0].orderStatus;
+      console.log("Current Status: ", currentStatus)
 
-      const checkSubitemsQuery = `
-        SELECT subitemID FROM subitem WHERE subitemID IN (?)
+      if (currentStatus !== 'Unpaid') {
+        console.error("Order cannot be canceled because it is not unpaid:", orderID);
+        return db.rollback(() => res.status(400).send("Order can only be canceled if it is unpaid"));
+      }
+
+      // Insert a new row in the orderstatus table to mark the order as 'Cancelled'
+      const insertOrderStatusQuery = `  
+        INSERT INTO orderstatus (orderID, orderStatus, statusDateTime, reason, employeeID)
+        VALUES (?, 'Cancelled', NOW(), ?, ?)
       `;
-      db.query(checkSubitemsQuery, [subitemIDs], (err, result) => {
+
+      db.query(insertOrderStatusQuery, [orderID, cancellationReason, employeeID], (err) => {
         if (err) {
-          console.error("Error validating subitemIDs:", err);
-          return db.rollback(() => res.status(500).send("Error validating subitemIDs"));
+          console.error("Error updating order status to cancelled:", err);
+          return db.rollback(() => res.status(500).send("Error updating order status to cancelled"));
         }
 
-        const validSubitemIDs = result.map(row => row.subitemID);
-        const invalidSubitemIDs = subitemIDs.filter(id => !validSubitemIDs.includes(id));
+        // Commit the transaction
+        db.commit((err) => {
+          if (err) {
+            console.error("Error committing transaction:", err);
+            return db.rollback(() => res.status(500).send("Error committing transaction"));
+          }
 
-        if (invalidSubitemIDs.length > 0) {
-          console.error("Invalid subitemIDs found:", invalidSubitemIDs);
-          return db.rollback(() => res.status(400).send("Invalid subitemIDs: " + invalidSubitemIDs.join(', ')));
-        }
-
-        // Insert each valid subitem used into subitemused table
-        const insertSubitemUsedPromises = subitemsUsed.map((subitem) => {
-          return new Promise((resolve, reject) => {
-            const insertSubitemUsedQuery = `
-              INSERT INTO subitemused (subitemID, quantityUsed, cancelledOrderID)
-              VALUES (?, ?, ?)
-            `;
-            db.query(insertSubitemUsedQuery, [subitem.subitemID, subitem.quantityUsed, cancelledOrderID], (err) => {
-              if (err) {
-                return reject(err);
-              }
-              resolve();
-            });
-          });
+          console.log("Order cancellation transaction committed successfully.");
+          res.status(200).send("Order cancelled successfully");
         });
-
-        // Execute all subitem inserts
-        Promise.all(insertSubitemUsedPromises)
-          .then(() => {
-            db.commit((err) => {
-              if (err) {
-                console.error("Error committing transaction:", err);
-                return db.rollback(() => res.status(500).send("Error committing transaction"));
-              }
-              console.log("Order cancellation transaction committed successfully.");
-              res.status(200).send("Order cancelled successfully");
-            });
-          })
-          .catch((err) => {
-            console.error("Error inserting subitems used:", err);
-            db.rollback(() => res.status(500).send("Error inserting subitems used"));
-          });
       });
     });
   });
@@ -311,17 +349,15 @@ router.get('/getPaymentDetails', (req, res) => {
       p.referenceNumber,
       d.discountType,
       d.discountAmount,
-      o.orderID,
+      os.orderID,
       os.orderStatus,
       os.statusDateTime
     FROM 
-      \`order\` o
-    JOIN 
-      payment p ON o.orderID = p.orderID
+      payment p
     LEFT JOIN 
       discount d ON p.paymentID = d.discountID
     JOIN 
-      orderstatus os ON o.orderID = os.orderID
+      orderstatus os ON p.orderStatusID = os.orderStatusID
     WHERE 
       os.orderStatus != 'Unpaid';
   `;
