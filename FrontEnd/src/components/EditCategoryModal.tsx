@@ -3,6 +3,7 @@ import Modal from "@/components/ui/Modal";
 import { CategoriesDataTypes } from "../../lib/types/CategoriesDataTypes";
 import React from "react";
 import Toggle from "react-toggle";
+import ValidationDialog from "@/components/ValidationDialog";
 
 interface EditCategoryModalProps {
   editCategoryModalIsVisible: boolean;
@@ -35,7 +36,26 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
     }
   }, [categoryToEdit]);
 
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
+
   const handleSave = () => {
+    const validationErrors: string[] = [];
+
+    // Validate category name
+    if (!categoryName.trim()) {
+      validationErrors.push("Category name is required.");
+    }
+
+    // If there are validation errors, display them and stop submission
+    if (validationErrors.length > 0) {
+      setValidationMessage(
+        `Please fill out the following:\n${validationErrors.join("\n")}`
+      );
+      return false;
+    }
+
     //@adgramirez replace this code with function that edits the category in the DB
 
     // if (setCategoryHolder) {
@@ -112,6 +132,12 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
           </button>
         </div>
       </form>
+      {validationMessage && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
+      )}
     </Modal>
   );
 };
