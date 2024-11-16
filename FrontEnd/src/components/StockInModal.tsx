@@ -215,28 +215,22 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   value={item.inventoryID}
                   onChange={(e) => {
                     const newInventoryID = parseInt(e.target.value);
-                    handleInventoryChange(newInventoryID, index); // Update the inventory item selection
                     updateInventoryItem(index, { inventoryID: newInventoryID });
+                    handleInventoryChange(newInventoryID, index); // Call handleInventoryChange after updating
                   }}
                   className="mb-2 mt-2 p-2 w-full text-black border border-black"
                 >
                   <option value="0" disabled>
-                    Select Inventory Item
+                    Select Item
                   </option>
-                  {inventoryNames
-                    .filter(
-                      (inv) =>
-                        !inventoryItems.some(
-                          (selectedItem, selectedIndex) =>
-                            selectedItem.inventoryID === inv.inventoryID &&
-                            selectedIndex !== index
-                        )
-                    )
-                    .map((inv) => (
-                      <option key={inv.inventoryID} value={inv.inventoryID}>
-                        {inv.inventoryName}
-                      </option>
-                    ))}
+                  {inventoryNames.map((inventory) => (
+                    <option
+                      key={inventory.inventoryID}
+                      value={inventory.inventoryID}
+                    >
+                      {inventory.inventoryName}
+                    </option>
+                  ))}
                 </select>
 
                 <button
