@@ -33,6 +33,8 @@ export type UOMManagementCardProps = {
   setCategoryToEdit: React.Dispatch<
     React.SetStateAction<UOMCategory | undefined>
   >;
+
+  setAddUOMModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
@@ -45,6 +47,7 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
   setDetailedData,
   setEditUOMCategoryModalIsVisible,
   setCategoryToEdit,
+  setAddUOMModalIsVisible,
 }) => {
   return (
     <>
@@ -129,7 +132,7 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
 
         <div className="w-full flex justify-end">
           <button
-            //   onClick={() => setAddUOMCategoryModalIsVisible(true)}
+            onClick={() => setAddUOMModalIsVisible(true)}
             className="bg-cream text-primaryBrown border-2 border-primaryBrown py-1 px-2 text-sm rounded mt-2"
           >
             Add UOM
