@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useCartContext } from "../../../lib/context/CartContext";
 
 import MenuCard from "@/components/ui/MenuCard";
 import QuantityModal from "@/components/QuantityModal";
