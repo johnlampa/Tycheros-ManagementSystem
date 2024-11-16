@@ -39,4 +39,14 @@ export type MultiItemStockOutData = {
   }[];
 
 }
+
+export type MultiItemUpdateStockData = {
+  employeeID: string;
+  updateStockDateTime: string;
+  inventoryItems: {
+    inventoryID: number;
+    quantityToUpdate: number
+  }[];
+
+}
   

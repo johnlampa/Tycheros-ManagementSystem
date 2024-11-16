@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
-import { MultiItemStockOutData } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
+import {
+  InventoryItem,
+  MultiItemStockOutData,
+} from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 
 interface StockOutModalProps {
@@ -28,6 +31,31 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
       expanded: true, // Expanding item details by default
     }))
   );
+
+  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data: InventoryItem[] = await response.json();
+        setInventoryData(data);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInventory();
+  }, []);
 
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
@@ -60,6 +88,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
   const validateForm = () => {
     const missingFields: string[] = [];
+    const quantityExceedsFields: string[] = [];
 
     // Validate general fields
     if (
@@ -71,6 +100,9 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
     // Validate each inventory item
     inventoryItems.forEach((item, index) => {
+      const inventory = inventoryData.find(
+        (inv) => inv.inventoryID === item.inventoryID
+      );
       const inventoryName =
         inventoryNames.find((inv) => inv.inventoryID === item.inventoryID)
           ?.inventoryName || `Item ${index + 1}`;
@@ -82,11 +114,19 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
       if (item.quantityToStockOut <= 0) {
         missingFields.push(`Quantity for ${inventoryName}`);
       }
+
+      if (inventory && item.quantityToStockOut > inventory.totalQuantity) {
+        quantityExceedsFields.push(
+          `Quantity for ${inventoryName} exceeds available total (${inventory.totalQuantity}).`
+        );
+      }
     });
 
-    if (missingFields.length > 0) {
+    if (missingFields.length > 0 || quantityExceedsFields.length > 0) {
       setValidationMessage(
-        `Please fill out the following:\n${missingFields.join("\n")}`
+        `Please address the following issues:\n${missingFields
+          .concat(quantityExceedsFields)
+          .join("\n")}`
       );
       return false;
     }
@@ -176,11 +216,20 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
                 <option value="0" disabled>
                   Select Inventory Item
                 </option>
-                {inventoryNames.map((inv) => (
-                  <option key={inv.inventoryID} value={inv.inventoryID}>
-                    {inv.inventoryName}
-                  </option>
-                ))}
+                {inventoryNames
+                  .filter(
+                    (inv) =>
+                      !inventoryItems.some(
+                        (selectedItem, selectedIndex) =>
+                          selectedItem.inventoryID === inv.inventoryID &&
+                          selectedIndex !== index
+                      )
+                  )
+                  .map((inv) => (
+                    <option key={inv.inventoryID} value={inv.inventoryID}>
+                      {inv.inventoryName}
+                    </option>
+                  ))}
               </select>
 
               <button onClick={() => toggleExpandItem(index)}>

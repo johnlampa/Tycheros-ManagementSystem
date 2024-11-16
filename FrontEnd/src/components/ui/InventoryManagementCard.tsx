@@ -12,7 +12,6 @@ import { format } from "date-fns";
 export type InventoryManagementCardProps = {
   inventoryItem: InventoryItem;
   handleEditItem: Function;
-  handleUpdateStock: Function;
 
   expandedRow: number | null;
   setExpandedRow: React.Dispatch<React.SetStateAction<number | null>>;
@@ -25,7 +24,6 @@ export type InventoryManagementCardProps = {
 const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
   inventoryItem,
   handleEditItem,
-  handleUpdateStock,
   expandedRow,
   setExpandedRow,
   toggleRow,
