@@ -17,13 +17,26 @@ const OrderCard: React.FC<OrderCardProps> = ({
   setSubtotal,
   type,
 }) => {
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(1);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+  }, [loggedInEmployeeID]);
+
   const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
     productID: 1,
     productName: "Matcha",
     categoryName: "Milk Tea",
+    categoryID: 7,
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
     status: 1,
+    employeeID: loggedInEmployeeID,
   });
 
   // Update subtotal whenever cart or menuData changes
