@@ -8,10 +8,18 @@ import AddUOMCategoryModal from "@/components/AddUOMCategoryModal";
 import { UOM, UOMCategory } from "../../../lib/types/UOMDataTypes";
 import UOMManagementCard from "@/components/ui/UOMManagementCard";
 import axios from "axios";
+import EditUOMCategoryModal from "@/components/EditUOMCategoryModal";
+import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 
 export default function Page() {
   const [addUOMCategoryModalIsVisible, setAddUOMCategoryModalIsVisible] =
     useState<boolean>(false);
+
+  const [editUOMCategoryModalIsVisible, setEditUOMCategoryModalIsVisible] =
+    useState<boolean>(false);
+  const [categoryToEdit, setCategoryToEdit] = useState<
+    UOMCategory | undefined
+  >();
 
   //@adgramirez add a useEffect to populate this array with ALL the UOM Categories
   const [UOMCategory, setUOMCategory] = useState<UOMCategory[]>([
@@ -112,6 +120,10 @@ export default function Page() {
                   setExpandedRow={setExpandedRow}
                   detailedData={detailedData}
                   setDetailedData={setDetailedData}
+                  setEditUOMCategoryModalIsVisible={
+                    setEditUOMCategoryModalIsVisible
+                  }
+                  setCategoryToEdit={setCategoryToEdit}
                 />
               </div>
             ))}
@@ -123,6 +135,13 @@ export default function Page() {
           setAddUOMCategoryModalVisibility={setAddUOMCategoryModalIsVisible}
           modalTitle="Add UOM Category"
         ></AddUOMCategoryModal>
+        <EditUOMCategoryModal
+          editUOMCategoryModalIsVisible={editUOMCategoryModalIsVisible}
+          setEditUOMCategoryModalVisibility={setEditUOMCategoryModalIsVisible}
+          modalTitle="Edit UOM Category"
+          categoryToEdit={categoryToEdit}
+          UOM={UOM}
+        ></EditUOMCategoryModal>
       </div>
     </div>
   );

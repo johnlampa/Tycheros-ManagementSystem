@@ -8,7 +8,6 @@ import { IconContext } from "react-icons";
 import axios from "axios";
 
 import { format } from "date-fns";
-import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import { UOM, UOMCategory } from "../../../lib/types/UOMDataTypes";
 
 export type UOMManagementCardProps = {
@@ -27,6 +26,13 @@ export type UOMManagementCardProps = {
 
   detailedData: { [key: number]: any };
   setDetailedData: React.Dispatch<React.SetStateAction<{ [key: number]: any }>>;
+
+  setEditUOMCategoryModalIsVisible: React.Dispatch<
+    React.SetStateAction<boolean>
+  >;
+  setCategoryToEdit: React.Dispatch<
+    React.SetStateAction<UOMCategory | undefined>
+  >;
 };
 
 const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
@@ -37,6 +43,8 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
   setExpandedRow,
   detailedData,
   setDetailedData,
+  setEditUOMCategoryModalIsVisible,
+  setCategoryToEdit,
 }) => {
   return (
     <>
@@ -65,8 +73,8 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
           <div>
             <button
               onClick={() => {
-                //   setCategoryToEdit(category);
-                //   setEditCategoryModalIsVisible(true);
+                setCategoryToEdit(category);
+                setEditUOMCategoryModalIsVisible(true);
               }}
               className="text-black px-3 text-xs rounded-full border border-black "
             >
