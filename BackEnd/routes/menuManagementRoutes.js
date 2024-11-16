@@ -165,7 +165,6 @@ router.get('/getSpecificSubitems/:productID', (req, res) => {
   });
 });
 
-// PUT PRODUCT ENDPOINT
 router.put('/putProduct/:productID', (req, res) => {
   const productID = req.params.productID;
   const updatedData = req.body;
@@ -187,80 +186,113 @@ router.put('/putProduct/:productID', (req, res) => {
   ];
 
   db.query(productUpdateQuery, productValues, (err, productResult) => {
-      if (err) {
-          console.error("Error updating product:", err);
-          return res.status(500).json({ error: "Internal Server Error" });
-      }
+    if (err) {
+      console.error('Error updating product:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
 
-      // Update the price table
-      if (updatedData.sellingPrice) {
-          const priceUpdateQuery = `
-            UPDATE price
-            SET sellingPrice = ?
-            WHERE productID = ?
-          `;
-
-          db.query(priceUpdateQuery, [updatedData.sellingPrice, productID], (err, priceResult) => {
-              if (err) {
-                  console.error("Error updating price:", err);
-                  return res.status(500).json({ error: "Internal Server Error" });
-              }
-          });
-      }
-
-      // Check if the product exists
-      const checkProductExistsQuery = `
-        SELECT 1 FROM product WHERE productID = ?
+    // Check if sellingPrice has changed
+    if (updatedData.sellingPrice) {
+      const checkPriceQuery = `
+        SELECT sellingPrice
+        FROM price
+        WHERE productID = ?
+        ORDER BY priceDateTime DESC
+        LIMIT 1
       `;
 
-      db.query(checkProductExistsQuery, [productID], (err, productExistsResult) => {
-          if (err) {
-              console.error("Error checking product existence:", err);
-              return res.status(500).json({ error: "Internal Server Error" });
-          }
+      db.query(checkPriceQuery, [productID], (err, priceResult) => {
+        if (err) {
+          console.error('Error checking existing price:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
 
-          if (productExistsResult.length === 0) {
-              return res.status(404).json({ error: "Product not found" });
-          }
+        // Safely retrieve the latest price for comparison
+        const latestPrice = priceResult[0]?.sellingPrice
+          ? parseFloat(priceResult[0].sellingPrice)
+          : null;
 
-          // Update or insert subitems if product exists
-          if (updatedData.subitems && Array.isArray(updatedData.subitems)) {
-              // First, delete existing subitems for the product
-              const deleteSubitemsQuery = `
-                DELETE FROM subitem WHERE productID = ?
-              `;
+        const newPrice = parseFloat(updatedData.sellingPrice);
 
-              db.query(deleteSubitemsQuery, [productID], (err) => {
-                  if (err) {
-                      console.error("Error deleting existing subitems:", err);
-                      return res.status(500).json({ error: "Internal Server Error" });
-                  }
+        if (latestPrice !== null && latestPrice === newPrice) {
+          console.log('No price change detected. Skipping price insertion.');
+        } else {
+          // Add a new price entry to the price table
+          const priceInsertQuery = `
+            INSERT INTO price (productID, sellingPrice, priceDateTime, employeeID)
+            VALUES (?, ?, NOW(), ?)
+          `;
 
-                  // Now insert the updated subitems
-                  updatedData.subitems.forEach((subitem) => {
-                      const subitemInsertQuery = `
-                        INSERT INTO subitem (productID, inventoryID, quantityNeeded)
-                        VALUES (?, ?, ?)
-                      `;
+          const priceValues = [
+            productID,
+            newPrice,
+            updatedData.employeeID, // Ensure the logged-in employee ID is passed from the frontend
+          ];
 
-                      const subitemValues = [
-                          productID,
-                          subitem.inventoryID,
-                          subitem.quantityNeeded || null,
-                      ];
-
-                      db.query(subitemInsertQuery, subitemValues, (err) => {
-                          if (err) {
-                              console.error("Error inserting new subitem:", err);
-                              return res.status(500).json({ error: "Internal Server Error" });
-                          }
-                      });
-                  });
-              });
-          }
-
-          return res.json({ message: "Product, subitems, and price updated successfully" });
+          db.query(priceInsertQuery, priceValues, (err, priceResult) => {
+            if (err) {
+              console.error('Error inserting price:', err);
+              return res.status(500).json({ error: 'Internal Server Error' });
+            }
+            console.log('New price entry added.');
+          });
+        }
       });
+    }
+
+    // Check if the product exists
+    const checkProductExistsQuery = `
+      SELECT 1 FROM product WHERE productID = ?
+    `;
+
+    db.query(checkProductExistsQuery, [productID], (err, productExistsResult) => {
+      if (err) {
+        console.error('Error checking product existence:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      if (productExistsResult.length === 0) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+
+      // Update or insert subitems if product exists
+      if (updatedData.subitems && Array.isArray(updatedData.subitems)) {
+        // First, delete existing subitems for the product
+        const deleteSubitemsQuery = `
+          DELETE FROM subitem WHERE productID = ?
+        `;
+
+        db.query(deleteSubitemsQuery, [productID], (err) => {
+          if (err) {
+            console.error('Error deleting existing subitems:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+          }
+
+          // Now insert the updated subitems
+          updatedData.subitems.forEach((subitem) => {
+            const subitemInsertQuery = `
+              INSERT INTO subitem (productID, inventoryID, quantityNeeded)
+              VALUES (?, ?, ?)
+            `;
+
+            const subitemValues = [
+              productID,
+              subitem.inventoryID,
+              subitem.quantityNeeded || null,
+            ];
+
+            db.query(subitemInsertQuery, subitemValues, (err) => {
+              if (err) {
+                console.error('Error inserting new subitem:', err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+              }
+            });
+          });
+        });
+      }
+
+      return res.json({ message: 'Product, subitems, and price updated successfully' });
+    });
   });
 });
 
@@ -281,6 +313,49 @@ router.delete('/deleteProduct/:productID', (req, res) => {
       } else {
           return res.status(404).json({ message: "Product not found" });
       }
+  });
+});
+
+router.get('/getPriceHistory/:productID', (req, res) => {
+  const { productID } = req.params;
+
+  // Validate input
+  if (!productID) {
+    return res.status(400).json({ error: 'Product ID is required' });
+  }
+
+  // SQL query
+  const query = `
+    SELECT 
+      p.productName,
+      pr.sellingPrice,
+      pr.priceDateTime,
+      pr.employeeID,
+      CONCAT(e.firstName, ' ', e.lastName) AS employeeName
+    FROM 
+      product p
+    JOIN 
+      price pr ON p.productID = pr.productID
+    JOIN 
+      employees e ON pr.employeeID = e.employeeID
+    WHERE 
+      p.productID = ?
+    ORDER BY
+	    priceDateTime ASC;
+  `;
+
+  // Execute query
+  db.query(query, [productID], (err, results) => {
+    if (err) {
+      console.error('Error fetching product details:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'No price history found for this product' });
+    }
+
+    res.status(200).json(results); // Return all results as an array
   });
 });
 

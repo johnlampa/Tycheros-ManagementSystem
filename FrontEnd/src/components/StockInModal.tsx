@@ -191,7 +191,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
           </div>
         </div>
         <div>
-          <div className="mb-3">
+          <div className="mb-3 text-black">
             Employee: {loggedInEmployeeName || "No employee found."}
           </div>
           <input

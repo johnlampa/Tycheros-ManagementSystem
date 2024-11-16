@@ -23,4 +23,5 @@ export type ProductDataTypes = {
   imageUrl: string;
   subitems?: SubitemDataTypes[];
   status: number;
+  employeeID: number;
 };

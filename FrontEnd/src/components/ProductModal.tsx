@@ -186,7 +186,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       })),
       status: 1,
       //@adgramirez modify backend
-      //employeeID: loggedInEmployeeID
+      employeeID: loggedInEmployeeID
     };
 
     try {
