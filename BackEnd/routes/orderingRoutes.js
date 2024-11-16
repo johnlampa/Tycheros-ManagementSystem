@@ -284,5 +284,51 @@ router.put('/updateMultipleSubitemQuantities', (req, res) => {
       });
   });
 });
-  
+
+// GET /getOrderStatuses endpoint
+router.get('/getOrderStatuses/:orderID', (req, res) => {
+  const { orderID } = req.params;
+
+  if (!orderID) {
+    return res.status(400).json({ error: 'OrderID is required' });
+  }
+
+  const getStatusesQuery = `
+    SELECT
+      os.orderStatus AS status,
+      os.statusDateTime,
+      os.employeeID,
+      e.firstName,
+      e.lastName
+    FROM
+      orderstatus os
+    LEFT JOIN
+      employees e ON os.employeeID = e.employeeID
+    WHERE
+      os.orderID = ?
+    ORDER BY
+      os.statusDateTime ASC
+  `;
+
+  db.query(getStatusesQuery, [orderID], (err, results) => {
+    if (err) {
+      console.error('Error fetching order statuses:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No statuses found for the specified orderID' });
+    }
+
+    const statusRecords = results.map((record) => ({
+      status: record.status,
+      statusDateTime: record.statusDateTime,
+      employeeID: record.employeeID,
+      employeeName: record.employeeID ? `${record.firstName} ${record.lastName}` : 'N/A',
+    }));
+
+    res.status(200).json(statusRecords);
+  });
+});
+
 module.exports = router;
