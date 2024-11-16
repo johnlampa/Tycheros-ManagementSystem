@@ -42,13 +42,19 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                 Active
               </div>
             ) : (
-              <div className="py-1 px-2 rounded-md bg-red w-min text-xs text-white mb-2">
+              <div className="py-1 px-2 rounded-md bg-gray w-min text-xs text-white mb-2">
                 Inactive
               </div>
             )}
-            {inventoryItem?.totalQuantity <= inventoryItem?.reorderPoint && (
+            {inventoryItem?.totalQuantity <= inventoryItem?.reorderPoint &&
+              inventoryItem?.totalQuantity != 0 && (
+                <div className="py-1 px-2 rounded-md bg-orange text-xs text-white mb-2 w-max">
+                  Low stock
+                </div>
+              )}
+            {inventoryItem?.totalQuantity == 0 && (
               <div className="py-1 px-2 rounded-md bg-red text-xs text-white mb-2 w-max">
-                Low stock
+                No stock
               </div>
             )}
           </div>
@@ -62,6 +68,7 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
         <div className="font-bold text-black">
           {inventoryItem?.inventoryName.toUpperCase()}
         </div>
+
         <div className="text-black text-sm">
           <span className="font-bold">
             {inventoryItem?.totalQuantity} {inventoryItem?.unitOfMeasure}
@@ -81,16 +88,6 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
             className="bg-cream border-2 border-primaryBrown text-primaryBrown py-1 px-2 text-sm rounded"
           >
             Edit Item
-          </button>
-          <button
-            onClick={() => {
-              if (inventoryItem?.inventoryID !== null) {
-                handleUpdateStock(inventoryItem.inventoryID.toString()); // Use the selected radio button's inventory ID
-              }
-            }}
-            className="bg-primaryBrown text-white py-1 px-2 text-sm rounded"
-          >
-            Update Stock
           </button>
         </div>
 
@@ -148,8 +145,7 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                                   </div>
                                 </div>
                                 <div className="flex justify-center items-center text-sm font-semibold">
-                                  &#8369; {detail.pricePerUnit} /{" "}
-                                  {detail.poUoM}
+                                  &#8369; {detail.pricePerUnit} / {detail.poUoM}
                                 </div>
                               </div>
                             </li>
