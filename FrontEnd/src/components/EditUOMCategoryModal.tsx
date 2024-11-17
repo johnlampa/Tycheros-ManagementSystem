@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
 import React from "react";
+import axios from "axios";
 import { UOM, UOMCategory } from "../../lib/types/UOMDataTypes";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
@@ -22,34 +23,48 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
   categoryToEdit,
   UOM,
 }) => {
-  const [categoryName, setCategoryName] = useState(
-    categoryToEdit?.categoryName
+  const [categoryName, setCategoryName] = useState<string>(
+    categoryToEdit?.categoryName || ""
   );
-  const [isChecked, setIsChecked] = useState<boolean>();
+  const [isChecked, setIsChecked] = useState<boolean>(
+    categoryToEdit?.status === 1
+  );
 
   useEffect(() => {
-    // Update categoryName when categoryToEdit changes
+    // Update state when categoryToEdit changes
     setCategoryName(categoryToEdit?.categoryName || "");
-
     setIsChecked(categoryToEdit?.status === 1);
-  }, [categoryToEdit, UOM]); // Dependencies include categoryToEdit and UOM
+  }, [categoryToEdit]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!categoryName?.trim()) {
+    if (!categoryName.trim()) {
       alert("Category name is required");
       return;
     }
 
-    const newCategory = {
+    const updatedCategory = {
       categoryName,
       status: isChecked ? 1 : 0,
     };
 
-    //@adgramirez add code that saves the details of the category to the DB
+    try {
+      // Make the PUT request to update the category
+      const response = await axios.put(
+        `http://localhost:8081/inventoryManagement/updateUoMCategory/${categoryToEdit?.categoryID}`,
+        updatedCategory
+      );
 
-    setEditUOMCategoryModalVisibility(false);
+      if (response.status === 200) {
+        alert("Category updated successfully!");
+        setEditUOMCategoryModalVisibility(false); // Close the modal on success
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error updating category:", error);
+      alert("Failed to update category. Please try again.");
+    }
   };
 
   const handleCancel = () => {
@@ -110,7 +125,7 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
           </button>
         </div>
       </form>
-    </Modal>
+    </Modal>  
   );
 };
 

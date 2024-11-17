@@ -24,7 +24,7 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
 
   useEffect(() => {
     // Update categoryName when categoryToEdit changes
-    setUOMName(UOMToEdit?.UOMName || "");
+    setUOMName(UOMToEdit?.UoM || "");
 
     setRatio(UOMToEdit?.ratio);
 

@@ -9,36 +9,70 @@ interface AddUOMCategoryModalProps {
     React.SetStateAction<boolean>
   >;
   modalTitle: string;
+  systemName: string;
 }
 
 const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
   addUOMCategoryModalIsVisible,
   setAddUOMCategoryModalVisibility,
   modalTitle,
+  systemName,
 }) => {
   const [categoryName, setCategoryName] = useState("");
   const [referenceUOMName, setReferenceUOMName] = useState("");
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+  
     if (!categoryName.trim()) {
-      alert("Category name is required");
+      alert("Category name is required.");
       return;
     }
-
-    const newCategory = {
+  
+    const payload = {
       categoryName,
       referenceUOMName,
+      systemName, // Use the systemName passed as a prop
       status: 1,
     };
-
-    //@adgramirez add code that adds the new category to the DB
-
-    setCategoryName("");
-    setReferenceUOMName("");
-    setAddUOMCategoryModalVisibility(false);
-  };
+  
+    console.log("Payload sent to the backend:", payload);
+  
+    try {
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/addUoMCategory",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Unknown error occurred.");
+      }
+  
+      const result = await response.json();
+      console.log("Successfully added category and UOM:", result);
+      alert("Category and UOM added successfully!");
+  
+      // Clear input fields and close modal
+      setCategoryName("");
+      setReferenceUOMName("");
+      setAddUOMCategoryModalVisibility(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error adding category and UOM:", error.message);
+        alert(`Failed to add category and UOM. Error: ${error.message}`);
+      } else {
+        console.error("Unknown error:", error);
+        alert("An unknown error occurred.");
+      }
+    }    
+  };  
 
   const handleCancel = () => {
     setAddUOMCategoryModalVisibility(false);
