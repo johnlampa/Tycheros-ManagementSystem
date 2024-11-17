@@ -19,8 +19,20 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
   statusRecordsModalIsVisible,
   setStatusRecordsModalIsVisible,
 }) => {
-  //@adgramirez add useeffect to populate this array with price records of PRODUCTID
-  const [statusRecordsForProduct, setStatusRecordsForProduct] = useState<StatusRecords[]>([]);
+  const [statusRecordsForProduct, setStatusRecordsForProduct] = useState<
+    StatusRecords[]
+  >([
+    {
+      status: "Unpaid",
+      date: "2024-11-02 16:39:28",
+      employeeID: 1,
+    },
+    {
+      status: "Unpaid",
+      date: "2024-11-02 16:39:28",
+      employeeID: 2,
+    },
+  ]);
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,16 +90,21 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
         setModalVisibility={setStatusRecordsModalIsVisible}
       >
         <div className="w-[340px] p-6 mx-auto rounded">
-          <div className="text-center text-xl font-bold text-black mb-4">
+          <div className="text-center text-xl font-bold text-black mb-4 ">
             Status Records
           </div>
+<<<<<<< HEAD
           <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm text-black">
+=======
+          <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm gap-x-1">
+>>>>>>> 2f57af4 (layout changes and employee name instead of employee id)
             <div className="flex justify-center items-center">Status</div>
-            <div className="flex justify-center items-center text-center ">
-              Date Changed
+            <div className="flex justify-center items-center text-center">
+              Date
             </div>
             <div className="flex justify-center items-center">Employee</div>
           </div>
+<<<<<<< HEAD
           {statusRecordsForProduct.map((statusRecord, statusRecordIndex) => (
             <div
               key={statusRecordIndex}
@@ -104,9 +121,34 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
               </div>
             </div>
           ))}
+=======
+          {statusRecordsForProduct.map((statusRecord, statusRecordIndex) => {
+            const employee = employees.find(
+              (emp) => emp.employeeID === statusRecord.employeeID
+            );
+            return (
+              <div
+                key={statusRecordIndex}
+                className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 gap-x-1"
+              >
+                <div className="flex justify-center items-center">
+                  {statusRecord.status}
+                </div>
+                <div className="flex justify-center items-center text-center">
+                  {statusRecord.date}
+                </div>
+                <div className="flex justify-center items-center text-xs text-center">
+                  {employee
+                    ? `${employee.lastName}, ${employee.firstName}`
+                    : "Unknown"}
+                </div>
+              </div>
+            );
+          })}
+>>>>>>> 2f57af4 (layout changes and employee name instead of employee id)
           <div className="mt-8 text-center flex justify-end">
             <button
-              className=" w-min bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 rounded"
+              className="w-min bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 rounded"
               onClick={(e) => {
                 e.preventDefault();
                 setStatusRecordsModalIsVisible(false);
