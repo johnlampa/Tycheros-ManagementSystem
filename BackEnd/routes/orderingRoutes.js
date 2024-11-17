@@ -333,4 +333,37 @@ router.get('/getOrderStatuses/:orderID', (req, res) => {
   });
 });
 
+// GET /getCategoriesBySystem
+router.get('/getCategoriesBySystem/:systemName', (req, res) => {
+  const { systemName } = req.params;
+
+  const query = `
+    SELECT 
+      c.categoryID,
+      c.categoryName,
+      c.status,
+      s.system AS systemName
+    FROM 
+      category c
+    JOIN 
+      \`system\` s ON c.systemID = s.systemID
+    WHERE 
+      s.system = ? AND
+      c.status = 1
+  `;
+
+  db.query(query, [systemName], (err, results) => {
+    if (err) {
+      console.error('Error fetching categories by system:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No categories found for the specified system' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
 module.exports = router;

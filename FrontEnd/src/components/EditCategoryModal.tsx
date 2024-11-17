@@ -40,35 +40,64 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
     null
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const validationErrors: string[] = [];
-
+  
     // Validate category name
     if (!categoryName.trim()) {
       validationErrors.push("Category name is required.");
     }
-
+  
     // If there are validation errors, display them and stop submission
     if (validationErrors.length > 0) {
       setValidationMessage(
         `Please fill out the following:\n${validationErrors.join("\n")}`
       );
-      return false;
+      return;
     }
-
-    //@adgramirez replace this code with function that edits the category in the DB
-
-    // if (setCategoryHolder) {
-    //   setCategoryHolder({
-    //     ...categoryToEdit,
-    //     categoryName,
-    //     status: isChecked ? 1 : 0,
-    //   });
-    // }
-
-    setEditCategoryModalIsVisible(false);
+  
+    try {
+      // Define the payload
+      const payload = {
+        categoryID: categoryToEdit?.categoryID,
+        categoryName,
+        status: isChecked ? 1 : 0,
+      };
+  
+      // Make the PUT request to the backend
+      const response = await fetch("http://localhost:8081/menuManagement/editCategory", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update category");
+      }
+  
+      const result = await response.json();
+      console.log("Category updated successfully:", result);
+  
+      // Update the category list or UI state
+      if (setCategoryHolder) {
+        setCategoryHolder({
+          categoryID: categoryToEdit?.categoryID ?? 0,
+          categoryName,
+          status: isChecked ? 1 : 0,
+          system: categoryToEdit?.system || "Unknown", // Ensure `system` is always a string
+        });
+      }
+  
+      setEditCategoryModalIsVisible(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating category:", error);
+      setValidationMessage("Failed to update category. Please try again.");
+    }
   };
-
+  
   const handleCancel = () => {
     setEditCategoryModalIsVisible(false);
   };
