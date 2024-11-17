@@ -21,23 +21,36 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
 }) => {
   const [statusRecordsForProduct, setStatusRecordsForProduct] = useState<
     StatusRecords[]
-  >([
-    {
-      status: "Unpaid",
-      date: "2024-11-02 16:39:28",
-      employeeID: 1,
-    },
-    {
-      status: "Unpaid",
-      date: "2024-11-02 16:39:28",
-      employeeID: 2,
-    },
-  ]);
+  >([]);
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   
+  useEffect(() => {
+    if (!orderID) return;
+
+    const fetchOrderStatuses = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:8081/ordering/getOrderStatuses/${orderID}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch order statuses");
+        }
+        const data: StatusRecords[] = await response.json();
+        setStatusRecordsForProduct(data);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderStatuses();
+  }, [orderID]);
+
   useEffect(() => {
     if (!orderID) return;
 
@@ -135,7 +148,7 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
                   {statusRecord.status}
                 </div>
                 <div className="flex justify-center items-center text-center">
-                  {statusRecord.date}
+                  {statusRecord.statusDateTime}
                 </div>
                 <div className="flex justify-center items-center text-xs text-center">
                   {employee
