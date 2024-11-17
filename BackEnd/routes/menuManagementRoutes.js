@@ -180,7 +180,8 @@ router.put('/putProduct/:productID', (req, res) => {
     UPDATE product
     SET productName = COALESCE(?, productName),
         imageUrl = COALESCE(?, imageUrl),
-        categoryID = COALESCE(?, categoryID)
+        categoryID = COALESCE(?, categoryID),
+        status = COALESCE(?, status)
     WHERE productID = ?
   `;
 
@@ -188,6 +189,7 @@ router.put('/putProduct/:productID', (req, res) => {
     updatedData.productName || null,
     updatedData.imageUrl || null,
     updatedData.categoryID || null,
+    updatedData.status,
     productID,
   ];
 

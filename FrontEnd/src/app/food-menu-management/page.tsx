@@ -92,18 +92,29 @@ export default function Page() {
             <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-5">
               {categories.map((category, categoryIndex) => (
                 <div key={categoryIndex} className="mt-5 lg:mt-0">
-                  <div className="flex items-center mb-2 gap-x-4">
-                    <p className="font-semibold text-lg ">
-                      {category.categoryName}
-                    </p>
+                  <div className="flex justify-between items-center mb-2 gap-x-4">
+                    <div className="flex items-center gap-x-4">
+                      <p className="font-semibold text-lg ">
+                        {category.categoryName}
+                      </p>
+                      {category?.status === 1 ? (
+                        <div className="py-1 px-2 rounded-md bg-tealGreen w-min text-xs text-white">
+                          Active
+                        </div>
+                      ) : (
+                        <div className="py-1 px-2 rounded-md bg-gray w-min text-xs text-white">
+                          Inactive
+                        </div>
+                      )}
+                    </div>
                     <button
                       onClick={() => {
                         setCategoryToEdit(category);
                         setEditCategoryModalIsVisible(true);
                       }}
-                      className="text-black px-3 text-xs rounded-full border border-black "
+                      className="text-black px-2 py-1 text-xs rounded-full border border-black "
                     >
-                      Edit
+                      Edit Category
                     </button>
                   </div>
 
