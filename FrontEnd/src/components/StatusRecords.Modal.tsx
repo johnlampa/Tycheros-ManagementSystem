@@ -28,6 +28,10 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    console.log(statusRecordsForProduct);
+  }, [statusRecordsForProduct]);
+
+  useEffect(() => {
     if (!orderID) return;
 
     const fetchOrderStatuses = async () => {
@@ -126,12 +130,15 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
                   {statusRecord.status}
                 </div>
                 <div className="flex justify-center items-center text-center">
-                  {statusRecord.statusDateTime}
+                  {statusRecord.statusDateTime
+                    .toString()
+                    .replace("T", " ")
+                    .slice(0, 19)}
                 </div>
                 <div className="flex justify-center items-center text-xs text-center">
                   {employee
                     ? `${employee.lastName}, ${employee.firstName}`
-                    : "Unknown"}
+                    : ""}
                 </div>
               </div>
             );
