@@ -16,30 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `price`
+-- Table structure for table `payment`
 --
 
-DROP TABLE IF EXISTS `price`;
+DROP TABLE IF EXISTS `payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `price` (
-  `priceID` int NOT NULL AUTO_INCREMENT,
-  `productID` int DEFAULT NULL,
-  `sellingPrice` int DEFAULT NULL,
-  PRIMARY KEY (`priceID`),
-  KEY `price_product_ID_idx` (`productID`),
-  CONSTRAINT `price_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `payment` (
+  `paymentID` int NOT NULL AUTO_INCREMENT,
+  `amount` decimal(10,2) NOT NULL,
+  `method` varchar(45) NOT NULL,
+  `referenceNumber` varchar(45) DEFAULT NULL,
+  `orderStatusID` int NOT NULL,
+  PRIMARY KEY (`paymentID`),
+  KEY `payment_orderStatus_ID_idx` (`orderStatusID`),
+  CONSTRAINT `payment_orderStatus_ID` FOREIGN KEY (`orderStatusID`) REFERENCES `orderstatus` (`orderStatusID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `price`
+-- Dumping data for table `payment`
 --
 
-LOCK TABLES `price` WRITE;
-/*!40000 ALTER TABLE `price` DISABLE KEYS */;
-INSERT INTO `price` VALUES (7,1,105),(8,2,100),(9,3,250),(10,4,180),(11,5,150),(15,9,125),(16,10,135),(17,11,100),(18,12,90),(19,13,160),(20,14,450),(21,15,300),(22,16,250),(23,17,250),(24,18,130),(25,19,150),(26,20,280),(27,21,280),(28,22,250),(29,23,240),(30,24,85),(31,25,85),(32,26,150),(33,27,130),(34,28,130),(35,29,75),(36,30,75);
-/*!40000 ALTER TABLE `price` ENABLE KEYS */;
+LOCK TABLES `payment` WRITE;
+/*!40000 ALTER TABLE `payment` DISABLE KEYS */;
+INSERT INTO `payment` VALUES (18,140.00,'GCash','123123',66),(19,150.00,'Cash','',68),(20,190.00,'GCash','15234asda',70);
+/*!40000 ALTER TABLE `payment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -51,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:34
+-- Dump completed on 2024-11-17 20:58:44

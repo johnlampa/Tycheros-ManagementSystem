@@ -16,32 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `subitemused`
+-- Table structure for table `purchaseorder`
 --
 
-DROP TABLE IF EXISTS `subitemused`;
+DROP TABLE IF EXISTS `purchaseorder`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subitemused` (
-  `subitemusedID` int NOT NULL AUTO_INCREMENT,
-  `subitemID` int DEFAULT NULL,
-  `quantityUsed` int DEFAULT NULL,
-  `cancelledOrderID` int DEFAULT NULL,
-  PRIMARY KEY (`subitemusedID`),
-  KEY `subitemused_subitem_ID_idx` (`subitemID`),
-  KEY `subitemused_cancelledorder_ID_idx` (`cancelledOrderID`),
-  CONSTRAINT `subitemused_cancelledorder_ID` FOREIGN KEY (`cancelledOrderID`) REFERENCES `cancelledorders` (`cancelledOrderID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `subitemused_subitem_ID` FOREIGN KEY (`subitemID`) REFERENCES `subitem` (`subitemID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `purchaseorder` (
+  `purchaseorderID` int NOT NULL AUTO_INCREMENT,
+  `supplierID` int NOT NULL,
+  `employeeID` int NOT NULL,
+  `stockInDateTime` datetime NOT NULL,
+  PRIMARY KEY (`purchaseorderID`),
+  KEY `purchaseOrder_supplier_ID_idx` (`supplierID`),
+  KEY `purchaseOrder_employee_ID_idx` (`employeeID`),
+  CONSTRAINT `purchaseOrder_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchaseOrder_supplier_ID` FOREIGN KEY (`supplierID`) REFERENCES `supplier` (`supplierID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subitemused`
+-- Dumping data for table `purchaseorder`
 --
 
-LOCK TABLES `subitemused` WRITE;
-/*!40000 ALTER TABLE `subitemused` DISABLE KEYS */;
-/*!40000 ALTER TABLE `subitemused` ENABLE KEYS */;
+LOCK TABLES `purchaseorder` WRITE;
+/*!40000 ALTER TABLE `purchaseorder` DISABLE KEYS */;
+INSERT INTO `purchaseorder` VALUES (1,1,1,'2024-11-02 16:41:51'),(3,1,1,'2024-11-05 00:00:00'),(4,1,1,'2024-11-13 00:00:00'),(5,2,1,'2024-11-13 00:00:00'),(6,3,1,'2024-11-13 00:00:00'),(7,4,1,'2024-11-13 00:00:00'),(8,5,2,'2024-11-13 00:00:00');
+/*!40000 ALTER TABLE `purchaseorder` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:35
+-- Dump completed on 2024-11-17 20:58:44

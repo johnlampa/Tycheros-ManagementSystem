@@ -5,6 +5,7 @@ import {
   MultiItemStockOutData,
 } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
+import { WiDirectionDown } from "react-icons/wi";
 
 interface StockOutModalProps {
   stockOutData: MultiItemStockOutData;
@@ -299,10 +300,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
             Stock Out
           </button>
           <button
-            onClick={() => {
-              onClose;
-              window.location.reload();
-            }}
+            onClick={onClose}
             className="bg-tealGreen text-black py-2 px-4 rounded"
           >
             Cancel

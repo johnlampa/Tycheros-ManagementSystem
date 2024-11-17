@@ -8,12 +8,14 @@ interface AddCategoryModalProps {
   addCategoryModalIsVisible: boolean;
   setAddCategoryModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   modalTitle: string;
+  systemName: string;
 }
 
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   addCategoryModalIsVisible,
   setAddCategoryModalVisibility,
   modalTitle,
+  systemName,
 }) => {
   const [categoryName, setCategoryName] = useState("");
 
@@ -21,7 +23,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
     null
   );
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validationErrors: string[] = [];
@@ -36,22 +38,45 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       setValidationMessage(
         `Please fill out the following:\n${validationErrors.join("\n")}`
       );
-      return false;
+      return;
     }
 
-    //@adgramirez replace this code with function that adds the new category to the DB
+    try {
+      // Define the payload
+      const payload = {
+        categoryName,
+        systemName,
+        status: 1, // Active status
+      };
 
-    // setCategories((prevCategories) => [
-    //   ...prevCategories,
-    //   {
-    //     categoryID: prevCategories.length + 1,
-    //     categoryName,
-    //     status: 1,
-    //   },
-    // ]);
+      // Make the POST request to the backend
+      const response = await fetch(
+        "http://localhost:8081/menuManagement/addCategory",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    setCategoryName("");
-    setAddCategoryModalVisibility(false);
+      if (!response.ok) {
+        throw new Error("Failed to add category");
+      }
+
+      const result = await response.json();
+      console.log("Category added successfully:", result);
+
+      // Clear the form and close the modal
+      setCategoryName("");
+      setAddCategoryModalVisibility(false);
+    } catch (error) {
+      console.error("Error adding category:", error);
+      setValidationMessage("Failed to add category. Please try again.");
+    }
+
+    window.location.reload();
   };
 
   const handleCancel = () => {

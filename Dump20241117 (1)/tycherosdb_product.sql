@@ -24,13 +24,14 @@ DROP TABLE IF EXISTS `product`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `product` (
   `productID` int NOT NULL AUTO_INCREMENT,
-  `productName` varchar(45) DEFAULT NULL,
-  `imageUrl` varchar(500) DEFAULT NULL,
-  `categoryID` int DEFAULT NULL,
+  `productName` varchar(45) NOT NULL,
+  `categoryID` int NOT NULL,
+  `status` tinyint NOT NULL,
+  `imageUrl` varchar(256) NOT NULL,
   PRIMARY KEY (`productID`),
   KEY `product_category_ID_idx` (`categoryID`),
   CONSTRAINT `product_category_ID` FOREIGN KEY (`categoryID`) REFERENCES `category` (`categoryID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +40,7 @@ CREATE TABLE `product` (
 
 LOCK TABLES `product` WRITE;
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
-INSERT INTO `product` VALUES (1,'French Fries','/assets/images/MilkTea.jpg',1),(2,'Sweet Potato','/assets/images/MilkTea.jpg',1),(3,'Group Crackers','/assets/images/MilkTea.jpg',1),(4,'Cheese Sticks','/assets/images/MilkTea.jpg',1),(5,'Chicken Nuggets','/assets/images/ChickenNuggets.jpg',1),(9,'Matcha','/assets/images/Matcha.jpg',7),(10,'Taro','/assets/images/Taro.jpg',7),(11,'Tiger','/assets/images/Tiger.jpg',8),(12,'Americano','/assets/images/Americano.jpg',9),(13,'Jack Daniel','/assets/images/JackDaniel.jpg',10),(14,'Soy Pompano','/assets/images/SoyPompano.jpg',2),(15,'Marinated Chicken','/assets/images/MarinatedChicken.jpg',2),(16,'Clubhouse Sandwich','/assets/images/ClubhouseSandwich.jpg',3),(17,'Tyche Burger','/assets/images/TycheBurger.jpg',3),(18,'Fried Milk Fish','/assets/images/FriedMilkFish.jpg',4),(19,'Fried Chicken','/assets/images/FriedChicken.jpg',4),(20,'Tyche Wings','/assets/images/TycheWings.jpg',5),(21,'Bolgogi Spicy Wings','/assets/images/BolgogiSpicyWings.jpg',5),(22,'Vietnamese Spring Rolls','/assets/images/VietnameseSpringRolls.jpg',6),(23,'Green Leafy with Pineapple','/assets/images/GreenLeafywithPineapple.jpg',6),(24,'Smirnoff','/assets/images/Smirnoff.jpg',8),(25,'Hot Coffee','/assets/images/HotCoffee.jpg',9),(26,'Don Papa','/assets/images/DonPapa.jpg',10),(27,'Choco Frappe','/assets/images/ChocoFrappe.jpg',11),(28,'Strawberry Frappe','/assets/images/MilkTea.jpg',11),(29,'Green Tea','/assets/images/GreenTea.jpg',12),(30,'Pepper Mint Tea','/assets/images/PepperMintTea.jpg',12);
+INSERT INTO `product` VALUES (1,'French Fries',1,1,'/assets/images/FrenchFries.jpg'),(2,'Sweet Potato',1,1,'/assets/images/SweetPotato.jpg'),(3,'Carbonara',1,1,'https://files.edgestore.dev/rl9gmafi5pbqe7zt/myPublicImages/_public/ce55ac2f-47ee-4c3f-b53b-724e4e3f78fb.png'),(4,'Carbonara',1,1,'https://files.edgestore.dev/rl9gmafi5pbqe7zt/myPublicImages/_public/0ae56850-2423-42f0-a2ac-5495e33e5092.png'),(5,'Carbonara',1,1,'https://files.edgestore.dev/rl9gmafi5pbqe7zt/myPublicImages/_public/49a1578e-2eb0-4638-bc1a-7f36b757d67e.png'),(6,'Carbonara',1,1,'https://files.edgestore.dev/rl9gmafi5pbqe7zt/myPublicImages/_public/2ed53005-e459-418e-93e5-9101c1be020e.png');
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:35
+-- Dump completed on 2024-11-17 20:58:43

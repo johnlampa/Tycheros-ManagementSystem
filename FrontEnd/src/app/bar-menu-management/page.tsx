@@ -20,14 +20,7 @@ export default function Page() {
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
 
   //@adgramirez - add useeffect to fetch categories and populate this categories array
-  const [categories, setCategories] = useState<CategoriesDataTypes[]>([
-    { categoryID: 7, categoryName: "Milk Tea", status: 1 },
-    { categoryID: 8, categoryName: "Beer", status: 1 },
-    { categoryID: 9, categoryName: "Coffee", status: 1 },
-    { categoryID: 10, categoryName: "Whiskey", status: 1 },
-    { categoryID: 11, categoryName: "Frappe", status: 1 },
-    { categoryID: 12, categoryName: "Tea", status: 1 },
-  ]);
+  const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
 
   const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
     useState(false);
@@ -64,6 +57,16 @@ export default function Page() {
       .catch((error) => {
         console.error("Error fetching menu data:", error);
       });
+
+    // Fetch Categories for Bar
+    axios
+      .get("http://localhost:8081/menuManagement/getCategoriesBySystem/Bar")
+      .then((response) => {
+        setCategories(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories for Food system:", error);
+      });
   }, []);
 
   return (
@@ -77,6 +80,13 @@ export default function Page() {
               </button>
             </Link>
           </Header>
+
+          <button
+            onClick={() => setAddCategoryModalIsVisible(true)}
+            className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-[360px] mt-4"
+          >
+            Add Category
+          </button>
 
           <div className="mt-5">
             <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-5">
@@ -116,6 +126,7 @@ export default function Page() {
             addCategoryModalIsVisible={addCategoryModalIsVisible}
             setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
             modalTitle="Add Category"
+            systemName="Bar"
           />
 
           <PriceRecordsModal

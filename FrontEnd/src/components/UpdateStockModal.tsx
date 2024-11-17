@@ -99,7 +99,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      console.log("Stock Out Data:", inventoryItems);
+      console.log("Update Data:", inventoryItems);
       await handleUpdateStock();
       onClose(); // Close the modal after submission
     }
@@ -138,7 +138,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-black">Stock Out</h2>
+          <h2 className="text-black">Update Stock</h2>
           <div className="flex items-center">
             <label htmlFor="updateStockDate" className="text-black mr-2">
               Date:
@@ -159,7 +159,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
           </div>
         </div>
 
-        <div className="mb-3">
+        <div className="mb-3 text-black">
           Employee: {loggedInEmployeeName || "No employee found."}
         </div>
 

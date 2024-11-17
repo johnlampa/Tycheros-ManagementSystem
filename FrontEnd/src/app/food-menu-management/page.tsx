@@ -20,14 +20,7 @@ export default function Page() {
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
 
   //@adgramirez - add useeffect to fetch categories and populate this categories array
-  const [categories, setCategories] = useState<CategoriesDataTypes[]>([
-    { categoryID: 1, categoryName: "Appetizers", status: 1 },
-    { categoryID: 2, categoryName: "Entrees", status: 1 },
-    { categoryID: 3, categoryName: "Snacks", status: 1 },
-    { categoryID: 4, categoryName: "Combo Meals", status: 1 },
-    { categoryID: 5, categoryName: "Wings", status: 1 },
-    { categoryID: 6, categoryName: "Salads", status: 1 },
-  ]);
+  const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
 
   const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
     useState(false);
@@ -63,6 +56,16 @@ export default function Page() {
       })
       .catch((error) => {
         console.error("Error fetching menu data:", error);
+      });
+
+    // Fetch Categories for Food
+    axios
+      .get("http://localhost:8081/menuManagement/getCategoriesBySystem/Food")
+      .then((response) => {
+        setCategories(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories for Food system:", error);
       });
   }, []);
 
@@ -135,6 +138,7 @@ export default function Page() {
             addCategoryModalIsVisible={addCategoryModalIsVisible}
             setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
             modalTitle="Add Category"
+            systemName="Food"
           />
 
           <PriceRecordsModal

@@ -16,33 +16,35 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `orderitem`
+-- Table structure for table `stockout`
 --
 
-DROP TABLE IF EXISTS `orderitem`;
+DROP TABLE IF EXISTS `stockout`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `orderitem` (
-  `orderitemID` int NOT NULL AUTO_INCREMENT,
-  `orderID` int DEFAULT NULL,
-  `productID` int DEFAULT NULL,
-  `quantity` int DEFAULT NULL,
-  PRIMARY KEY (`orderitemID`),
-  KEY `orderitem_order_ID_idx` (`orderID`),
-  KEY `orderitem_product_ID_idx` (`productID`),
-  CONSTRAINT `orderitem_order_ID` FOREIGN KEY (`orderID`) REFERENCES `order` (`orderID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `orderitem_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `stockout` (
+  `stockOutID` int NOT NULL AUTO_INCREMENT,
+  `subinventoryID` int NOT NULL,
+  `quantity` int NOT NULL,
+  `reason` tinyblob,
+  `stockOutDateTime` datetime NOT NULL,
+  `employeeID` int NOT NULL,
+  PRIMARY KEY (`stockOutID`),
+  KEY `stockout_subinventory_ID_idx` (`subinventoryID`),
+  KEY `stockout_employee_ID_idx` (`employeeID`),
+  CONSTRAINT `stockout_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `stockout_subinventory_ID` FOREIGN KEY (`subinventoryID`) REFERENCES `subinventory` (`subinventoryID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `orderitem`
+-- Dumping data for table `stockout`
 --
 
-LOCK TABLES `orderitem` WRITE;
-/*!40000 ALTER TABLE `orderitem` DISABLE KEYS */;
-INSERT INTO `orderitem` VALUES (8,5,1,1),(9,5,4,1),(10,6,1,2),(11,6,4,4),(12,6,9,1),(13,7,5,1),(15,7,11,1),(16,8,1,3),(17,8,10,1),(18,9,5,1),(20,9,10,1),(24,10,1,1),(26,10,27,1),(27,12,1,2),(29,12,24,2);
-/*!40000 ALTER TABLE `orderitem` ENABLE KEYS */;
+LOCK TABLES `stockout` WRITE;
+/*!40000 ALTER TABLE `stockout` DISABLE KEYS */;
+INSERT INTO `stockout` VALUES (2,3,50,_binary 'Secret','2024-11-12 00:00:00',1),(3,4,40,'','2024-11-12 00:00:00',1),(4,11,1,_binary 'reason','2024-11-14 00:00:00',2);
+/*!40000 ALTER TABLE `stockout` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -54,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:34
+-- Dump completed on 2024-11-17 20:58:43

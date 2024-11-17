@@ -16,34 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `order`
+-- Table structure for table `system`
 --
 
-DROP TABLE IF EXISTS `order`;
+DROP TABLE IF EXISTS `system`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `order` (
-  `orderID` int NOT NULL AUTO_INCREMENT,
-  `paymentID` int DEFAULT NULL,
-  `employeeID` int DEFAULT NULL,
-  `date` datetime DEFAULT NULL,
-  `status` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`orderID`),
-  KEY `order_payment_ID_idx` (`paymentID`),
-  KEY `order_employee_ID_idx` (`employeeID`),
-  CONSTRAINT `order_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `order_payment_ID` FOREIGN KEY (`paymentID`) REFERENCES `payment` (`paymentID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `system` (
+  `systemID` int NOT NULL AUTO_INCREMENT,
+  `system` varchar(45) NOT NULL,
+  PRIMARY KEY (`systemID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `order`
+-- Dumping data for table `system`
 --
 
-LOCK TABLES `order` WRITE;
-/*!40000 ALTER TABLE `order` DISABLE KEYS */;
-INSERT INTO `order` VALUES (5,4,1,'2024-09-30 00:00:00','Completed'),(6,3,1,'2024-09-30 00:00:00','Completed'),(7,5,1,'2024-10-01 00:00:00','Completed'),(8,6,1,'2024-10-01 00:00:00','Completed'),(9,7,1,'2024-10-01 00:00:00','Pending'),(10,NULL,1,'2024-10-01 00:00:00','Unpaid'),(11,NULL,1,'2024-10-01 00:00:00','Unpaid'),(12,8,1,'2024-10-01 00:00:00','Completed');
-/*!40000 ALTER TABLE `order` ENABLE KEYS */;
+LOCK TABLES `system` WRITE;
+/*!40000 ALTER TABLE `system` DISABLE KEYS */;
+INSERT INTO `system` VALUES (1,'Food'),(2,'Bar'),(3,'UoM');
+/*!40000 ALTER TABLE `system` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -55,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:35
+-- Dump completed on 2024-11-17 20:58:44
