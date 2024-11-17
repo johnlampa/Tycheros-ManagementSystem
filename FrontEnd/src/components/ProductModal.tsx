@@ -12,6 +12,9 @@ import { useEdgeStore } from "../../lib/edgestore";
 import Link from "next/link";
 import ValidationDialog from "@/components/ValidationDialog";
 
+import Toggle from "react-toggle";
+import "react-toggle/style.css";
+
 const ProductModal: React.FC<ProductModalProps> = ({
   productModalIsVisible,
   setProductModalVisibility,
@@ -93,6 +96,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
       setSubitems([]);
     };
   }, [productModalIsVisible]);
+
+  const [isChecked, setIsChecked] = useState<boolean>();
+
+  useEffect(() => {
+    setIsChecked(menuProductToEdit?.status === 1);
+  }, [menuProductToEdit]);
 
   const handleAddSubitem = () => {
     setSubitems([...subitems, { inventoryID: -1, quantityNeeded: 0 }]);
@@ -191,7 +200,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           formJson[`quantityNeeded-${index}`] as string
         ),
       })),
-      status: 1,
+      status: type === "edit" ? (isChecked ? 1 : 0) : 1, // Conditional status logic
       //@adgramirez modify backend
       employeeID: loggedInEmployeeID,
     };
@@ -223,6 +232,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
       if (setMenuProductHolder) {
         setMenuProductHolder(updatedProduct);
       }
+
+      console.log(updatedProduct);
 
       form.reset();
       setProductModalVisibility(false);
@@ -398,6 +409,19 @@ const ProductModal: React.FC<ProductModalProps> = ({
             }}
           />
         </div>
+
+        {type === "edit" && (
+          <div className="flex gap-x-2 text-black mb-5">
+            <p>Active: </p>
+            <Toggle
+              checked={isChecked}
+              icons={false}
+              onChange={(e) => {
+                setIsChecked(e.target.checked);
+              }}
+            />
+          </div>
+        )}
 
         {/* Save button with conditional disabled state */}
         <button

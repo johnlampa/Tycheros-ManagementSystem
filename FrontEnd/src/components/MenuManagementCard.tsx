@@ -49,28 +49,42 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   return (
     <>
       <div className="rounded-md p-4 bg-cream w-[310px]">
-        <div className="grid grid-cols-[3fr_2fr_2fr] gap-2 text-base font-semibold mb-3">
-          <p className="justify-normal items-center text-black">Name</p>
-          <p className="flex ml-auto text-black">Price</p>
-          <p></p>
-        </div>
+        {menuData.filter((item) => item.categoryName === categoryName).length >
+          0 && (
+          <div className="grid grid-cols-[43.5px_3fr_2fr_2fr] gap-2 text-sm font-semibold mb-3">
+            <p>Status</p>
+            <p className="justify-normal items-center text-black">Name</p>
+            <p className="flex ml-auto text-black">Price</p>
+            <p></p>
+          </div>
+        )}
+
         {menuData
           .filter((item) => item.categoryName === categoryName)
           .map((item) => (
             <div
               key={item.productID}
-              className="grid grid-cols-[3fr_2fr_2fr] gap-2 mb-3"
+              className="grid grid-cols-[43.5px_3fr_2fr_2fr] gap-2 mb-6"
             >
-              <p className="my-auto text-black truncate text-sm">
+              {item?.status === 1 ? (
+                <div className="text-tealGreen text-xs flex justify-center items-center">
+                  Active
+                </div>
+              ) : (
+                <div className="text-red text-xs flex justify-center items-center">
+                  Inactive
+                </div>
+              )}
+              <p className="my-auto text-black truncate text-xs">
                 {item.productName}
               </p>
-              <p className="flex ml-auto items-center text-black text-sm">
+              <p className="flex ml-auto items-center text-black text-xs">
                 &#8369; {item.sellingPrice}
               </p>
-              <div className="ml-3">
+              <div className="ml-3 flex justify-center">
                 <button
                   onClick={() => toggleEdit(item.productID)}
-                  className="w-min px-4 py-1 rounded-full text-black text-sm bg-white hover:text-black hover:bg-lightTealGreen"
+                  className="w-min px-2 py-1 rounded-full text-black text-xs bg-white hover:text-black hover:bg-lightTealGreen"
                 >
                   Edit
                 </button>
@@ -79,7 +93,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
           ))}
         <div className="flex justify-center items-center">
           <button
-            className="mt-3 px-3 py-1 rounded-md w-full text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-lightTealGreen"
+            className="px-3 py-1 rounded-md w-full text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-lightTealGreen"
             onClick={toggleAdd}
           >
             Add Product
