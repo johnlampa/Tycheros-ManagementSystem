@@ -21,17 +21,23 @@ router.get('/getProduct', (req, res) => {
         p.productID, 
         p.productName, 
         c.categoryName, 
-        pr.sellingPrice
+        pr.sellingPrice,
+        p.status,
+        s.system
     FROM 
         product p
     JOIN 
         category c ON p.categoryID = c.categoryID
     JOIN 
+        \`system\` s ON c.systemID = s.systemID
+    JOIN 
         price pr ON p.productID = pr.productID
     JOIN 
-        (SELECT productID, MAX(priceID) as maxPriceID 
-         FROM price 
-         GROUP BY productID) latestPrice 
+        (
+            SELECT productID, MAX(priceID) as maxPriceID 
+            FROM price 
+            GROUP BY productID
+        ) latestPrice 
         ON pr.productID = latestPrice.productID AND pr.priceID = latestPrice.maxPriceID;
   `;
 
@@ -357,6 +363,103 @@ router.get('/getPriceHistory/:productID', (req, res) => {
 
     res.status(200).json(results); // Return all results as an array
   });
+});
+
+// GET /getCategoriesBySystem
+router.get('/getCategoriesBySystem/:systemName', (req, res) => {
+  const { systemName } = req.params;
+
+  const query = `
+    SELECT 
+      c.categoryID,
+      c.categoryName,
+      c.status,
+      s.system AS systemName
+    FROM 
+      category c
+    JOIN 
+      \`system\` s ON c.systemID = s.systemID
+    WHERE 
+      s.system = ?
+  `;
+
+  db.query(query, [systemName], (err, results) => {
+    if (err) {
+      console.error('Error fetching categories by system:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No categories found for the specified system' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+// POST /addCategory endpoint
+router.post('/addCategory', (req, res) => {
+  const { categoryName, systemName, status } = req.body;
+
+  if (!categoryName || !systemName) {
+    return res.status(400).json({ error: 'Category name and system name are required' });
+  }
+
+  // Check if the system exists
+  const checkSystemQuery = `
+    SELECT systemID FROM \`system\` WHERE \`system\` = ?
+  `;
+
+  db.query(checkSystemQuery, [systemName], (err, systemResult) => {
+    if (err) {
+      console.error('Error checking system:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    let systemID;
+
+    if (systemResult.length > 0) {
+      // System exists, retrieve the ID
+      systemID = systemResult[0].systemID;
+    } else {
+      // System does not exist, insert it
+      const insertSystemQuery = `
+        INSERT INTO \`system\` (\`system\`)
+        VALUES (?)
+      `;
+
+      db.query(insertSystemQuery, [systemName], (err, insertSystemResult) => {
+        if (err) {
+          console.error('Error inserting system:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        systemID = insertSystemResult.insertId;
+        insertCategory(systemID);
+      });
+
+      return; // Exit this block to avoid calling insertCategory twice
+    }
+
+    // Insert the category
+    insertCategory(systemID);
+  });
+
+  function insertCategory(systemID) {
+    const insertCategoryQuery = `
+      INSERT INTO category (categoryName, systemID, status)
+      VALUES (?, ?, ?)
+    `;
+
+    db.query(insertCategoryQuery, [categoryName, systemID, status || 1], (err, categoryResult) => {
+      if (err) {
+        console.error('Error inserting category:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+
+      res.status(201).json({ message: 'Category added successfully', categoryID: categoryResult.insertId });
+    });
+  }
 });
 
 module.exports = router;

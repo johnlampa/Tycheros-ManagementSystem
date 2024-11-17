@@ -11,46 +11,20 @@ import Link from "next/link";
 import MenuHeaderSection from "@/components/section/MenuHeaderSection";
 
 export default function Page() {
-  //@adgramirez - add useeffect to fetch categories and populate this categories array
-  const categories: CategoriesDataTypes[] = [
-    {
-      categoryID: 1,
-      categoryName: "Appetizers",
-      status: 1,
-    },
-    {
-      categoryID: 2,
-      categoryName: "Entrees",
-      status: 1,
-    },
-    {
-      categoryID: 3,
-      categoryName: "Snacks",
-      status: 0,
-    },
-    {
-      categoryID: 4,
-      categoryName: "Combo Meals",
-      status: 1,
-    },
-    {
-      categoryID: 5,
-      categoryName: "Wings",
-      status: 1,
-    },
-    {
-      categoryID: 6,
-      categoryName: "Salads",
-      status: 1,
-    },
-  ];
-
+  const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:8081/ordering/getCustomerMenu")
       .then((response) => response.json())
       .then((data) => setMenuData(data))
+      .catch((error) => console.error("Error fetching menu data:", error));
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:8081/menuManagement/getCategoriesBySystem/Food")
+      .then((response) => response.json())
+      .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching menu data:", error));
   }, []);
 

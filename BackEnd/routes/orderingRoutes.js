@@ -36,6 +36,8 @@ router.get('/getCustomerMenu', (req, res) => {
               FROM price pr2
               WHERE pr2.productID = p.productID AND p.status = 1
           )
+      ORDER BY
+          productID ASC;
     `;
   
     db.query(query, (err, result) => {
