@@ -83,6 +83,12 @@ export default function Page() {
       }));
     }
   };
+
+  const [selectedCategoryID, setSelectedCategoryID] = useState<number | null>(null);
+  const handleAddUOMModal = (isVisible: boolean, categoryID: number) => {
+    setAddUOMModalIsVisible(isVisible); // Pass boolean here
+    setSelectedCategoryID(categoryID); // Set the categoryID
+  };
     
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
@@ -116,14 +122,14 @@ export default function Page() {
                   setExpandedRow={setExpandedRow}
                   detailedData={detailedData}
                   setDetailedData={setDetailedData}
-                  setEditUOMCategoryModalIsVisible={
-                    setEditUOMCategoryModalIsVisible
-                  }
+                  setEditUOMCategoryModalIsVisible={setEditUOMCategoryModalIsVisible}
                   setCategoryToEdit={setCategoryToEdit}
-                  setAddUOMModalIsVisible={setAddUOMModalIsVisible}
+                  setAddUOMModalIsVisible={(isVisible) =>
+                    handleAddUOMModal(!!isVisible, category.categoryID) // Ensure `isVisible` is a boolean
+                  }
                   setEditUOMModalIsVisible={setEditUOMModalIsVisible}
                   setUOMToEdit={setUOMToEdit}
-                />
+                />;
               </div>
             ))}
           </div>
@@ -147,7 +153,8 @@ export default function Page() {
           addUOMModalIsVisible={addUOMModalIsVisible}
           setAddUOMModalVisibility={setAddUOMModalIsVisible}
           modalTitle="Add UOM"
-        ></AddUOMModal>
+          categoryID={selectedCategoryID || 0} // Pass the selected categoryID
+        />
         <EditUOMModal
           editUOMModalIsVisible={editUOMModalIsVisible}
           setEditUOMModalVisibility={setEditUOMModalIsVisible}

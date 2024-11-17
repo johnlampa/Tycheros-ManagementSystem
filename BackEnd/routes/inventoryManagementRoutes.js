@@ -500,7 +500,7 @@ router.get('/getUoMsWithCategories', async (req, res) => {
     JOIN 
       category c ON uom.categoryID = c.categoryID
     ORDER BY 
-      c.categoryName ASC, uom.UoM ASC
+      c.categoryName ASC, uom.unitOfMeasurementID ASC
   `;
 
   try {
@@ -626,6 +626,103 @@ router.put('/updateUoMCategory/:categoryID', async (req, res) => {
     res.status(200).json({ message: 'Category updated successfully' });
   } catch (err) {
     console.error('Error in /updateUoMCategory:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post('/addUoM', async (req, res) => {
+  const { categoryID, UOMName, ratio, status } = req.body;
+
+  if (!categoryID || !UOMName || ratio === undefined) {
+    return res.status(400).json({ error: 'Category ID, UOM Name, and Ratio are required' });
+  }
+
+  try {
+    // Determine the `type` based on the ratio
+    let type = '';
+    if (ratio >= 1) {
+      type = 'bigger';
+    } else if (ratio > 0) {
+      type = 'smaller';
+    } else {
+      return res.status(400).json({ error: 'Ratio must be greater than 0' });
+    }
+
+    // Insert the UoM into the database
+    const insertUOMQuery = `
+      INSERT INTO unitofmeasurement (categoryID, UoM, type, ratio, status)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    const [result] = await pool.query(insertUOMQuery, [
+      categoryID,
+      UOMName,
+      type,
+      ratio,
+      status || 1, // Default status to 1 (active) if not provided
+    ]);
+
+    return res.status(201).json({
+      message: 'Unit of Measurement added successfully',
+      unitOfMeasurementID: result.insertId,
+    });
+  } catch (err) {
+    console.error('Error adding UoM:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.put('/editUoM/:unitOfMeasurementID', async (req, res) => {
+  const { unitOfMeasurementID } = req.params;
+  const { UOMName, ratio, status } = req.body;
+
+  // Validate inputs
+  if (!UOMName || ratio === undefined || status === undefined) {
+    return res
+      .status(400)
+      .json({ error: 'UOM Name, Ratio, and Status are required' });
+  }
+
+  try {
+    // Determine the `type` based on the ratio
+    let type = '';
+    if (ratio >= 1) {
+      type = 'bigger';
+    } else if (ratio > 0) {
+      type = 'smaller';
+    } else {
+      return res
+        .status(400)
+        .json({ error: 'Ratio must be greater than 0' });
+    }
+
+    // Update the UoM in the database
+    const updateUOMQuery = `
+      UPDATE unitofmeasurement
+      SET 
+        UoM = ?,
+        ratio = ?,
+        type = ?,
+        status = ?
+      WHERE unitOfMeasurementID = ?
+    `;
+
+    const [result] = await pool.query(updateUOMQuery, [
+      UOMName,
+      ratio,
+      type,
+      status,
+      unitOfMeasurementID,
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Unit of Measurement not found' });
+    }
+
+    return res.status(200).json({
+      message: 'Unit of Measurement updated successfully',
+    });
+  } catch (err) {
+    console.error('Error updating UoM:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

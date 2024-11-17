@@ -9,7 +9,7 @@ const ValidationDialog: React.FC<ValidationDialogProps> = ({
   message,
   onClose,
 }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-100">
     <div className="bg-white p-5 rounded-lg w-80">
       <h2 className="text-black font-bold mb-4 text-2xl">Error</h2>
       <div className="text-black whitespace-pre-wrap">{message}</div>
