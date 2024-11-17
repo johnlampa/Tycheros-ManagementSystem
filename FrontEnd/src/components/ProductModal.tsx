@@ -60,6 +60,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
 
   useEffect(() => {
+    console.log(inventoryData);
+  });
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
       if (loggedInEmployeeID) {
@@ -275,6 +279,21 @@ const ProductModal: React.FC<ProductModalProps> = ({
     setProductModalVisibility(false);
   };
 
+  const [selectedInventories, setSelectedInventories] = useState(
+    subitems.map((subitem) => subitem.inventoryID || null)
+  );
+
+  const handleInventoryChange = (index: number, newInventoryID: number) => {
+    setSelectedInventories((prev) => {
+      const updatedSelections = [...prev];
+      updatedSelections[index] = newInventoryID;
+      return updatedSelections;
+    });
+
+    // Update the corresponding subitem's inventoryID
+    subitems[index].inventoryID = newInventoryID;
+  };
+
   return (
     <Modal
       modalIsVisible={productModalIsVisible}
@@ -346,12 +365,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <select
               className="border border-gray rounded w-[60%] p-3 text-black mr-5 h-12"
               defaultValue={subitem.inventoryID}
+              value={selectedInventories[index] || ""} // Bind value to selectedInventories
               name={`subitem-${index}`}
               id={`subitem-${index}`}
+              onChange={(e) =>
+                handleInventoryChange(index, parseInt(e.target.value))
+              }
             >
               <option value="">Choose</option>
               {inventoryData
-                ?.filter((item) => item.inventoryCategory !== "Condiments")
+                ?.filter(
+                  (item) =>
+                    (item.inventoryCategory === "Produce" ||
+                      item.inventoryCategory === "Dairy and Eggs" ||
+                      item.inventoryCategory === "Meat and Poultry" ||
+                      item.inventoryCategory === "Seafood" ||
+                      item.inventoryCategory === "Canned Goods" ||
+                      item.inventoryCategory === "Beverages") &&
+                    (!selectedInventories.includes(item.inventoryID) || // Allow unselected items
+                      selectedInventories[index] === item.inventoryID) // Allow reselecting current selection
+                )
                 .map((item) => (
                   <option value={item.inventoryID} key={item.inventoryID}>
                     {item.inventoryName} ({item.unitOfMeasure})
