@@ -19,13 +19,42 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
   statusRecordsModalIsVisible,
   setStatusRecordsModalIsVisible,
 }) => {
-  //@adgramirez add useeffect to populate this array with price records of PRODUCTID
-  const [statusRecordsForProduct, setStatusRecordsForProduct] = useState<StatusRecords[]>([]);
+  const [statusRecordsForProduct, setStatusRecordsForProduct] = useState<
+    StatusRecords[]
+  >([]);
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  
+
+  useEffect(() => {
+    console.log(statusRecordsForProduct);
+  }, [statusRecordsForProduct]);
+
+  useEffect(() => {
+    if (!orderID) return;
+
+    const fetchOrderStatuses = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:8081/ordering/getOrderStatuses/${orderID}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch order statuses");
+        }
+        const data: StatusRecords[] = await response.json();
+        setStatusRecordsForProduct(data);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderStatuses();
+  }, [orderID]);
+
   useEffect(() => {
     if (!orderID) return;
 
@@ -78,35 +107,45 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
         setModalVisibility={setStatusRecordsModalIsVisible}
       >
         <div className="w-[340px] p-6 mx-auto rounded">
-          <div className="text-center text-xl font-bold text-black mb-4">
+          <div className="text-center text-xl font-bold text-black mb-4 ">
             Status Records
           </div>
-          <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm text-black">
+          <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm gap-x-1">
             <div className="flex justify-center items-center">Status</div>
-            <div className="flex justify-center items-center text-center ">
-              Date Changed
+            <div className="flex justify-center items-center text-center">
+              Date
             </div>
             <div className="flex justify-center items-center">Employee</div>
           </div>
-          {statusRecordsForProduct.map((statusRecord, statusRecordIndex) => (
-            <div
-              key={statusRecordIndex}
-              className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 text-black"
-            >
-              <div className="flex justify-center items-center">
-                {statusRecord.status}
+          {statusRecordsForProduct.map((statusRecord, statusRecordIndex) => {
+            const employee = employees.find(
+              (emp) => emp.employeeID === statusRecord.employeeID
+            );
+            return (
+              <div
+                key={statusRecordIndex}
+                className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 gap-x-1"
+              >
+                <div className="flex justify-center items-center">
+                  {statusRecord.status}
+                </div>
+                <div className="flex justify-center items-center text-center">
+                  {statusRecord.statusDateTime
+                    .toString()
+                    .replace("T", " ")
+                    .slice(0, 19)}
+                </div>
+                <div className="flex justify-center items-center text-xs text-center">
+                  {employee
+                    ? `${employee.lastName}, ${employee.firstName}`
+                    : ""}
+                </div>
               </div>
-              <div className="flex justify-center items-center">
-                {statusRecord.statusDateTime.substring(0, 10)}
-              </div>
-              <div className="flex justify-center items-center">
-                {statusRecord.employeeID}
-              </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="mt-8 text-center flex justify-end">
             <button
-              className=" w-min bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 rounded"
+              className="w-min bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 rounded"
               onClick={(e) => {
                 e.preventDefault();
                 setStatusRecordsModalIsVisible(false);
