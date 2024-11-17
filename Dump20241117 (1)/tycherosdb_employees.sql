@@ -16,33 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `subitem`
+-- Table structure for table `employees`
 --
 
-DROP TABLE IF EXISTS `subitem`;
+DROP TABLE IF EXISTS `employees`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subitem` (
-  `subitemID` int NOT NULL AUTO_INCREMENT,
-  `productID` int DEFAULT NULL,
-  `inventoryID` int DEFAULT NULL,
-  `quantityNeeded` int DEFAULT NULL,
-  PRIMARY KEY (`subitemID`),
-  KEY `subitem_product_ID_idx` (`productID`),
-  KEY `subitem_inventory_ID_idx` (`inventoryID`),
-  CONSTRAINT `subitem_inventory_ID` FOREIGN KEY (`inventoryID`) REFERENCES `inventory` (`inventoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `subitem_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `employees` (
+  `employeeID` int NOT NULL AUTO_INCREMENT,
+  `password` varchar(45) NOT NULL,
+  `firstName` varchar(45) NOT NULL,
+  `lastName` varchar(45) NOT NULL,
+  `contactInformation` varchar(11) NOT NULL,
+  `designation` varchar(45) NOT NULL,
+  `status` varchar(45) NOT NULL,
+  PRIMARY KEY (`employeeID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subitem`
+-- Dumping data for table `employees`
 --
 
-LOCK TABLES `subitem` WRITE;
-/*!40000 ALTER TABLE `subitem` DISABLE KEYS */;
-INSERT INTO `subitem` VALUES (7,1,1,100),(8,1,2,50),(9,1,14,50);
-/*!40000 ALTER TABLE `subitem` ENABLE KEYS */;
+LOCK TABLES `employees` WRITE;
+/*!40000 ALTER TABLE `employees` DISABLE KEYS */;
+INSERT INTO `employees` VALUES (1,'123','John Kyle','Lampa','09123456789','Owner','1'),(2,'123','Agustine James','Salcedo','09123456789','Manager','Active');
+/*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -54,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:34
+-- Dump completed on 2024-11-17 20:58:45

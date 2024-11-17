@@ -57,7 +57,7 @@ export default function Page() {
       .catch((error) => {
         console.error("Error fetching menu data:", error);
       });
-      
+
     // Fetch Categories for Food
     axios
       .get("http://localhost:8081/menuManagement/getCategoriesBySystem/Food")
@@ -67,10 +67,7 @@ export default function Page() {
       .catch((error) => {
         console.error("Error fetching categories for Food system:", error);
       });
-
   }, []);
-  
-  
 
   return (
     <>
@@ -141,7 +138,7 @@ export default function Page() {
             addCategoryModalIsVisible={addCategoryModalIsVisible}
             setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
             modalTitle="Add Category"
-            systemName="Poods"
+            systemName="Food"
           />
 
           <PriceRecordsModal

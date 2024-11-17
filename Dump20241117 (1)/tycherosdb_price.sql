@@ -16,31 +16,34 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `stockout`
+-- Table structure for table `price`
 --
 
-DROP TABLE IF EXISTS `stockout`;
+DROP TABLE IF EXISTS `price`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `stockout` (
-  `stockoutID` int NOT NULL AUTO_INCREMENT,
-  `subinventoryID` int DEFAULT NULL,
-  `quantity` decimal(10,2) DEFAULT NULL,
-  `reason` varchar(255) DEFAULT NULL,
-  `date` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`stockoutID`),
-  KEY `subinventoryID` (`subinventoryID`),
-  CONSTRAINT `stockout_ibfk_1` FOREIGN KEY (`subinventoryID`) REFERENCES `subinventory` (`subinventoryID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `price` (
+  `priceID` int NOT NULL AUTO_INCREMENT,
+  `productID` int NOT NULL,
+  `sellingPrice` decimal(10,2) NOT NULL,
+  `priceDateTime` datetime NOT NULL,
+  `employeeID` int NOT NULL,
+  PRIMARY KEY (`priceID`),
+  KEY `price_employee_ID_idx` (`employeeID`),
+  KEY `price_product_ID_idx` (`productID`),
+  CONSTRAINT `price_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `price_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `stockout`
+-- Dumping data for table `price`
 --
 
-LOCK TABLES `stockout` WRITE;
-/*!40000 ALTER TABLE `stockout` DISABLE KEYS */;
-/*!40000 ALTER TABLE `stockout` ENABLE KEYS */;
+LOCK TABLES `price` WRITE;
+/*!40000 ALTER TABLE `price` DISABLE KEYS */;
+INSERT INTO `price` VALUES (1,1,120.00,'2024-11-02 16:39:28',1),(2,1,120.00,'2024-11-02 16:40:01',1),(3,2,100.00,'2024-11-12 09:32:40',1),(4,6,70.00,'2024-11-12 17:55:14',1),(5,2,90.00,'2024-11-16 15:58:25',2),(6,2,50.00,'2024-11-16 15:58:41',2),(14,1,90.00,'2024-11-16 16:12:01',2),(15,1,80.00,'2024-11-16 16:12:56',1),(16,1,100.00,'2024-11-17 20:43:26',1);
+/*!40000 ALTER TABLE `price` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-10-10 13:29:34
+-- Dump completed on 2024-11-17 20:58:44

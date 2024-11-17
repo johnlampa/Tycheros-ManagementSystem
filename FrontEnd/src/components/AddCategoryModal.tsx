@@ -25,14 +25,14 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const validationErrors: string[] = [];
-  
+
     // Validate category name
     if (!categoryName.trim()) {
       validationErrors.push("Category name is required.");
     }
-  
+
     // If there are validation errors, display them and stop submission
     if (validationErrors.length > 0) {
       setValidationMessage(
@@ -40,7 +40,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       );
       return;
     }
-  
+
     try {
       // Define the payload
       const payload = {
@@ -48,23 +48,26 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
         systemName,
         status: 1, // Active status
       };
-  
+
       // Make the POST request to the backend
-      const response = await fetch("http://localhost:8081/menuManagement/addCategory", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-  
+      const response = await fetch(
+        "http://localhost:8081/menuManagement/addCategory",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to add category");
       }
-  
+
       const result = await response.json();
       console.log("Category added successfully:", result);
-  
+
       // Clear the form and close the modal
       setCategoryName("");
       setAddCategoryModalVisibility(false);
@@ -72,8 +75,10 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       console.error("Error adding category:", error);
       setValidationMessage("Failed to add category. Please try again.");
     }
+
+    window.location.reload();
   };
-  
+
   const handleCancel = () => {
     setAddCategoryModalVisibility(false);
     setCategoryName("");
