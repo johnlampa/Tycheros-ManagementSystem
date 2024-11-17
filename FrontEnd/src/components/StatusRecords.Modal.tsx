@@ -26,7 +26,7 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  
+
   useEffect(() => {
     if (!orderID) return;
 
@@ -106,35 +106,13 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
           <div className="text-center text-xl font-bold text-black mb-4 ">
             Status Records
           </div>
-<<<<<<< HEAD
-          <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm text-black">
-=======
           <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm gap-x-1">
->>>>>>> 2f57af4 (layout changes and employee name instead of employee id)
             <div className="flex justify-center items-center">Status</div>
             <div className="flex justify-center items-center text-center">
               Date
             </div>
             <div className="flex justify-center items-center">Employee</div>
           </div>
-<<<<<<< HEAD
-          {statusRecordsForProduct.map((statusRecord, statusRecordIndex) => (
-            <div
-              key={statusRecordIndex}
-              className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 text-black"
-            >
-              <div className="flex justify-center items-center">
-                {statusRecord.status}
-              </div>
-              <div className="flex justify-center items-center">
-                {statusRecord.statusDateTime.substring(0, 10)}
-              </div>
-              <div className="flex justify-center items-center">
-                {statusRecord.employeeID}
-              </div>
-            </div>
-          ))}
-=======
           {statusRecordsForProduct.map((statusRecord, statusRecordIndex) => {
             const employee = employees.find(
               (emp) => emp.employeeID === statusRecord.employeeID
@@ -158,7 +136,6 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
               </div>
             );
           })}
->>>>>>> 2f57af4 (layout changes and employee name instead of employee id)
           <div className="mt-8 text-center flex justify-end">
             <button
               className="w-min bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 rounded"
