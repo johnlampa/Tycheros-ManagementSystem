@@ -70,7 +70,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               orderID: order.orderID,
               newStatus,
               employeeID: loggedInEmployeeID,
-              updatePayment: true
+              updatePayment: true,
             }),
           }
         );
@@ -105,14 +105,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
     }, [order]);
 
     const handleCancelOrder = useCallback(() => {
-      if (order.status === "Unpaid" || order.status === "Pending") {
-        if (setCancelOrderModalVisibility) {
-          setCancelOrderModalVisibility(true);
-          if (setOrderToEdit) {
-            setOrderToEdit(order);
-          }
-        }
-      } else if (order.status === "Completed") {
+      if (order.status === "Unpaid") {
         if (setCancelOrderModalVisibility) {
           setCancelOrderModalVisibility(true);
           if (setOrderToEdit) {
@@ -154,7 +147,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                 <div>
                   <span className="font-semibold">MOP: </span>
                   <span>{payment?.method}</span>
-                </div> 
+                </div>
                 {payment?.referenceNumber && (
                   <div>
                     <span className="font-semibold">Reference: </span>
@@ -287,24 +280,6 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                     onClick={handleCompleteOrder}
                   >
                     Complete Order
-                  </button>
-
-                  <button
-                    className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
-                    onClick={handleCancelOrder}
-                  >
-                    Cancel Order
-                  </button>
-                </div>
-              )}
-
-              {order.status === "Completed" && (
-                <div>
-                  <button
-                    className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
-                    onClick={handleCancelOrder}
-                  >
-                    Cancel Order
                   </button>
                 </div>
               )}
