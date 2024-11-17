@@ -22,7 +22,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:8081/menuManagement/getCategoriesBySystem/Food")
+    fetch("http://localhost:8081/ordering/getCategoriesBySystem/Food")
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching menu data:", error));

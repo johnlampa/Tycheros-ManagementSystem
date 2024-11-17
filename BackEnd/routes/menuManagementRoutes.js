@@ -462,4 +462,34 @@ router.post('/addCategory', (req, res) => {
   }
 });
 
+// PUT /editCategory
+router.put('/editCategory', (req, res) => {
+  const { categoryID, categoryName, status } = req.body;
+
+  // Validate required fields
+  if (!categoryID || !categoryName || typeof status === 'undefined') {
+    return res.status(400).json({ error: 'categoryID, categoryName, and status are required.' });
+  }
+
+  const query = `
+    UPDATE category
+    SET categoryName = ?, status = ?
+    WHERE categoryID = ?
+  `;
+
+  db.query(query, [categoryName, status, categoryID], (err, results) => {
+    if (err) {
+      console.error('Error updating category:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ message: 'No category found with the specified ID' });
+    }
+
+    res.status(200).json({ message: 'Category updated successfully' });
+  });
+});
+
+
 module.exports = router;
