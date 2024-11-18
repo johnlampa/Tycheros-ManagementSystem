@@ -151,14 +151,12 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                   (uom: UOM) =>
                     category.categoryID === uom.categoryID &&
                     parseInt(uom.ratio.toString()) !== 1
-                ).map((filteredUOM: UOM) => (
-                  <span key={filteredUOM.unitOfMeasurementID} className="mr-2">
-                    {filteredUOM.UoM},
-                  </span>
-                ))}
+                )
+                  .map((filteredUOM: UOM) => filteredUOM.UoM)
+                  .join(", ")}
               </div>
             ) : (
-              <div></div>
+              <div>Not found</div>
             )}
           </div>
         </div>
