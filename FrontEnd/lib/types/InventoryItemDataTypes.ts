@@ -45,6 +45,7 @@ export type MultiItemUpdateStockData = {
   updateStockDateTime: string;
   inventoryItems: {
     inventoryID: number;
+    subinventoryID: number;
     quantityToUpdate: number
   }[];
 

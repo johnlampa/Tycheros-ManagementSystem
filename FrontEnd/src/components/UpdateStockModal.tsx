@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { MultiItemUpdateStockData } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
+import axios from "axios";
 
 interface UpdateStockModalProps {
   updateStockData: MultiItemUpdateStockData;
@@ -22,6 +23,17 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
   handleInventoryChange,
   employees,
 }) => {
+  const updateInventoryItem = (index: number, updatedItem: any) => {
+    const newInventoryItems = [...inventoryItems];
+    newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
+    setInventoryItems(newInventoryItems);
+    setUpdateStockData({
+      ...updateStockData,
+      inventoryItems: newInventoryItems,
+    });
+    console.log("new inv items: ", newInventoryItems);
+  };
+
   const [inventoryItems, setInventoryItems] = useState(
     updateStockData.inventoryItems.map((item) => ({
       ...item,
@@ -38,6 +50,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
       ...inventoryItems,
       {
         inventoryID: 0,
+        subinventoryID: 0,
         quantityToUpdate: 0,
         expanded: true,
       },
@@ -48,16 +61,6 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
     const newInventoryItems = [...inventoryItems];
     newInventoryItems[index].expanded = !newInventoryItems[index].expanded;
     setInventoryItems(newInventoryItems);
-  };
-
-  const updateInventoryItem = (index: number, updatedItem: any) => {
-    const newInventoryItems = [...inventoryItems];
-    newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
-    setInventoryItems(newInventoryItems);
-    setUpdateStockData({
-      ...updateStockData,
-      inventoryItems: newInventoryItems,
-    });
   };
 
   const validateForm = () => {
@@ -134,6 +137,37 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
     }
   }, [employees, loggedInEmployeeID]);
 
+  const [selectedInventories, setSelectedInventories] = useState<number[]>([]);
+  const [detailedData, setDetailedData] = useState<{ [key: number]: any }>({}); // Store details for each inventoryID
+
+  // Function to fetch detailed data for a selected inventory item
+  const populateDetailedData = async (inventoryID: number) => {
+    if (!detailedData[inventoryID]) {
+      try {
+        const response = await axios.get(
+          `http://localhost:8081/inventoryManagement/getInventoryItemDetails/${inventoryID}`
+        );
+        setDetailedData((prev) => ({
+          ...prev,
+          [inventoryID]: response.data,
+        }));
+      } catch (error) {
+        console.error(
+          `Error fetching details for inventory ID ${inventoryID}:`,
+          error
+        );
+      }
+    }
+  };
+
+  const updateSelectedInventories = (index: number, newInventoryID: number) => {
+    setSelectedInventories((prev) => {
+      const updated = [...prev];
+      updated[index] = newInventoryID; // Update the inventory selection at the specified index
+      return updated;
+    });
+  };
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
@@ -158,49 +192,65 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
             />
           </div>
         </div>
-
         <div className="mb-3 text-black">
           Employee: {loggedInEmployeeName || "No employee found."}
         </div>
 
         {inventoryItems.map((item, index) => (
           <div key={index} className="mb-4 p-2 border border-black bg-cream">
-            <div className="flex justify-between items-center">
-              <select
-                value={item.inventoryID}
-                onChange={(e) => {
-                  const newInventoryID = parseInt(e.target.value);
-                  handleInventoryChange(newInventoryID, index); // Update the inventory item selection
-                  updateInventoryItem(index, { inventoryID: newInventoryID });
-                }}
-                className="mb-2 mt-2 p-2 w-full text-black border border-black"
-              >
-                <option value="0" disabled>
-                  Select Inventory Item
-                </option>
-                {inventoryNames
-                  .filter(
-                    (inv) =>
-                      !inventoryItems.some(
-                        (selectedItem, selectedIndex) =>
-                          selectedItem.inventoryID === inv.inventoryID &&
-                          selectedIndex !== index
-                      )
-                  )
-                  .map((inv) => (
-                    <option key={inv.inventoryID} value={inv.inventoryID}>
-                      {inv.inventoryName}
-                    </option>
-                  ))}
-              </select>
-
+            <div className="flex justify-between items-center text-black">
+              <div>Inventory Item</div>
               <button onClick={() => toggleExpandItem(index)}>
                 {item.expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
               </button>
             </div>
-
+            <select
+              value={item.inventoryID}
+              onChange={(e) => {
+                const newInventoryID = parseInt(e.target.value);
+                handleInventoryChange(newInventoryID, index); // Update the inventory item selection
+                updateInventoryItem(index, { inventoryID: newInventoryID });
+                updateSelectedInventories(index, newInventoryID); // Update selected inventories
+                populateDetailedData(newInventoryID); // Fetch detailed data
+              }}
+              className="mb-2 mt-2 p-2 w-full text-black border border-black"
+            >
+              <option value="0" disabled>
+                Select Inventory Item
+              </option>
+              {inventoryNames.map((inv) => (
+                <option key={inv.inventoryID} value={inv.inventoryID}>
+                  {inv.inventoryName}
+                </option>
+              ))}
+            </select>
             {item.expanded && (
-              <div>
+              <div className="text-black">
+                Subinventory ID
+                <select
+                  value={item.subinventoryID}
+                  onChange={(e) => {
+                    const newSubinventoryID = parseInt(e.target.value);
+                    updateInventoryItem(index, {
+                      subinventoryID: newSubinventoryID,
+                    });
+                  }}
+                  className="mb-2 mt-2 p-2 w-full text-black border border-black"
+                >
+                  <option value="0" disabled>
+                    Select Subinventory ID
+                  </option>
+                  {detailedData[selectedInventories[index]]?.map(
+                    (subinv: any) => (
+                      <option
+                        key={subinv.subinventoryID}
+                        value={subinv.subinventoryID}
+                      >
+                        {subinv.subinventoryID}
+                      </option>
+                    )
+                  )}
+                </select>
                 <div className="mb-2">
                   <input
                     type="number"
@@ -221,14 +271,12 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
             )}
           </div>
         ))}
-
         <button
           onClick={addInventoryItem}
           className="bg-tealGreen text-black py-2 px-4 rounded mb-4 w-full"
         >
           Add Inventory Item
         </button>
-
         <div className="flex justify-between">
           <button
             onClick={handleSubmit}
