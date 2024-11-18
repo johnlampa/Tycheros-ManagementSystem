@@ -177,14 +177,27 @@ router.get('/getUoMsByCategory/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
 
   const query = `
-    SELECT uom.*
-    FROM unitofmeasurement uom
-    WHERE uom.category = (
-        SELECT uom2.category
+    SELECT 
+      uom.unitOfMeasurementID, 
+      uom.UoM, 
+      uom.type, 
+      uom.ratio, 
+      uom.status, 
+      category.categoryName AS category,
+      \`system\`.system AS systemName
+    FROM 
+      unitofmeasurement uom
+    JOIN 
+      category ON uom.categoryID = category.categoryID
+    JOIN 
+      \`system\` ON category.systemID = \`system\`.systemID
+    WHERE 
+      uom.categoryID = (
+        SELECT uom2.categoryID
         FROM unitofmeasurement uom2
         JOIN inventory inv ON inv.unitOfMeasurementID = uom2.unitOfMeasurementID
         WHERE inv.inventoryID = ?
-    );
+      ) AND uom.status = 1
   `;
 
   try {
@@ -430,16 +443,21 @@ router.put('/updateStatus/:inventoryID', async (req, res) => {
 router.get('/getReferenceUnits', async (req, res) => {
   const query = `
     SELECT 
-      unitOfMeasurementID, 
-      category, 
-      UoM, 
-      type, 
-      ratio, 
-      status
+      uom.unitOfMeasurementID, 
+      uom.UoM, 
+      uom.type, 
+      uom.ratio, 
+      uom.status, 
+      category.categoryName AS category,
+      \`system\`.system AS systemName
     FROM 
-      unitofmeasurement
+      unitofmeasurement uom
+    JOIN 
+      category ON uom.categoryID = category.categoryID
+    JOIN 
+      \`system\` ON category.systemID = \`system\`.systemID
     WHERE 
-      type = 'reference' AND status = 1
+      uom.type = 'reference' AND uom.status = 1
   `;
 
   try {
