@@ -60,6 +60,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
 
   useEffect(() => {
+    console.log(inventoryData);
+  });
+
+  useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
       if (loggedInEmployeeID) {
@@ -82,6 +86,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
         )
         .then((response) => {
           setSubitems(response.data);
+          console.log(
+            "productModalIsVisible changed. response data: ",
+            response.data
+          );
         })
         .catch((error) => {
           console.error("Error fetching subitems:", error);
@@ -89,7 +97,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
     } else if (type === "add") {
       setSubitems([]);
     }
-  }, [type, menuProductToEdit]);
+  }, [type, menuProductToEdit, productModalIsVisible]);
 
   useEffect(() => {
     return () => {
@@ -195,7 +203,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       categoryID: categoryID,
       imageUrl: "", // Initially set as an empty string
       subitems: subitems.map((subitem, index) => ({
-        inventoryID: parseInt(formJson[`subitem-${index}`] as string),
+        inventoryID: parseInt(subitem.inventoryID.toString()),
         quantityNeeded: parseFloat(
           formJson[`quantityNeeded-${index}`] as string
         ),
@@ -246,34 +254,56 @@ const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
 
-  const handleDelete = () => {
-    if (menuProductToEdit?.productID) {
-      const confirmDelete = window.confirm(
-        "Are you sure you want to delete this product? This action cannot be undone."
-      );
-      if (confirmDelete) {
-        axios
-          .delete(
-            `http://localhost:8081/menuManagement/deleteProduct/${menuProductToEdit.productID}`
-          )
-          .then((response) => {
-            console.log("Product deleted:", response.data);
-            const updatedMenuData = menuData.filter(
-              (product) => product.productID !== menuProductToEdit.productID
-            );
-            setMenuData(updatedMenuData);
-            setProductModalVisibility(false);
-          })
-          .catch((error) => {
-            console.error("Error deleting product:", error);
-          });
-      }
-    }
-  };
-
   const handleCancel = () => {
     setProductModalVisibility(false);
   };
+
+  const [selectedInventories, setSelectedInventories] = useState<number[]>([]);
+
+  // Reset subitems when productModalIsVisible changes
+  useEffect(() => {
+    setSubitems([]); // Clear subitems when modal changes
+  }, [productModalIsVisible]);
+
+  // Update selectedInventories as component mounts
+  useEffect(() => {
+    const updatedInventories = subitems.map(
+      (subitem) => subitem.inventoryID || 0
+    );
+    setSelectedInventories(updatedInventories);
+  }, []);
+
+  // Update selectedInventories when subitems change
+  useEffect(() => {
+    const updatedInventories = subitems.map(
+      (subitem) => subitem.inventoryID || 0
+    );
+    setSelectedInventories(updatedInventories);
+  }, [subitems]);
+
+  const handleInventoryChange = (index: number, newInventoryID: number) => {
+    // Update selectedInventories
+    setSelectedInventories((prev) => {
+      const updatedSelections = [...prev];
+      updatedSelections[index] = newInventoryID;
+      return updatedSelections;
+    });
+
+    // Safely update subitems
+    setSubitems((prev) =>
+      prev.map((subitem, i) =>
+        i === index ? { ...subitem, inventoryID: newInventoryID } : subitem
+      )
+    );
+  };
+
+  useEffect(() => {
+    console.log("Updated selectedInventories: ", selectedInventories);
+  }, [selectedInventories]);
+
+  useEffect(() => {
+    console.log("Updated subitems: ", subitems);
+  }, [subitems]);
 
   return (
     <Modal
@@ -346,12 +376,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <select
               className="border border-gray rounded w-[60%] p-3 text-black mr-5 h-12"
               defaultValue={subitem.inventoryID}
+              value={selectedInventories[index] || ""} // Bind value to selectedInventories
               name={`subitem-${index}`}
               id={`subitem-${index}`}
+              onChange={(e) =>
+                handleInventoryChange(index, parseInt(e.target.value))
+              }
             >
               <option value="">Choose</option>
               {inventoryData
-                ?.filter((item) => item.inventoryCategory !== "Condiments")
+                ?.filter(
+                  (item) =>
+                    (item.inventoryCategory === "Produce" ||
+                      item.inventoryCategory === "Dairy and Eggs" ||
+                      item.inventoryCategory === "Meat and Poultry" ||
+                      item.inventoryCategory === "Seafood" ||
+                      item.inventoryCategory === "Canned Goods" ||
+                      item.inventoryCategory === "Beverages") &&
+                    (!selectedInventories.includes(item.inventoryID) || // Allow unselected items
+                      selectedInventories[index] === item.inventoryID) // Allow reselecting current selection
+                )
                 .map((item) => (
                   <option value={item.inventoryID} key={item.inventoryID}>
                     {item.inventoryName} ({item.unitOfMeasure})
