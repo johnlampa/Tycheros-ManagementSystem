@@ -86,6 +86,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
         )
         .then((response) => {
           setSubitems(response.data);
+          console.log(
+            "productModalIsVisible changed. response data: ",
+            response.data
+          );
         })
         .catch((error) => {
           console.error("Error fetching subitems:", error);
@@ -93,7 +97,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
     } else if (type === "add") {
       setSubitems([]);
     }
-  }, [type, menuProductToEdit]);
+  }, [type, menuProductToEdit, productModalIsVisible]);
 
   useEffect(() => {
     return () => {
@@ -199,7 +203,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       categoryID: categoryID,
       imageUrl: "", // Initially set as an empty string
       subitems: subitems.map((subitem, index) => ({
-        inventoryID: parseInt(formJson[`subitem-${index}`] as string),
+        inventoryID: parseInt(subitem.inventoryID.toString()),
         quantityNeeded: parseFloat(
           formJson[`quantityNeeded-${index}`] as string
         ),
@@ -250,49 +254,56 @@ const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
 
-  const handleDelete = () => {
-    if (menuProductToEdit?.productID) {
-      const confirmDelete = window.confirm(
-        "Are you sure you want to delete this product? This action cannot be undone."
-      );
-      if (confirmDelete) {
-        axios
-          .delete(
-            `http://localhost:8081/menuManagement/deleteProduct/${menuProductToEdit.productID}`
-          )
-          .then((response) => {
-            console.log("Product deleted:", response.data);
-            const updatedMenuData = menuData.filter(
-              (product) => product.productID !== menuProductToEdit.productID
-            );
-            setMenuData(updatedMenuData);
-            setProductModalVisibility(false);
-          })
-          .catch((error) => {
-            console.error("Error deleting product:", error);
-          });
-      }
-    }
-  };
-
   const handleCancel = () => {
     setProductModalVisibility(false);
   };
 
-  const [selectedInventories, setSelectedInventories] = useState(
-    subitems.map((subitem) => subitem.inventoryID || null)
-  );
+  const [selectedInventories, setSelectedInventories] = useState<number[]>([]);
+
+  // Reset subitems when productModalIsVisible changes
+  useEffect(() => {
+    setSubitems([]); // Clear subitems when modal changes
+  }, [productModalIsVisible]);
+
+  // Update selectedInventories as component mounts
+  useEffect(() => {
+    const updatedInventories = subitems.map(
+      (subitem) => subitem.inventoryID || 0
+    );
+    setSelectedInventories(updatedInventories);
+  }, []);
+
+  // Update selectedInventories when subitems change
+  useEffect(() => {
+    const updatedInventories = subitems.map(
+      (subitem) => subitem.inventoryID || 0
+    );
+    setSelectedInventories(updatedInventories);
+  }, [subitems]);
 
   const handleInventoryChange = (index: number, newInventoryID: number) => {
+    // Update selectedInventories
     setSelectedInventories((prev) => {
       const updatedSelections = [...prev];
       updatedSelections[index] = newInventoryID;
       return updatedSelections;
     });
 
-    // Update the corresponding subitem's inventoryID
-    subitems[index].inventoryID = newInventoryID;
+    // Safely update subitems
+    setSubitems((prev) =>
+      prev.map((subitem, i) =>
+        i === index ? { ...subitem, inventoryID: newInventoryID } : subitem
+      )
+    );
   };
+
+  useEffect(() => {
+    console.log("Updated selectedInventories: ", selectedInventories);
+  }, [selectedInventories]);
+
+  useEffect(() => {
+    console.log("Updated subitems: ", subitems);
+  }, [subitems]);
 
   return (
     <Modal
