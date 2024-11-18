@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react"; // Make sure React is imported
+import React, { useEffect, useState } from "react"; // Make sure React is imported
 import { InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
 
 import { PiCaretCircleUpFill, PiCaretCircleDownFill } from "react-icons/pi";
@@ -40,6 +40,24 @@ export type UOMManagementCardProps = {
   setUOMToEdit: React.Dispatch<React.SetStateAction<UOM | undefined>>;
 };
 
+function formatRatio(ratio: any): string {
+  const numericRatio = Number(ratio); // Ensure ratio is a number
+
+  if (isNaN(numericRatio)) {
+    return "Invalid Ratio"; // Handle non-numeric values gracefully
+  }
+
+  if (numericRatio >= 1) {
+    // For numbers >= 1, remove unnecessary trailing zeros
+    return parseFloat(numericRatio.toFixed(10)).toString();
+  } else if (numericRatio > 0) {
+    // For small numbers < 1, remove unnecessary trailing zeros
+    return parseFloat(numericRatio.toFixed(10)).toString();
+  } else {
+    return "0"; // Handle zero values explicitly
+  }
+}
+
 const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
   category,
   UOM,
@@ -54,6 +72,10 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
   setEditUOMModalIsVisible,
   setUOMToEdit,
 }) => {
+  useEffect(() => {
+    console.log("Uoms: ", UOM);
+  }, [UOM]);
+
   return (
     <>
       <div className="p-4 w-[320px] rounded-md bg-cream">
@@ -69,7 +91,11 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
           )}
           <IconContext.Provider value={{ color: "#6C4E3D", size: "27px" }}>
             <button onClick={() => toggleRow(category.categoryID)}>
-              <PiCaretCircleDownFill className="text-white group-hover:text-primaryBrown transition-colors duration-300" />
+              {expandedRow === category.categoryID ? (
+                <PiCaretCircleUpFill className="text-white group-hover:text-primaryBrown transition-colors duration-300" />
+              ) : (
+                <PiCaretCircleDownFill className="text-white group-hover:text-primaryBrown transition-colors duration-300" />
+              )}
             </button>
           </IconContext.Provider>
         </div>
@@ -92,7 +118,7 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
         </div>
 
         <div className="w-full mt-4 text-sm">
-          <div className="w-full flex gap-x-2 ">
+          <div className="w-full flex gap-x-2 text-black ">
             <div>Reference: </div>
             {UOM.find(
               (uom: UOM) =>
@@ -105,7 +131,7 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                     (uom: UOM) =>
                       category.categoryID === uom.categoryID &&
                       parseInt(uom.ratio.toString()) === 1
-                  )?.UOMName
+                  )?.UoM
                 }
               </div>
             ) : (
@@ -113,21 +139,21 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
             )}
           </div>
 
-          <div className="w-full flex gap-x-2 ">
+          <div className="w-full flex gap-x-2 text-black">
             <div>Others: </div>
-            {UOM.map(
+            {UOM.filter(
               (uom: UOM) =>
                 category.categoryID === uom.categoryID &&
                 parseInt(uom.ratio.toString()) !== 1
-            ) ? (
+            ).length > 0 ? (
               <div className="font-semibold">
-                {
-                  UOM.find(
-                    (uom: UOM) =>
-                      category.categoryID === uom.categoryID &&
-                      parseInt(uom.ratio.toString()) !== 1
-                  )?.UOMName
-                }
+                {UOM.filter(
+                  (uom: UOM) =>
+                    category.categoryID === uom.categoryID &&
+                    parseInt(uom.ratio.toString()) !== 1
+                )
+                  .map((filteredUOM: UOM) => filteredUOM.UoM)
+                  .join(", ")}
               </div>
             ) : (
               <div>Not found</div>
@@ -152,19 +178,17 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                   Units of Measurement
                 </p>
               </div>
-              <div className="text-sm flex flex-col items-center w-full ">
+              <div className="text-sm flex flex-col items-center w-full">
                 {detailedData[category.categoryID] &&
                 detailedData[category.categoryID].length > 0 ? (
                   <>
-                    {/* <div className="w-full h-[2px] bg-primaryBrown my-4"></div> */}
-
                     <div className="w-full">
                       {detailedData[category.categoryID]?.map(
                         (detail: UOM, index: number) => (
                           <div key={index} className="mt-5">
                             <div className="flex items-center gap-x-3">
                               <div className="text-base font-semibold mb-1">
-                                {detail.UOMName}
+                                {detail.UoM}
                               </div>
                               <div>
                                 <button
@@ -173,7 +197,7 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                                     console.log(detail);
                                     setEditUOMModalIsVisible(true);
                                   }}
-                                  className="text-black px-3 text-xs rounded-full border border-black "
+                                  className="text-black px-3 text-xs rounded-full border border-black"
                                 >
                                   Edit
                                 </button>
@@ -184,10 +208,14 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                               <div>Reference</div>
                             ) : (
                               <div className="flex gap-x-2">
-                                <div>Ratio to Reference:</div>
-                                <div className="font-semibold">
-                                  {detail.ratio}
-                                </div>
+                                {parseInt(detail.ratio.toString()) !== 1 ? (
+                                  <>
+                                    <div>Ratio to Reference:</div>
+                                    <div className="font-semibold">
+                                      {formatRatio(detail.ratio)}
+                                    </div>
+                                  </>
+                                ) : null}
                               </div>
                             )}
                             <div className="flex gap-x-2">

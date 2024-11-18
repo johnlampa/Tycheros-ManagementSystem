@@ -24,13 +24,15 @@ DROP TABLE IF EXISTS `unitofmeasurement`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `unitofmeasurement` (
   `unitOfMeasurementID` int NOT NULL AUTO_INCREMENT,
-  `category` varchar(45) NOT NULL,
+  `categoryID` int NOT NULL,
   `UoM` varchar(45) NOT NULL,
   `type` varchar(45) NOT NULL,
-  `ratio` decimal(20,15) NOT NULL,
+  `ratio` decimal(20,10) NOT NULL,
   `status` tinyint NOT NULL,
-  PRIMARY KEY (`unitOfMeasurementID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`unitOfMeasurementID`),
+  KEY `unitofmeasurement_category_ID_idx` (`categoryID`),
+  CONSTRAINT `unitofmeasurement_category_ID` FOREIGN KEY (`categoryID`) REFERENCES `category` (`categoryID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +41,7 @@ CREATE TABLE `unitofmeasurement` (
 
 LOCK TABLES `unitofmeasurement` WRITE;
 /*!40000 ALTER TABLE `unitofmeasurement` DISABLE KEYS */;
-INSERT INTO `unitofmeasurement` VALUES (1,'Weight','g','reference',1.000000000000000,1),(2,'Weight','kg','bigger',1000.000000000000000,1),(3,'Pieces','pc/s','reference',1.000000000000000,1),(4,'Volume','L','reference',1.000000000000000,1),(5,'Pieces','Dozen','bigger',12.000000000000000,1);
+INSERT INTO `unitofmeasurement` VALUES (1,16,'g','reference',1.0000000000,1),(2,16,'kg','bigger',1000.0000000000,1),(3,17,'pc/s','reference',1.0000000000,1),(4,18,'L','reference',1.0000000000,1),(5,17,'Dozen','bigger',12.0000000000,1),(6,19,'TestUoM','reference',1.0000000000,1),(7,18,'mL','smaller',0.0010000000,1),(8,16,'mg','smaller',0.0010000000,1),(9,20,'TestUoM2','reference',1.0000000000,1),(10,19,'smallTestUoM','smaller',0.0010000000,1),(11,19,'bigTestUoM','bigger',1000.0000000000,1),(12,21,'TestUoM3','reference',1.0000000000,1),(13,22,'TestUoM4','reference',1.0000000000,1),(14,17,'tray','bigger',30.0000000000,1);
 /*!40000 ALTER TABLE `unitofmeasurement` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:43
+-- Dump completed on 2024-11-18 14:36:49

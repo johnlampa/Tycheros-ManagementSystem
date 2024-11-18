@@ -5,9 +5,10 @@ export type UOMCategory = {
 }
 
 export type UOM = {
-    UOMID: number,
+    unitOfMeasurementID: number,
     categoryID: number,
-    UOMName: string,
+    UoM: string,
+    type: string,
     ratio: number,
     status: number
 }

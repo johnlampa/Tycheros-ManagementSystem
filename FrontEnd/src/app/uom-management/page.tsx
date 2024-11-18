@@ -30,71 +30,68 @@ export default function Page() {
     useState<boolean>(false);
   const [UOMToEdit, setUOMToEdit] = useState<UOM | undefined>();
 
-  //@adgramirez add a useEffect to populate this array with ALL the UOM Categories
-  const [UOMCategory, setUOMCategory] = useState<UOMCategory[]>([
-    {
-      categoryID: 1,
-      categoryName: "Weight",
-      status: 1,
-    },
-    {
-      categoryID: 2,
-      categoryName: "Pieces",
-      status: 1,
-    },
-  ]);
+  const [UOMCategory, setUOMCategory] = useState<UOMCategory[]>([]);
+  const [UOM, setUOM] = useState<UOM[]>([]);
 
-  //@adgramirez add a useEffect to populate this array with ALL the UOM
-  const [UOM, setUOM] = useState<UOM[]>([
-    {
-      UOMID: 1,
-      categoryID: 1,
-      UOMName: "g",
-      ratio: 1.0,
-      status: 1,
-    },
-    {
-      UOMID: 2,
-      categoryID: 1,
-      UOMName: "kg",
-      ratio: 1000,
-      status: 1,
-    },
-    {
-      UOMID: 3,
-      categoryID: 2,
-      UOMName: "pc/s",
-      ratio: 1,
-      status: 1,
-    },
-  ]);
+  useEffect(() => {
+    axios
+      .get(
+        "http://localhost:8081/inventoryManagement/getCategoriesBySystem/UoM"
+      )
+      .then((response) => {
+        setUOMCategory(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching UOM categories:", error);
+      });
+
+    // Fetch UOMs with categories
+    axios
+      .get("http://localhost:8081/inventoryManagement/getUoMsWithCategories")
+      .then((response) => {
+        setUOM(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching UOMs with categories:", error);
+      });
+  }, []);
+
+  const groupUOMsByCategory = () => {
+    const grouped: { [key: number]: UOM[] } = {};
+    UOM.forEach((uom) => {
+      if (!grouped[uom.categoryID]) {
+        grouped[uom.categoryID] = [];
+      }
+      grouped[uom.categoryID].push(uom);
+    });
+    return grouped;
+  };
+
+  const groupedUOMs = groupUOMsByCategory();
 
   const [expandedRow, setExpandedRow] = useState<number | null>(null); // Track the expanded row
   const [detailedData, setDetailedData] = useState<{ [key: number]: any }>({}); // Store details for each categoryID
 
-  const toggleRow = async (categoryID: number) => {
+  const toggleRow = (categoryID: number) => {
     if (expandedRow === categoryID) {
       // Collapse the currently expanded row
       setExpandedRow(null);
     } else {
-      // Expand the selected row and fetch details if not already fetched
-      if (!detailedData[categoryID]) {
-        // Filter UOM array based on categoryID
-        const UOMUnderCategoryID = UOM.filter(
-          (uom) => uom.categoryID === categoryID
-        );
-
-        console.log("Filtered UOMs: ", UOMUnderCategoryID);
-
-        // You can now store or use UOMUnderCategoryID as needed
-        // For example, updating detailedData
-        setDetailedData((prev) => ({
-          ...prev,
-          [categoryID]: UOMUnderCategoryID,
-        }));
-      }
-      setExpandedRow(categoryID); // Set the clicked row as the expanded one
+      // Expand the selected row
+      setExpandedRow(categoryID);
+      setDetailedData((prev) => ({
+        ...prev,
+        [categoryID]: groupedUOMs[categoryID] || [],
+      }));
     }
+  };
+
+  const [selectedCategoryID, setSelectedCategoryID] = useState<number | null>(
+    null
+  );
+  const handleAddUOMModal = (isVisible: boolean, categoryID: number) => {
+    setAddUOMModalIsVisible(isVisible); // Pass boolean here
+    setSelectedCategoryID(categoryID); // Set the categoryID
   };
 
   return (
@@ -133,7 +130,10 @@ export default function Page() {
                     setEditUOMCategoryModalIsVisible
                   }
                   setCategoryToEdit={setCategoryToEdit}
-                  setAddUOMModalIsVisible={setAddUOMModalIsVisible}
+                  setAddUOMModalIsVisible={
+                    (isVisible) =>
+                      handleAddUOMModal(!!isVisible, category.categoryID) // Ensure `isVisible` is a boolean
+                  }
                   setEditUOMModalIsVisible={setEditUOMModalIsVisible}
                   setUOMToEdit={setUOMToEdit}
                 />
@@ -146,6 +146,7 @@ export default function Page() {
           addUOMCategoryModalIsVisible={addUOMCategoryModalIsVisible}
           setAddUOMCategoryModalVisibility={setAddUOMCategoryModalIsVisible}
           modalTitle="Add UOM Category"
+          systemName="UoM"
         ></AddUOMCategoryModal>
         <EditUOMCategoryModal
           editUOMCategoryModalIsVisible={editUOMCategoryModalIsVisible}
@@ -159,7 +160,8 @@ export default function Page() {
           addUOMModalIsVisible={addUOMModalIsVisible}
           setAddUOMModalVisibility={setAddUOMModalIsVisible}
           modalTitle="Add UOM"
-        ></AddUOMModal>
+          categoryID={selectedCategoryID || 0} // Pass the selected categoryID
+        />
         <EditUOMModal
           editUOMModalIsVisible={editUOMModalIsVisible}
           setEditUOMModalVisibility={setEditUOMModalIsVisible}

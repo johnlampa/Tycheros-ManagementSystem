@@ -16,33 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `inventory`
+-- Table structure for table `employees`
 --
 
-DROP TABLE IF EXISTS `inventory`;
+DROP TABLE IF EXISTS `employees`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `inventory` (
-  `inventoryID` int NOT NULL AUTO_INCREMENT,
-  `inventoryName` varchar(45) NOT NULL,
-  `inventoryCategory` varchar(45) NOT NULL,
-  `unitOfMeasurementID` int NOT NULL,
-  `reorderPoint` int NOT NULL,
-  `inventoryStatus` tinyint NOT NULL,
-  PRIMARY KEY (`inventoryID`),
-  KEY `inventory_UoM_ID_idx` (`unitOfMeasurementID`),
-  CONSTRAINT `inventory_UoM_ID` FOREIGN KEY (`unitOfMeasurementID`) REFERENCES `unitofmeasurement` (`unitOfMeasurementID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `employees` (
+  `employeeID` int NOT NULL AUTO_INCREMENT,
+  `password` varchar(45) NOT NULL,
+  `firstName` varchar(45) NOT NULL,
+  `lastName` varchar(45) NOT NULL,
+  `contactInformation` varchar(11) NOT NULL,
+  `designation` varchar(45) NOT NULL,
+  `status` varchar(45) NOT NULL,
+  PRIMARY KEY (`employeeID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `inventory`
+-- Dumping data for table `employees`
 --
 
-LOCK TABLES `inventory` WRITE;
-/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
-INSERT INTO `inventory` VALUES (1,'Potato','Produce',1,1000,1),(2,'Cheese Powder','Dry Goods',1,500,1),(3,'BBQ Powder','Dry Goods',1,500,1),(4,'Banana','Produce',3,20,0),(5,'Apple','Produce',3,20,1),(6,'Eggs','Dairy and Eggs',3,20,1),(7,'Ground Pork','Meat and Poultry',1,1000,1),(8,'Orange','Produce',3,20,0),(9,'Mango','Produce',3,20,1),(10,'Flour','Dry Goods',1,1000,1),(11,'Chicken Legs','Meat and Poultry',3,50,1),(12,'Ground Beef','Meat and Poultry',1,1500,1),(13,'Milk Fish','Seafood',3,1000,0);
-/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
+LOCK TABLES `employees` WRITE;
+/*!40000 ALTER TABLE `employees` DISABLE KEYS */;
+INSERT INTO `employees` VALUES (1,'123','John Kyle','Lampa','09123456789','Owner','1'),(2,'123','Agustine James','Salcedo','09123456789','Manager','Active');
+/*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -54,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:44
+-- Dump completed on 2024-11-18 14:36:50

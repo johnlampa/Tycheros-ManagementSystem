@@ -16,29 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `discount`
+-- Table structure for table `system`
 --
 
-DROP TABLE IF EXISTS `discount`;
+DROP TABLE IF EXISTS `system`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `discount` (
-  `discountID` int NOT NULL,
-  `discountType` varchar(45) NOT NULL,
-  `discountAmount` decimal(10,2) NOT NULL,
-  PRIMARY KEY (`discountID`),
-  CONSTRAINT `discount_payment_ID` FOREIGN KEY (`discountID`) REFERENCES `payment` (`paymentID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `system` (
+  `systemID` int NOT NULL AUTO_INCREMENT,
+  `system` varchar(45) NOT NULL,
+  PRIMARY KEY (`systemID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `discount`
+-- Dumping data for table `system`
 --
 
-LOCK TABLES `discount` WRITE;
-/*!40000 ALTER TABLE `discount` DISABLE KEYS */;
-INSERT INTO `discount` VALUES (18,'PWD',100.00),(19,'PWD',10.00),(20,'PWD',20.00);
-/*!40000 ALTER TABLE `discount` ENABLE KEYS */;
+LOCK TABLES `system` WRITE;
+/*!40000 ALTER TABLE `system` DISABLE KEYS */;
+INSERT INTO `system` VALUES (1,'Food'),(2,'Bar'),(3,'UoM');
+/*!40000 ALTER TABLE `system` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -50,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:44
+-- Dump completed on 2024-11-18 14:36:49

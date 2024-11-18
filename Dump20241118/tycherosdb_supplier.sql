@@ -16,35 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `stockout`
+-- Table structure for table `supplier`
 --
 
-DROP TABLE IF EXISTS `stockout`;
+DROP TABLE IF EXISTS `supplier`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `stockout` (
-  `stockOutID` int NOT NULL AUTO_INCREMENT,
-  `subinventoryID` int NOT NULL,
-  `quantity` int NOT NULL,
-  `reason` tinyblob,
-  `stockOutDateTime` datetime NOT NULL,
-  `employeeID` int NOT NULL,
-  PRIMARY KEY (`stockOutID`),
-  KEY `stockout_subinventory_ID_idx` (`subinventoryID`),
-  KEY `stockout_employee_ID_idx` (`employeeID`),
-  CONSTRAINT `stockout_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `stockout_subinventory_ID` FOREIGN KEY (`subinventoryID`) REFERENCES `subinventory` (`subinventoryID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `supplier` (
+  `supplierID` int NOT NULL AUTO_INCREMENT,
+  `supplierName` varchar(45) NOT NULL,
+  PRIMARY KEY (`supplierID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `stockout`
+-- Dumping data for table `supplier`
 --
 
-LOCK TABLES `stockout` WRITE;
-/*!40000 ALTER TABLE `stockout` DISABLE KEYS */;
-INSERT INTO `stockout` VALUES (2,3,50,_binary 'Secret','2024-11-12 00:00:00',1),(3,4,40,'','2024-11-12 00:00:00',1),(4,11,1,_binary 'reason','2024-11-14 00:00:00',2);
-/*!40000 ALTER TABLE `stockout` ENABLE KEYS */;
+LOCK TABLES `supplier` WRITE;
+/*!40000 ALTER TABLE `supplier` DISABLE KEYS */;
+INSERT INTO `supplier` VALUES (1,'Potato Corner'),(2,'XYZ'),(3,'Appler'),(4,'Fruits'),(5,'GMall');
+/*!40000 ALTER TABLE `supplier` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -56,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:43
+-- Dump completed on 2024-11-18 14:36:49

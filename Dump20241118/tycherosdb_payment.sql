@@ -16,31 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `subinventory`
+-- Table structure for table `payment`
 --
 
-DROP TABLE IF EXISTS `subinventory`;
+DROP TABLE IF EXISTS `payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subinventory` (
-  `subinventoryID` int NOT NULL,
-  `inventoryID` int NOT NULL,
-  `quantityRemaining` int NOT NULL,
-  PRIMARY KEY (`subinventoryID`),
-  KEY `subinventory_inventory_ID_idx` (`inventoryID`),
-  CONSTRAINT `subinventory_inventory_ID` FOREIGN KEY (`inventoryID`) REFERENCES `inventory` (`inventoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `subinventory_POItem_ID` FOREIGN KEY (`subinventoryID`) REFERENCES `purchaseorderitem` (`purchaseOrderItemID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `payment` (
+  `paymentID` int NOT NULL AUTO_INCREMENT,
+  `amount` decimal(10,2) NOT NULL,
+  `method` varchar(45) NOT NULL,
+  `referenceNumber` varchar(45) DEFAULT NULL,
+  `orderStatusID` int NOT NULL,
+  PRIMARY KEY (`paymentID`),
+  KEY `payment_orderStatus_ID_idx` (`orderStatusID`),
+  CONSTRAINT `payment_orderStatus_ID` FOREIGN KEY (`orderStatusID`) REFERENCES `orderstatus` (`orderStatusID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subinventory`
+-- Dumping data for table `payment`
 --
 
-LOCK TABLES `subinventory` WRITE;
-/*!40000 ALTER TABLE `subinventory` DISABLE KEYS */;
-INSERT INTO `subinventory` VALUES (1,1,0),(2,1,500),(3,2,900),(4,3,400),(5,1,1000),(6,2,1000),(7,7,1000),(8,1,100),(9,5,24),(10,5,36),(11,4,11),(12,1,25);
-/*!40000 ALTER TABLE `subinventory` ENABLE KEYS */;
+LOCK TABLES `payment` WRITE;
+/*!40000 ALTER TABLE `payment` DISABLE KEYS */;
+INSERT INTO `payment` VALUES (18,140.00,'GCash','123123',66),(19,150.00,'Cash','',68),(20,190.00,'GCash','15234asda',70);
+/*!40000 ALTER TABLE `payment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:43
+-- Dump completed on 2024-11-18 14:36:49

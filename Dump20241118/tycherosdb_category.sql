@@ -16,27 +16,31 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `system`
+-- Table structure for table `category`
 --
 
-DROP TABLE IF EXISTS `system`;
+DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `system` (
-  `systemID` int NOT NULL AUTO_INCREMENT,
-  `system` varchar(45) NOT NULL,
-  PRIMARY KEY (`systemID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `category` (
+  `categoryID` int NOT NULL AUTO_INCREMENT,
+  `categoryName` varchar(45) NOT NULL,
+  `systemID` int NOT NULL,
+  `status` tinyint NOT NULL,
+  PRIMARY KEY (`categoryID`),
+  KEY `category_system_ID_idx` (`systemID`),
+  CONSTRAINT `category_system_ID` FOREIGN KEY (`systemID`) REFERENCES `system` (`systemID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `system`
+-- Dumping data for table `category`
 --
 
-LOCK TABLES `system` WRITE;
-/*!40000 ALTER TABLE `system` DISABLE KEYS */;
-INSERT INTO `system` VALUES (1,'Food'),(2,'Bar'),(3,'UoM');
-/*!40000 ALTER TABLE `system` ENABLE KEYS */;
+LOCK TABLES `category` WRITE;
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+INSERT INTO `category` VALUES (1,'Appetizers',1,1),(2,'Entrees',1,1),(3,'Snacks',1,1),(4,'Combo Meals',1,1),(5,'Wings',1,1),(6,'Salads',1,1),(7,'Milk Tea',2,1),(8,'Beer',2,1),(9,'Coffee',2,1),(10,'Whiskey',2,1),(11,'Frappe',2,1),(12,'Tea',2,1),(13,'Pasta',1,1),(14,'Rice Meals',1,1),(15,'Snacks',1,1),(16,'Weight',3,1),(17,'Pieces',3,1),(18,'Volume',3,1),(19,'Test',3,1),(20,'Test2',3,0),(21,'Test3',3,1),(22,'Test4',3,1);
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -48,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:44
+-- Dump completed on 2024-11-18 14:36:49

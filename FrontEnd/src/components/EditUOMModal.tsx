@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import Modal from "@/components/ui/Modal";
+import ValidationDialog from "@/components/ValidationDialog"; // Validation dialog
 import React from "react";
 import { UOM } from "../../lib/types/UOMDataTypes";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
+import axios from "axios";
 
 interface EditUOMModalProps {
   editUOMModalIsVisible: boolean;
@@ -19,40 +21,63 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
   UOMToEdit,
 }) => {
   const [UOMName, setUOMName] = useState("");
-  const [ratio, setRatio] = useState<number>();
+  const [ratio, setRatio] = useState<number | undefined>();
   const [isChecked, setIsChecked] = useState<boolean>();
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
-    // Update categoryName when categoryToEdit changes
-    setUOMName(UOMToEdit?.UOMName || "");
-
+    // Update state when UOMToEdit changes
+    setUOMName(UOMToEdit?.UoM || "");
     setRatio(UOMToEdit?.ratio);
-
     setIsChecked(UOMToEdit?.status === 1);
-  }, [UOMToEdit]); // Dependencies include categoryToEdit and UOM
+  }, [UOMToEdit]);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!UOMName?.trim()) {
-      alert("Category name is required");
+    if (!UOMName.trim()) {
+      setValidationMessage("UOM name is required.");
       return;
     }
 
-    const newUOM = {
+    if (ratio === undefined || ratio <= 0) {
+      setValidationMessage("Ratio must be greater than 0.");
+      return;
+    }
+
+    const updatedUOM = {
       UOMName,
       ratio,
       status: isChecked ? 1 : 0,
     };
 
-    //@adgramirez add code that saves the details of the UOM to the DB
+    try {
+      const response = await axios.put(
+        `http://localhost:8081/inventoryManagement/editUoM/${UOMToEdit?.unitOfMeasurementID}`,
+        updatedUOM
+      );
 
-    setEditUOMModalVisibility(false);
+      if (response.status === 200) {
+        alert("Unit of Measurement updated successfully!");
+        setEditUOMModalVisibility(false); // Close modal after success
+        window.location.reload(); // Reload the page to reflect changes
+      }
+    } catch (error) {
+      console.error("Error updating UOM:", error);
+      setValidationMessage("Failed to update Unit of Measurement. Please try again.");
+    }
   };
 
   const handleCancel = () => {
+    // Reset the values to their defaults from UOMToEdit
+    setUOMName(UOMToEdit?.UoM || "");
+    setRatio(UOMToEdit?.ratio);
+    setIsChecked(UOMToEdit?.status === 1);
+
+    // Close the modal
     setEditUOMModalVisibility(false);
-    setUOMName("");
   };
 
   return (
@@ -119,6 +144,7 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
 
         <div className="mt-2 text-center">
           <button
+            type="button"
             className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
             onClick={handleCancel}
           >
@@ -126,6 +152,13 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
           </button>
         </div>
       </form>
+
+      {validationMessage && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
+      )}
     </Modal>
   );
 };

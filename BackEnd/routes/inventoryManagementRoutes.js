@@ -177,14 +177,27 @@ router.get('/getUoMsByCategory/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
 
   const query = `
-    SELECT uom.*
-    FROM unitofmeasurement uom
-    WHERE uom.category = (
-        SELECT uom2.category
+    SELECT 
+      uom.unitOfMeasurementID, 
+      uom.UoM, 
+      uom.type, 
+      uom.ratio, 
+      uom.status, 
+      category.categoryName AS category,
+      \`system\`.system AS systemName
+    FROM 
+      unitofmeasurement uom
+    JOIN 
+      category ON uom.categoryID = category.categoryID
+    JOIN 
+      \`system\` ON category.systemID = \`system\`.systemID
+    WHERE 
+      uom.categoryID = (
+        SELECT uom2.categoryID
         FROM unitofmeasurement uom2
         JOIN inventory inv ON inv.unitOfMeasurementID = uom2.unitOfMeasurementID
         WHERE inv.inventoryID = ?
-    );
+      ) AND uom.status = 1
   `;
 
   try {
@@ -430,16 +443,21 @@ router.put('/updateStatus/:inventoryID', async (req, res) => {
 router.get('/getReferenceUnits', async (req, res) => {
   const query = `
     SELECT 
-      unitOfMeasurementID, 
-      category, 
-      UoM, 
-      type, 
-      ratio, 
-      status
+      uom.unitOfMeasurementID, 
+      uom.UoM, 
+      uom.type, 
+      uom.ratio, 
+      uom.status, 
+      category.categoryName AS category,
+      \`system\`.system AS systemName
     FROM 
-      unitofmeasurement
+      unitofmeasurement uom
+    JOIN 
+      category ON uom.categoryID = category.categoryID
+    JOIN 
+      \`system\` ON category.systemID = \`system\`.systemID
     WHERE 
-      type = 'reference' AND status = 1
+      uom.type = 'reference' AND uom.status = 1
   `;
 
   try {
@@ -451,6 +469,280 @@ router.get('/getReferenceUnits', async (req, res) => {
   }
 });
 
+// GET /getCategoriesBySystem
+router.get('/getCategoriesBySystem/:systemName', async (req, res) => {
+  const { systemName } = req.params;
 
+  const query = `
+    SELECT 
+      c.categoryID,
+      c.categoryName,
+      c.status,
+      s.system AS systemName
+    FROM 
+      category c
+    JOIN 
+      \`system\` s ON c.systemID = s.systemID
+    WHERE 
+      s.system = ?
+  `;
+
+  try {
+    const [results] = await pool.query(query, [systemName]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No categories found for the specified system' });
+    }
+
+    res.status(200).json(results);
+  } catch (err) {
+    console.error('Error fetching categories by system:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// GET /getUoMsWithCategories
+router.get('/getUoMsWithCategories', async (req, res) => {
+  const query = `
+    SELECT 
+      uom.unitOfMeasurementID,
+      uom.categoryID,
+      uom.UoM,
+      uom.type,
+      uom.ratio,
+      uom.status,
+      c.categoryName,
+      c.status AS categoryStatus
+    FROM 
+      unitofmeasurement uom
+    JOIN 
+      category c ON uom.categoryID = c.categoryID
+    ORDER BY 
+      c.categoryName ASC, uom.unitOfMeasurementID ASC
+  `;
+
+  try {
+    const [result] = await pool.query(query);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('Error fetching UoMs with categories:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post('/addUoMCategory', async (req, res) => {
+  const { categoryName, systemName, referenceUOMName, status } = req.body;
+
+  console.log("Received request:", req.body);
+
+  if (!categoryName || !systemName) {
+    console.error("Missing required fields");
+    return res
+      .status(400)
+      .json({ error: "Category name and system name are required" });
+  }
+
+  try {
+    // Check if the system exists
+    const checkSystemQuery = `
+      SELECT systemID FROM \`system\` WHERE \`system\` = ?
+    `;
+    const [systemResult] = await pool.query(checkSystemQuery, [systemName]);
+
+    let systemID;
+
+    if (systemResult.length > 0) {
+      // System exists
+      systemID = systemResult[0].systemID;
+    } else {
+      // Insert new system
+      const insertSystemQuery = `
+        INSERT INTO \`system\` (\`system\`)
+        VALUES (?)
+      `;
+      const [insertSystemResult] = await pool.query(insertSystemQuery, [
+        systemName,
+      ]);
+      console.log("Inserted new system:", insertSystemResult);
+      systemID = insertSystemResult.insertId;
+    }
+
+    // Insert the category
+    const insertCategoryQuery = `
+      INSERT INTO category (categoryName, systemID, status)
+      VALUES (?, ?, ?)
+    `;
+    const [categoryResult] = await pool.query(insertCategoryQuery, [
+      categoryName,
+      systemID,
+      status || 1,
+    ]);
+    const categoryID = categoryResult.insertId;
+    console.log("Inserted category with ID:", categoryID);
+
+    // Insert the UOM if provided
+    if (referenceUOMName) {
+      const insertUOMQuery = `
+        INSERT INTO unitofmeasurement (categoryID, UoM, type, ratio, status)
+        VALUES (?, ?, 'reference', 1.0, ?)
+      `;
+      const [uomResult] = await pool.query(insertUOMQuery, [
+        categoryID,
+        referenceUOMName,
+        status || 1,
+      ]);
+      console.log("Inserted UOM with ID:", uomResult.insertId);
+
+      return res.status(201).json({
+        message: "Category and reference UOM added successfully",
+        categoryID: categoryID,
+        unitOfMeasurementID: uomResult.insertId,
+      });
+    }
+
+    return res.status(201).json({
+      message: "Category added successfully without reference UOM",
+      categoryID: categoryID,
+    });
+  } catch (err) {
+    console.error("Error in /addUoMCategory:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.put('/updateUoMCategory/:categoryID', async (req, res) => {
+  const { categoryID } = req.params;
+  const { categoryName, status } = req.body;
+
+  console.log("Category ID:", categoryID);
+  console.log("Request Body:", req.body);
+
+  if (!categoryName && status === undefined) {
+    return res.status(400).json({
+      error: 'At least one of categoryName or status must be provided',
+    });
+  }
+
+  try {
+    const updateCategoryQuery = `
+      UPDATE category
+      SET 
+        categoryName = COALESCE(?, categoryName),
+        status = COALESCE(?, status)
+      WHERE categoryID = ?
+    `;
+    const [result] = await pool.query(updateCategoryQuery, [
+      categoryName || null,
+      status !== undefined ? status : null,
+      categoryID,
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    res.status(200).json({ message: 'Category updated successfully' });
+  } catch (err) {
+    console.error('Error in /updateUoMCategory:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post('/addUoM', async (req, res) => {
+  const { categoryID, UOMName, ratio, status } = req.body;
+
+  if (!categoryID || !UOMName || ratio === undefined) {
+    return res.status(400).json({ error: 'Category ID, UOM Name, and Ratio are required' });
+  }
+
+  try {
+    // Determine the `type` based on the ratio
+    let type = '';
+    if (ratio >= 1) {
+      type = 'bigger';
+    } else if (ratio > 0) {
+      type = 'smaller';
+    } else {
+      return res.status(400).json({ error: 'Ratio must be greater than 0' });
+    }
+
+    // Insert the UoM into the database
+    const insertUOMQuery = `
+      INSERT INTO unitofmeasurement (categoryID, UoM, type, ratio, status)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    const [result] = await pool.query(insertUOMQuery, [
+      categoryID,
+      UOMName,
+      type,
+      ratio,
+      status || 1, // Default status to 1 (active) if not provided
+    ]);
+
+    return res.status(201).json({
+      message: 'Unit of Measurement added successfully',
+      unitOfMeasurementID: result.insertId,
+    });
+  } catch (err) {
+    console.error('Error adding UoM:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.put('/editUoM/:unitOfMeasurementID', async (req, res) => {
+  const { unitOfMeasurementID } = req.params;
+  const { UOMName, ratio, status } = req.body;
+
+  // Validate inputs
+  if (!UOMName || ratio === undefined || status === undefined) {
+    return res
+      .status(400)
+      .json({ error: 'UOM Name, Ratio, and Status are required' });
+  }
+
+  try {
+    // Determine the `type` based on the ratio
+    let type = '';
+    if (ratio >= 1) {
+      type = 'bigger';
+    } else if (ratio > 0) {
+      type = 'smaller';
+    } else {
+      return res
+        .status(400)
+        .json({ error: 'Ratio must be greater than 0' });
+    }
+
+    // Update the UoM in the database
+    const updateUOMQuery = `
+      UPDATE unitofmeasurement
+      SET 
+        UoM = ?,
+        ratio = ?,
+        type = ?,
+        status = ?
+      WHERE unitOfMeasurementID = ?
+    `;
+
+    const [result] = await pool.query(updateUOMQuery, [
+      UOMName,
+      ratio,
+      type,
+      status,
+      unitOfMeasurementID,
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Unit of Measurement not found' });
+    }
+
+    return res.status(200).json({
+      message: 'Unit of Measurement updated successfully',
+    });
+  } catch (err) {
+    console.error('Error updating UoM:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 module.exports = router;

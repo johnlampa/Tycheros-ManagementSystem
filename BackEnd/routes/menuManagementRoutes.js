@@ -53,23 +53,27 @@ router.get('/getProduct', (req, res) => {
 router.get('/getAllInventoryItems', (req, res) => {
   const query = `
     SELECT 
-      i.inventoryID,
-      i.inventoryName,
-      i.inventoryCategory,
-      i.reorderPoint,
-      i.inventoryStatus,
-      i.unitOfMeasurementID,
-      u.category AS uomCategory,
-      u.UoM AS unitOfMeasure,
-      u.type AS uomType,
-      u.ratio,
-      u.status AS uomStatus
+        i.inventoryID,
+        i.inventoryName,
+        i.inventoryCategory,
+        i.reorderPoint,
+        i.inventoryStatus,
+        i.unitOfMeasurementID,
+        c.categoryName AS uomCategory,
+        u.UoM AS unitOfMeasure,
+        u.type AS uomType,
+        u.ratio,
+        u.status AS uomStatus
     FROM 
-      inventory i
+        inventory i
     JOIN 
-      unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
-	  ORDER BY
-	    inventoryName ASC;
+        unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
+    JOIN 
+        category c ON u.categoryID = c.categoryID
+	WHERE
+        i.inventoryStatus = 1
+    ORDER BY 
+        i.inventoryName ASC;
   `;
 
   db.query(query, (err, result) => {

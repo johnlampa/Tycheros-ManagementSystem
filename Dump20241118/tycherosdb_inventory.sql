@@ -16,29 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `category`
+-- Table structure for table `inventory`
 --
 
-DROP TABLE IF EXISTS `category`;
+DROP TABLE IF EXISTS `inventory`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `category` (
-  `categoryID` int NOT NULL AUTO_INCREMENT,
-  `categoryName` varchar(45) NOT NULL,
-  `systemID` int NOT NULL,
-  `status` tinyint NOT NULL,
-  PRIMARY KEY (`categoryID`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `inventory` (
+  `inventoryID` int NOT NULL AUTO_INCREMENT,
+  `inventoryName` varchar(45) NOT NULL,
+  `inventoryCategory` varchar(45) NOT NULL,
+  `unitOfMeasurementID` int NOT NULL,
+  `reorderPoint` int NOT NULL,
+  `inventoryStatus` tinyint NOT NULL,
+  PRIMARY KEY (`inventoryID`),
+  KEY `inventory_UoM_ID_idx` (`unitOfMeasurementID`),
+  CONSTRAINT `inventory_UoM_ID` FOREIGN KEY (`unitOfMeasurementID`) REFERENCES `unitofmeasurement` (`unitOfMeasurementID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `category`
+-- Dumping data for table `inventory`
 --
 
-LOCK TABLES `category` WRITE;
-/*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'Appetizers',1,1),(2,'Entrees',1,1),(3,'Snacks',1,1),(4,'Combo Meals',1,1),(5,'Wings',1,1),(6,'Salads',1,1),(7,'Milk Tea',2,1),(8,'Beer',2,1),(9,'Coffee',2,1),(10,'Whiskey',2,1),(11,'Frappe',2,1),(12,'Tea',2,1),(13,'Pasta',1,1),(14,'Rice Meals',1,1),(15,'Snacks',4,1);
-/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+LOCK TABLES `inventory` WRITE;
+/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
+INSERT INTO `inventory` VALUES (1,'Potato','Produce',1,1000,1),(2,'Cheese Powder','Dry Goods',1,500,1),(3,'BBQ Powder','Dry Goods',1,500,1),(4,'Banana','Produce',3,20,1),(5,'Apple','Produce',3,20,1),(6,'Eggs','Dairy and Eggs',3,20,1),(7,'Ground Pork','Meat and Poultry',1,1000,1),(8,'Orange','Produce',3,20,0),(9,'Mango','Produce',3,20,1),(10,'Flour','Dry Goods',1,1000,1),(11,'Chicken Legs','Meat and Poultry',3,50,0),(12,'Ground Beef','Meat and Poultry',1,1500,1),(13,'Milk Fish','Seafood',3,1000,0);
+/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -50,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-17 20:58:44
+-- Dump completed on 2024-11-18 14:36:50
