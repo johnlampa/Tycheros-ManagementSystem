@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react"; // Make sure React is imported
+import React, { useEffect, useState } from "react"; // Make sure React is imported
 import { InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
 
 import { PiCaretCircleUpFill, PiCaretCircleDownFill } from "react-icons/pi";
@@ -72,6 +72,10 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
   setEditUOMModalIsVisible,
   setUOMToEdit,
 }) => {
+  useEffect(() => {
+    console.log("Uoms: ", UOM);
+  }, [UOM]);
+
   return (
     <>
       <div className="p-4 w-[320px] rounded-md bg-cream">
@@ -137,22 +141,24 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
 
           <div className="w-full flex gap-x-2 text-black">
             <div>Others: </div>
-            {UOM.map(
+            {UOM.filter(
               (uom: UOM) =>
                 category.categoryID === uom.categoryID &&
                 parseInt(uom.ratio.toString()) !== 1
-            ) ? (
+            ).length > 0 ? (
               <div className="font-semibold">
-                {
-                  UOM.find(
-                    (uom: UOM) =>
-                      category.categoryID === uom.categoryID &&
-                      parseInt(uom.ratio.toString()) !== 1
-                  )?.UoM
-                }
+                {UOM.filter(
+                  (uom: UOM) =>
+                    category.categoryID === uom.categoryID &&
+                    parseInt(uom.ratio.toString()) !== 1
+                ).map((filteredUOM: UOM) => (
+                  <span key={filteredUOM.unitOfMeasurementID} className="mr-2">
+                    {filteredUOM.UoM},
+                  </span>
+                ))}
               </div>
             ) : (
-              <div>Not found</div>
+              <div></div>
             )}
           </div>
         </div>
@@ -207,7 +213,9 @@ const UOMManagementCard: React.FC<UOMManagementCardProps> = ({
                                 {parseInt(detail.ratio.toString()) !== 1 ? (
                                   <>
                                     <div>Ratio to Reference:</div>
-                                    <div className="font-semibold">{formatRatio(detail.ratio)}</div>
+                                    <div className="font-semibold">
+                                      {formatRatio(detail.ratio)}
+                                    </div>
                                   </>
                                 ) : null}
                               </div>

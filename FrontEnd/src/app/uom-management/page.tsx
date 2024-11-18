@@ -35,7 +35,9 @@ export default function Page() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8081/inventoryManagement/getCategoriesBySystem/UoM")
+      .get(
+        "http://localhost:8081/inventoryManagement/getCategoriesBySystem/UoM"
+      )
       .then((response) => {
         setUOMCategory(response.data);
       })
@@ -43,7 +45,7 @@ export default function Page() {
         console.error("Error fetching UOM categories:", error);
       });
 
-      // Fetch UOMs with categories
+    // Fetch UOMs with categories
     axios
       .get("http://localhost:8081/inventoryManagement/getUoMsWithCategories")
       .then((response) => {
@@ -51,7 +53,7 @@ export default function Page() {
       })
       .catch((error) => {
         console.error("Error fetching UOMs with categories:", error);
-    });
+      });
   }, []);
 
   const groupUOMsByCategory = () => {
@@ -64,8 +66,8 @@ export default function Page() {
     });
     return grouped;
   };
-  
-  const groupedUOMs = groupUOMsByCategory();  
+
+  const groupedUOMs = groupUOMsByCategory();
 
   const [expandedRow, setExpandedRow] = useState<number | null>(null); // Track the expanded row
   const [detailedData, setDetailedData] = useState<{ [key: number]: any }>({}); // Store details for each categoryID
@@ -84,12 +86,14 @@ export default function Page() {
     }
   };
 
-  const [selectedCategoryID, setSelectedCategoryID] = useState<number | null>(null);
+  const [selectedCategoryID, setSelectedCategoryID] = useState<number | null>(
+    null
+  );
   const handleAddUOMModal = (isVisible: boolean, categoryID: number) => {
     setAddUOMModalIsVisible(isVisible); // Pass boolean here
     setSelectedCategoryID(categoryID); // Set the categoryID
   };
-    
+
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
@@ -122,14 +126,17 @@ export default function Page() {
                   setExpandedRow={setExpandedRow}
                   detailedData={detailedData}
                   setDetailedData={setDetailedData}
-                  setEditUOMCategoryModalIsVisible={setEditUOMCategoryModalIsVisible}
+                  setEditUOMCategoryModalIsVisible={
+                    setEditUOMCategoryModalIsVisible
+                  }
                   setCategoryToEdit={setCategoryToEdit}
-                  setAddUOMModalIsVisible={(isVisible) =>
-                    handleAddUOMModal(!!isVisible, category.categoryID) // Ensure `isVisible` is a boolean
+                  setAddUOMModalIsVisible={
+                    (isVisible) =>
+                      handleAddUOMModal(!!isVisible, category.categoryID) // Ensure `isVisible` is a boolean
                   }
                   setEditUOMModalIsVisible={setEditUOMModalIsVisible}
                   setUOMToEdit={setUOMToEdit}
-                />;
+                />
               </div>
             ))}
           </div>
