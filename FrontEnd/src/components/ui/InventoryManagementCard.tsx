@@ -110,6 +110,12 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                           <div key={index} className="p-2 w-[300px]">
                             <li className="w-full">
                               <div>
+                                Subinventory ID:{" "}
+                                <span className="font-semibold">
+                                  {detail.subinventoryID}
+                                </span>
+                              </div>
+                              <div>
                                 Date:{" "}
                                 {detail.stockInDate
                                   ? format(
@@ -119,31 +125,39 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                                   : "N/A"}{" "}
                                 by {detail.employeeName}
                               </div>
-                              <div className="mb-1"></div>
+                              <div className="mb-4"></div>
                               <div className="grid grid-cols-[3fr_1fr]">
                                 <div>
-                                  <div className="text-base font-semibold">
-                                    {detail.supplierName}
+                                  <div className="flex  items-end gap-x-1">
+                                    <div className="text-base font-semibold">
+                                      {detail.supplierName}
+                                    </div>
+                                    <div className="text-gray mb-0.5">
+                                      at &#8369; {detail.pricePerUnit} /{" "}
+                                      {detail.poUoM}
+                                    </div>
                                   </div>
 
-                                  <div className="border border-gray rounded-md p-0.5 w-fit">
-                                    {detail.quantityRemaining}{" "}
-                                    {inventoryItem.unitOfMeasure} in stock
-                                  </div>
-                                  <div className="text-gray mt-0.5">
+                                  <div className="flex items-center gap-x-1 mt-1">
                                     best before{" "}
-                                    <span className="font-semibold">
-                                      {detail.expiryDate
-                                        ? format(
-                                            new Date(detail.expiryDate),
-                                            "yyyy-MM-dd"
-                                          )
-                                        : "N/A"}{" "}
-                                    </span>
+                                    <div className="">
+                                      <span className="font-semibold">
+                                        {detail.expiryDate
+                                          ? format(
+                                              new Date(detail.expiryDate),
+                                              "yyyy-MM-dd"
+                                            )
+                                          : "N/A"}{" "}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="flex justify-center items-center text-sm font-semibold">
-                                  &#8369; {detail.pricePerUnit} / {detail.poUoM}
+                                <div className="flex flex-col justify-center items-center text-sm font-semibold border border-gray rounded-md p-1 w-fit">
+                                  <div>
+                                    {detail.quantityRemaining}{" "}
+                                    {inventoryItem.unitOfMeasure}
+                                  </div>{" "}
+                                  <span className="font-normal">in stock</span>
                                 </div>
                               </div>
                             </li>

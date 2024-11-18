@@ -164,6 +164,7 @@ export default function InventoryManagementPage() {
       inventoryItems: [
         {
           inventoryID: 0,
+          subinventoryID: 0,
           quantityToUpdate: 0,
         },
       ],
