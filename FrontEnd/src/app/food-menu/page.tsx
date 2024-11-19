@@ -5,10 +5,10 @@ import MenuCard from "@/components/ui/MenuCard";
 import QuantityModal from "@/components/QuantityModal";
 
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
-import { Order } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Link from "next/link";
 import MenuHeaderSection from "@/components/section/MenuHeaderSection";
+import Image from "next/image";
 
 export default function Page() {
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
@@ -60,7 +60,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="w-full min-h-screen border border-black mx-auto relative bg-white text-black">
+      <div className="w-full min-h-screen mx-auto relative bg-white text-black">
         {/* Parent container has relative positioning */}
         <div className="z-50">
           <MenuHeaderSection
@@ -71,22 +71,29 @@ export default function Page() {
 
         <div className="p-6 flex flex-col justify-center items-center">
           {categories
-            .filter((item) => item.status === 1)
-            .map((category) => (
-              <div
-                key={category.categoryName}
-                id={category.categoryName}
-                className="mb-8"
-              >
-                <p className="font-pattaya text-2xl mb-3 align-left">
-                  {category.categoryName}
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-12 content-center duration-150">
-                  {menuData
-                    .filter(
-                      (item) => item.categoryName === category.categoryName
-                    )
-                    .map((item, index) => (
+            .filter((category) => category.status === 1) // Only include active categories
+            .map((category) => {
+              // Get menu items for this category
+              const categoryMenuItems = menuData.filter(
+                (item) => item.categoryName === category.categoryName
+              );
+
+              // Only render the category if it has menu items
+              if (categoryMenuItems.length === 0) {
+                return null; // Skip this category
+              }
+
+              return (
+                <div
+                  key={category.categoryName}
+                  id={category.categoryName}
+                  className="mb-8"
+                >
+                  <p className="font-pattaya text-2xl mb-3 align-left">
+                    {category.categoryName}
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-12 content-center duration-150">
+                    {categoryMenuItems.map((item, index) => (
                       <div key={index}>
                         <MenuCard
                           product={item}
@@ -98,22 +105,26 @@ export default function Page() {
                         />
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
+
         {/* Check Order Button with a smaller circle containing a larger image */}
         <Link
           href={{
             pathname: "/order-summary",
           }}
         >
-          <div className="sticky bottom-4 right-0 mr-5 ml-auto w-min h-min flex flex-col items-center">
+          <div className="fixed bottom-4 right-0 mr-5 ml-auto w-min h-min flex flex-col items-center">
             <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white shadow-lg hover:bg-blue-600 flex items-center justify-center overflow-hidden">
-              <img
+              <Image
                 src="/assets/images/CheckOrder.png" // Replace with your image path
                 alt="Check Order"
                 className="h-full w-full object-cover"
+                width={3600}
+                height={3534}
               />
             </button>
             <div className="mt-[3px] flex justify-center items-center">

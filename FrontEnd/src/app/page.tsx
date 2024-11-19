@@ -3,6 +3,8 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { GiHamburgerMenu } from "react-icons/gi";
 
+import Image from "next/image";
+
 export default function Home() {
   return (
     <>
@@ -30,10 +32,12 @@ export default function Home() {
             }}
           >
             {/* Only show <img> on small screens */}
-            <img
+            <Image
               src="/assets/images/TycherosHeader.jpg"
               alt="Tycheros Header"
               className="h-full w-full object-cover lg:hidden"
+              width={2048}
+              height={1536}
             />
 
             {/* Overlay container for buttons only on large screens */}
@@ -69,10 +73,12 @@ export default function Home() {
           <Link href={{ pathname: "/order-summary" }}>
             <div className="fixed bottom-4 right-5 w-min h-min flex flex-col items-center">
               <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 shadow-lg hover:bg-blue-600 flex items-center justify-center overflow-hidden">
-                <img
-                  src="/assets/images/CheckOrder.png"
+                <Image
+                  src="/assets/images/CheckOrder.png" // Replace with your image path
                   alt="Check Order"
                   className="h-full w-full object-cover"
+                  width={3600}
+                  height={3534}
                 />
               </button>
               <div className="mt-[3px] flex justify-center items-center">
