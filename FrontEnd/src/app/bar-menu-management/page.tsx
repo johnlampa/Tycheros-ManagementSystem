@@ -1,16 +1,16 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import MenuManagementCard from "@/components/MenuManagementCard";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { InventoryDataTypes } from "../../../lib/types/InventoryDataTypes";
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import axios from "axios";
-import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+import Link from "next/link";
 import Header from "@/components/Header";
-import EditCategoryModal from "@/components/EditCategoryModal";
 import AddCategoryModal from "@/components/AddCategoryModal";
-
+import EditCategoryModal from "@/components/EditCategoryModal";
 import PriceRecordsModal from "@/components/PriceRecordsModal";
 
 export default function Page() {
@@ -48,7 +48,7 @@ export default function Page() {
         console.error("Error fetching inventory data:", error);
       });
 
-    // Fetch Menu Data (you might need to implement this endpoint)
+    // Fetch Menu Data
     axios
       .get("http://localhost:8081/menuManagement/getProduct")
       .then((response) => {
@@ -65,77 +65,93 @@ export default function Page() {
         setCategories(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching categories for Food system:", error);
+        console.error("Error fetching categories for Bar system:", error);
       });
   }, []);
-
   return (
-    <>
-      <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-        <div className="w-full flex flex-col items-center justify-center bg-white min-h-screen text-black">
-          <Header text="Bar Menu" color={"tealGreen"} type={"orders"}>
-            <Link href={"/menu-selection"} className="z-100">
-              <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-              </button>
-            </Link>
-          </Header>
-
-          <button
-            onClick={() => setAddCategoryModalIsVisible(true)}
-            className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-[360px] mt-4"
-          >
-            Add Category
+    <div className="flex flex-col min-h-screen">
+      <Header text="Bar Menu" color={"tealGreen"} type={"orders"}>
+        <Link href={"/menu-selection"} className="z-100">
+          <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+            <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
           </button>
+        </Link>
+      </Header>
 
-          <div className="mt-5">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-5">
-              {categories.map((category, categoryIndex) => (
-                <div key={categoryIndex} className="mt-5 lg:mt-0">
-                  <p className="font-semibold text-lg mb-2">
-                    {category.categoryName}
-                  </p>
-                  <div>
-                    <MenuManagementCard
-                      categoryName={category.categoryName}
-                      menuData={MenuData}
-                      setMenuData={setMenuData}
-                      inventoryData={InventoryData}
-                      setInventoryData={setInventoryData}
-                      menuProductHolder={menuProductHolder}
-                      setMenuProductHolder={setMenuProductHolder}
-                      setProductIDForPriceRecords={setProductIDForPriceRecords}
-                      setPriceRecordsModalIsVisible={
-                        setPriceRecordsModalIsVisible
-                      }
-                    />
+      <div className="flex-grow flex flex-col items-center bg-white text-black">
+        <button
+          onClick={() => setAddCategoryModalIsVisible(true)}
+          className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-[360px] mt-4"
+        >
+          Add Category
+        </button>
+
+        <div className="my-5">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-5">
+            {categories.map((category, categoryIndex) => (
+              <div key={categoryIndex} className="mt-5 lg:mt-0 w-[310px]">
+                <div className="flex justify-between items-center mb-2 gap-x-4">
+                  <div className="flex items-center gap-x-4">
+                    <p className="font-semibold text-lg ">
+                      {category.categoryName}
+                    </p>
+                    {category?.status === 1 ? (
+                      <div className="py-1 px-2 rounded-md bg-tealGreen w-min text-xs text-white">
+                        Active
+                      </div>
+                    ) : (
+                      <div className="py-1 px-2 rounded-md bg-gray w-min text-xs text-white">
+                        Inactive
+                      </div>
+                    )}
                   </div>
+                  <button
+                    onClick={() => {
+                      setCategoryToEdit(category);
+                      setEditCategoryModalIsVisible(true);
+                    }}
+                    className="text-black px-2 py-1 text-xs rounded-full border border-black"
+                  >
+                    Edit Category
+                  </button>
                 </div>
-              ))}
-            </div>
+
+                <MenuManagementCard
+                  categoryName={category.categoryName}
+                  menuData={MenuData}
+                  setMenuData={setMenuData}
+                  inventoryData={InventoryData}
+                  setInventoryData={setInventoryData}
+                  menuProductHolder={menuProductHolder}
+                  setMenuProductHolder={setMenuProductHolder}
+                  setProductIDForPriceRecords={setProductIDForPriceRecords}
+                  setPriceRecordsModalIsVisible={setPriceRecordsModalIsVisible}
+                />
+              </div>
+            ))}
           </div>
-
-          <EditCategoryModal
-            editCategoryModalIsVisible={editCategoryModalIsVisible}
-            setEditCategoryModalIsVisible={setEditCategoryModalIsVisible}
-            modalTitle={"Edit Category"}
-            categoryToEdit={categoryToEdit}
-          />
-
-          <AddCategoryModal
-            addCategoryModalIsVisible={addCategoryModalIsVisible}
-            setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
-            modalTitle="Add Category"
-            systemName="Bar"
-          />
-
-          <PriceRecordsModal
-            productID={productIDForPriceRecords}
-            priceRecordsModalIsVisible={priceRecordsModalIsVisible}
-            setPriceRecordsModalIsVisible={setPriceRecordsModalIsVisible}
-          ></PriceRecordsModal>
         </div>
       </div>
-    </>
+
+      <EditCategoryModal
+        editCategoryModalIsVisible={editCategoryModalIsVisible}
+        setEditCategoryModalIsVisible={setEditCategoryModalIsVisible}
+        modalTitle={"Edit Category"}
+        categoryToEdit={categoryToEdit}
+      />
+
+      <AddCategoryModal
+        addCategoryModalIsVisible={addCategoryModalIsVisible}
+        setAddCategoryModalVisibility={setAddCategoryModalIsVisible}
+        modalTitle="Add Category"
+        systemName="Bar"
+      />
+
+      <PriceRecordsModal
+        productID={productIDForPriceRecords}
+        priceRecordsModalIsVisible={priceRecordsModalIsVisible}
+        setPriceRecordsModalIsVisible={setPriceRecordsModalIsVisible}
+      />
+    </div>
   );
 }

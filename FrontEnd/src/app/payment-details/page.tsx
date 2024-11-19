@@ -54,7 +54,6 @@ function PaymentDetailsPage() {
     console.log("loggedInEmployeeID: ", loggedInEmployeeID);
   }, [loggedInEmployeeID]);
 
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -202,15 +201,15 @@ function PaymentDetailsPage() {
   };
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-white">
       {showDialog && (
         <ValidationDialog
           message={validationMessage}
           onClose={() => setShowDialog(false)}
         />
       )}
-      <div className="w-full flex justify-center items-center">
-        <div className="w-[360px] flex flex-col justify-center items-center gap-3 pb-3 border bg-white">
+      <div className="flex flex-col flex-grow justify-center items-center">
+        <div className="w-full flex flex-col flex-grow items-center gap-3 pb-3">
           <Header
             text="Payment Details"
             color={"tealGreen"}
@@ -222,121 +221,125 @@ function PaymentDetailsPage() {
               </button>
             </Link>
           </Header>
-          <div className="w-[320px] text-black">
-            <div className="w-full bg-cream rounded-md p-3 mb-4">
-              <p className="font-semibold mb-1">Discounts</p>
-              <div className="grid grid-cols-[2fr_1fr] gap-x-2 justify-center items-center ">
-                <label htmlFor="discountTypeInput" className="text-xs">
-                  Type
-                </label>
-                <label htmlFor="discountAmountInput" className="text-xs">
-                  Amount
-                </label>
-                <input
-                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
-                  placeholder="Enter Discount Type Here"
-                  value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value)}
-                  id="discountTypeInput"
-                  name="discountTypeInput"
-                />
-                <input
-                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
-                  value={discountAmount}
-                  type="text" // Change this to text to allow full control
-                  onChange={handleDiscountAmountChange}
-                  id="discountAmountInput"
-                  name="discountAmountInput"
-                />
+          <div className="w-min text-black md:mt-16">
+            <div className="md:flex gap-x-10 lg:gap-x-32">
+              <div className="md:flex md:flex-col md:gap-y-10">
+                <div className="w-[320px] bg-cream rounded-md p-3 mb-4 md:mb-0 ">
+                  <p className="font-semibold mb-1">Discounts</p>
+                  <div className="grid grid-cols-[2fr_1fr] gap-x-2 justify-center items-center ">
+                    <label htmlFor="discountTypeInput" className="text-xs">
+                      Type
+                    </label>
+                    <label htmlFor="discountAmountInput" className="text-xs">
+                      Amount
+                    </label>
+                    <input
+                      className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                      placeholder="Enter Discount Type Here"
+                      value={discountType}
+                      onChange={(e) => setDiscountType(e.target.value)}
+                      id="discountTypeInput"
+                      name="discountTypeInput"
+                    />
+                    <input
+                      className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                      value={discountAmount}
+                      type="text" // Change this to text to allow full control
+                      onChange={handleDiscountAmountChange}
+                      id="discountAmountInput"
+                      name="discountAmountInput"
+                    />
+                  </div>
+                </div>
+
+                <div className="w-[320px] bg-cream rounded-md p-3">
+                  <p className="font-semibold mb-2">Payment Method</p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <input
+                          type="radio"
+                          id="gcash"
+                          name="paymentMethod"
+                          value="GCash"
+                          className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                        />
+                        <label htmlFor="gcash" className="text-gray-700">
+                          GCash
+                        </label>
+                      </div>
+                      <div>&#8369; {total.toFixed(2)}</div>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <input
+                          type="radio"
+                          id="card"
+                          name="paymentMethod"
+                          value="Card"
+                          className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                        />
+                        <label htmlFor="card" className="text-gray-700">
+                          Card
+                        </label>
+                      </div>
+                      <div>&#8369; {total.toFixed(2)}</div>
+                    </div>
+
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <input
+                          type="radio"
+                          id="cash"
+                          name="paymentMethod"
+                          value="Cash"
+                          className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                        />
+                        <label htmlFor="cash" className="text-gray-700">
+                          Cash
+                        </label>
+                      </div>
+                      <div>&#8369; {total.toFixed(2)}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 mt-4">
+                    <div className="flex flex-col justify-center">
+                      <div className="text-xs font-semibold w-max">
+                        Enter Reference Number:
+                      </div>
+                      <div className="text-xs">(for GCash or Card)</div>
+                    </div>
+                    <input
+                      className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                      value={referenceNumber}
+                      onChange={(e) => setReferenceNumber(e.target.value)}
+                      placeholder="Reference"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-center mt-7 md:mt-0">
+                <div className="w-[320px] flex flex-col">
+                  <div className="mb-1  font-semibold text-[25px]">
+                    Order Summary
+                  </div>
+                  <OrderManagementCard
+                    menuData={menuData}
+                    order={order}
+                    orders={orders}
+                    setOrders={setOrders}
+                    type={"payment"}
+                    discountAmount={discountAmount}
+                    payments={payments}
+                  ></OrderManagementCard>
+                </div>
               </div>
             </div>
-
-            <div className="w-full bg-cream rounded-md p-3 mb-7">
-              <p className="font-semibold mb-2">Payment Method</p>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <input
-                      type="radio"
-                      id="gcash"
-                      name="paymentMethod"
-                      value="GCash"
-                      className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-                    <label htmlFor="gcash" className="text-gray-700">
-                      GCash
-                    </label>
-                  </div>
-                  <div>&#8369; {total.toFixed(2)}</div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <div>
-                    <input
-                      type="radio"
-                      id="card"
-                      name="paymentMethod"
-                      value="Card"
-                      className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-                    <label htmlFor="card" className="text-gray-700">
-                      Card
-                    </label>
-                  </div>
-                  <div>&#8369; {total.toFixed(2)}</div>
-                </div>
-
-                <div className="flex justify-between items-center mb-3">
-                  <div>
-                    <input
-                      type="radio"
-                      id="cash"
-                      name="paymentMethod"
-                      value="Cash"
-                      className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-                    <label htmlFor="cash" className="text-gray-700">
-                      Cash
-                    </label>
-                  </div>
-                  <div>&#8369; {total.toFixed(2)}</div>
-                </div>
-              </div>
-              <div className="flex gap-3 mt-4">
-                <div className="flex flex-col justify-center">
-                  <div className="text-xs font-semibold w-max">
-                    Enter Reference Number:
-                  </div>
-                  <div className="text-xs">(for GCash or Card)</div>
-                </div>
-                <input
-                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
-                  value={referenceNumber}
-                  onChange={(e) => setReferenceNumber(e.target.value)}
-                  placeholder="Reference"
-                />
-              </div>
-            </div>
-
-            <div className="w-full flex flex-col">
-              <div className="mb-1  font-semibold text-[25px]">
-                Order Summary
-              </div>
-              <OrderManagementCard
-                menuData={menuData}
-                order={order}
-                orders={orders}
-                setOrders={setOrders}
-                type={"payment"}
-                discountAmount={discountAmount}
-                payments={payments}
-              ></OrderManagementCard>
-            </div>
-
-            <div className="mt-5">
+            <div className="mt-5 md:mt-32">
               <button
                 className="w-full h-[39px] bg-tealGreen rounded-md p-3 flex justify-center items-center"
                 onClick={handleConfirmPayment}
@@ -349,7 +352,7 @@ function PaymentDetailsPage() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

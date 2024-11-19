@@ -72,7 +72,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
   }, [subitems, inventoryData]);
 
   return (
-    <div className="w-36 flex flex-col bg-cream border border-gray-300 rounded-md shadow-2xl overflow-hidden h-[280px]">
+    <div className="w-36 flex flex-col bg-cream border border-gray rounded-md shadow-2xl overflow-hidden h-[280px]">
       {/* Image Section */}
       <div className="w-full h-[150px] relative">
         <Image

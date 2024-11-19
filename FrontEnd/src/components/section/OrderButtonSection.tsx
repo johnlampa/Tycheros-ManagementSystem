@@ -22,9 +22,9 @@ const OrderButtonSection: React.FC<OrderButtonSectionProps> = ({
               &#8369; {subtotal.toFixed(2)}
             </div>
           </div>
-          <Link href={"/checkout"}>
+          <Link href={subtotal === 0 ? "#" : "/checkout"}>
             <button
-              className=" w-full lg:w-[380px] h-[39px] bg-tealGreen rounded-md"
+              className={` w-full lg:w-[380px] h-[39px] bg-tealGreen rounded-md ${subtotal === 0 ? "disabled" : ""}`}
               onClick={handleClick}
             >
               <span className="font-pattaya text-[20px] text-white">
