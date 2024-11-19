@@ -48,7 +48,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
 
   return (
     <>
-      <div className="rounded-md p-4 bg-cream w-[310px]">
+      <div className="rounded-md p-4 bg-cream w-full">
         {menuData.filter((item) => item.categoryName === categoryName).length >
           0 && (
           <div className="grid grid-cols-[43.5px_3fr_2fr_2fr] gap-2 text-sm font-semibold mb-3">
