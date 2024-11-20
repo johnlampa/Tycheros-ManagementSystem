@@ -510,7 +510,7 @@ export default function InventoryManagementPage() {
                 Stock In Records
               </div>
             </Link>
-            <Link href={""}>
+            <Link href={"/stock-out-records"}>
               <div
                 className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
                 font-pattaya text-white`}
