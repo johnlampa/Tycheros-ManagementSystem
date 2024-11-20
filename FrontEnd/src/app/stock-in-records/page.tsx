@@ -24,84 +24,14 @@ export type StockIn = {
 };
 
 export default function InventoryManagementPage() {
-  const [stockInData, setStockInData] = useState<StockIn[]>([
-    {
-      purchaseOrderID: 1,
-      stockInDateTime: "2024-11-02 16:41:51",
-      employeeFirstName: "Agustine",
-      employeeLastName: "Salcedo",
-      supplierName: "Apple",
-      purchaseOrderItems: [
-        {
-          purchaseOrderItemName: "Apple",
-          pricePerPOUoM: 150,
-          unitOfMeasurement: "dozens",
-          expiryDate: "2024-12-02",
-          quantityOrdered: 3,
-        },
-        {
-          purchaseOrderItemName: "Banana",
-          pricePerPOUoM: 150,
-          unitOfMeasurement: "dozens",
-          expiryDate: "2024-12-02",
-          quantityOrdered: 1,
-        },
-      ],
-    },
-    {
-      purchaseOrderID: 1,
-      stockInDateTime: "2024-11-02 16:41:51",
-      employeeFirstName: "John Kyle",
-      employeeLastName: "Lampa",
-      supplierName: "Appler",
-      purchaseOrderItems: [
-        {
-          purchaseOrderItemName: "Apple",
-          pricePerPOUoM: 150,
-          unitOfMeasurement: "dozens",
-          expiryDate: "2024-12-02",
-          quantityOrdered: 2,
-        },
-        {
-          purchaseOrderItemName: "Banana",
-          pricePerPOUoM: 150,
-          unitOfMeasurement: "dozens",
-          expiryDate: "2024-12-02",
-          quantityOrdered: 3,
-        },
-      ],
-    },
-    {
-      purchaseOrderID: 1,
-      stockInDateTime: "2024-11-02 16:41:51",
-      employeeFirstName: "John Kyle",
-      employeeLastName: "Lampa",
-      supplierName: "Applest",
-      purchaseOrderItems: [
-        {
-          purchaseOrderItemName: "Apple",
-          pricePerPOUoM: 150,
-          unitOfMeasurement: "dozens",
-          expiryDate: "2024-12-02",
-          quantityOrdered: 3,
-        },
-        {
-          purchaseOrderItemName: "Banana",
-          pricePerPOUoM: 150,
-          unitOfMeasurement: "dozens",
-          expiryDate: "2024-12-02",
-          quantityOrdered: 3,
-        },
-      ],
-    },
-  ]);
+  const [stockInData, setStockInData] = useState<StockIn[]>([]);
 
-  // useEffect(() => {
-  //   fetch("http://localhost:8081/inventoryManagement/getStockInRecords")
-  //     .then((response) => response.json())
-  //     .then((data) => setStockInData(data))
-  //     .catch((error) => console.error("Error fetching menu data:", error));
-  // }, []);
+  useEffect(() => {
+     fetch("http://localhost:8081/inventoryManagement/getStockInRecords")
+       .then((response) => response.json())
+       .then((data) => setStockInData(data))
+       .catch((error) => console.error("Error fetching menu data:", error));
+   }, []);
 
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
