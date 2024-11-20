@@ -4,6 +4,7 @@ export type CancelOrderModalProps = {
   cancelOrderModalIsVisible: boolean;
   setCancelOrderModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   modalTitle: string;
+  loggedInEmployeeID: number;
 
   orderToEdit: Order | undefined;
 
