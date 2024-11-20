@@ -493,15 +493,34 @@ export default function InventoryManagementPage() {
           </Link>
         </Header>
         <div className="h-[80px] w-full bg-tealGreen flex justify-center items-center">
-          <Link href={"/uom-management"}>
-            <div
-              className={`w-max h-[25px] p-3 rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
+          <div className=" grid grid-cols-2 md:grid-cols-3 gap-3">
+            <Link href={"/uom-management"}>
+              <div
+                className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
                 font-pattaya text-white`}
-            >
-              Units of Measurement
-            </div>
-          </Link>
+              >
+                Units of Measurement
+              </div>
+            </Link>
+            <Link href={"/stock-in-records"}>
+              <div
+                className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
+                font-pattaya text-white`}
+              >
+                Stock In Records
+              </div>
+            </Link>
+            <Link href={"/stock-out-records"}>
+              <div
+                className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
+                font-pattaya text-white`}
+              >
+                Stock Out Records
+              </div>
+            </Link>
+          </div>
         </div>
+
         <div className="p-4">
           <div className="w-[320px]">
             <button
