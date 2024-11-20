@@ -325,7 +325,7 @@ router.post('/cancelOrder', (req, res) => {
 
         // Retrieve order items to replenish subinventory
         const getOrderItemsQuery = `
-          SELECT oi.productID, oi.quantity AS orderQuantity, s.inventoryID, s.subitemID, s.quantityNeeded
+          SELECT oi.productID, oi.quantity AS orderQuantity, s.inventoryID, s.quantityNeeded
           FROM orderitem oi
           JOIN subitem s ON s.productID = oi.productID
           WHERE oi.orderID = ?
@@ -338,64 +338,108 @@ router.post('/cancelOrder', (req, res) => {
           }
 
           // Iterate through each order item to replenish subinventory
-          const updateSubinventoryPromises = orderItems.map((item) => {
+          const replenishSubinventory = (inventoryID, quantityToReplenish) => {
             return new Promise((resolve, reject) => {
-              // Get the available quantity remaining from the subinventory
               const getSubinventoryQuery = `
-                SELECT si.subinventoryID, si.quantityRemaining, poi.quantityOrdered
-                FROM subinventory si
-                JOIN purchaseorderitem poi ON poi.inventoryID = si.inventoryID
-                WHERE si.inventoryID = ? AND si.subinventoryID = ?
-                LIMIT 1
+                SELECT 
+                  si.subinventoryID, 
+                  si.quantityRemaining, 
+                  poi.quantityOrdered, 
+                  poi.expiryDate
+                FROM 
+                  subinventory si
+                JOIN 
+                  purchaseorderitem poi 
+                ON 
+                  si.subinventoryID = poi.purchaseOrderItemID
+                WHERE 
+                  si.inventoryID = ?
+                ORDER BY 
+                  CASE WHEN si.quantityRemaining = 0 THEN 1 ELSE 0 END, 
+                  poi.expiryDate ASC;
               `;
 
-              db.query(getSubinventoryQuery, [item.inventoryID, item.subitemID], (err, subinventoryData) => {
-                if (err) {
-                  console.error("Error fetching subinventory data:", err);
-                  return reject(err);
-                }
+              db.query(getSubinventoryQuery, [inventoryID], (err, subinventories) => {
+                if (err) return reject(err);
 
-                if (subinventoryData.length === 0) {
-                  console.warn(`No subinventory data found for inventoryID: ${item.inventoryID}`);
+                if (subinventories.length === 0) {
+                  console.warn(`No subinventory found for inventoryID: ${inventoryID}`);
                   return resolve();
                 }
 
-                const { subinventoryID, quantityRemaining, quantityOrdered } = subinventoryData[0];
+                let remainingQuantity = quantityToReplenish;
 
-                // Calculate the new quantity, ensuring it does not exceed quantityOrdered
-                const quantityToReplenish = item.quantityNeeded * item.orderQuantity;
-                const maxReplenishable = quantityOrdered - quantityRemaining;
-                const actualReplenishQuantity = Math.min(quantityToReplenish, maxReplenishable);
+                // Iterate over subinventories to update quantities
+                const updatePromises = subinventories.map((subinventory, index) => {
+                  return new Promise((innerResolve, innerReject) => {
+                    if (remainingQuantity <= 0) return innerResolve(); // No more replenishment needed
 
-                if (actualReplenishQuantity <= 0) {
-                  console.warn(`No replenishment needed for subinventoryID: ${subinventoryID}`);
-                  return resolve();
-                }
+                    const { subinventoryID, quantityRemaining, quantityOrdered } = subinventory;
 
-                // Update the subinventory with the replenished quantity
-                const updateSubinventoryQuery = `
-                  UPDATE subinventory
-                  SET quantityRemaining = quantityRemaining + ?
-                  WHERE subinventoryID = ?
-                `;
+                    // Calculate how much can be replenished into this subinventory
+                    const replenishable = quantityOrdered - quantityRemaining;
+                    const replenishQuantity = Math.min(remainingQuantity, replenishable);
 
-                db.query(updateSubinventoryQuery, [actualReplenishQuantity, subinventoryID], (err) => {
-                  if (err) {
-                    console.error("Error updating subinventory:", err);
-                    return reject(err);
+                    if (replenishQuantity > 0) {
+                      const updateSubinventoryQuery = `
+                        UPDATE subinventory
+                        SET quantityRemaining = quantityRemaining + ?
+                        WHERE subinventoryID = ?
+                      `;
+                      db.query(updateSubinventoryQuery, [replenishQuantity, subinventoryID], (err) => {
+                        if (err) return innerReject(err);
+
+                        console.log(`Replenished ${replenishQuantity} to subinventoryID: ${subinventoryID}`);
+                        remainingQuantity -= replenishQuantity;
+                        innerResolve();
+                      });
+                    } else {
+                      innerResolve();
+                    }
+                  });
+                });
+
+                // Handle excess stock by adding it to the subinventory with the latest expiry date
+                Promise.all(updatePromises).then(() => {
+                  if (remainingQuantity > 0) {
+                    const latestExpirySubinventory = subinventories
+                      .filter((si) => si.quantityRemaining === 0)
+                      .sort((a, b) => new Date(b.expiryDate) - new Date(a.expiryDate))[0];
+
+                    if (latestExpirySubinventory) {
+                      const { subinventoryID } = latestExpirySubinventory;
+
+                      const updateExcessQuery = `
+                        UPDATE subinventory
+                        SET quantityRemaining = quantityRemaining + ?
+                        WHERE subinventoryID = ?
+                      `;
+                      db.query(updateExcessQuery, [remainingQuantity, subinventoryID], (err) => {
+                        if (err) return reject(err);
+
+                        console.log(
+                          `Excess of ${remainingQuantity} added to subinventoryID: ${subinventoryID}`
+                        );
+                        resolve();
+                      });
+                    } else {
+                      console.warn(`No subinventory with quantityRemaining = 0 for inventoryID: ${inventoryID}`);
+                      resolve();
+                    }
+                  } else {
+                    resolve();
                   }
-
-                  console.log(`Replenished ${actualReplenishQuantity} for subinventoryID: ${subinventoryID}`);
-                  resolve();
                 });
               });
             });
-          });
+          };
 
-          // Execute all subinventory update promises
+          const updateSubinventoryPromises = orderItems.map((item) =>
+            replenishSubinventory(item.inventoryID, item.orderQuantity * item.quantityNeeded)
+          );
+
           Promise.all(updateSubinventoryPromises)
             .then(() => {
-              // Commit the transaction after all updates
               db.commit((err) => {
                 if (err) {
                   console.error("Error committing transaction:", err);
