@@ -10,8 +10,8 @@ import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
 import axios from "axios";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
-
 import StatusRecordsModal from "@/components/StatusRecords.Modal";
+import { useRouter } from "next/navigation";  // Import useRouter for redirection
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -20,37 +20,35 @@ export default function Page() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
-    useState<boolean>(false);
+  const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] = useState<boolean>(false);
   const [orderToEdit, setOrderToEdit] = useState<Order>();
 
-  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] =
-    useState(false);
-
-  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<
-    number | undefined
-  >(0);
+  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] = useState(false);
+  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<number | undefined>(0);
 
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  const router = useRouter();  // Initialize the router for redirection
+
+  // Check if the user is logged in
   useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-      if (loggedInEmployeeID) {
-        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+
+      if (!loggedInEmployeeID) {
+        // Redirect to login if not logged in
+        router.push("/login");
+        return;  // Exit the useEffect if not logged in
       }
+
+      setLoggedInEmployeeID(parseInt(loggedInEmployeeID)); // Set the logged-in employee ID
     }
-  }, []);
+  }, [router]);
 
-  useEffect(() => {
-    console.log("loggedInEmployeeID: ", loggedInEmployeeID);
-  }, [loggedInEmployeeID]);
-
+  // Fetch data only if the user is logged in
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8081/orderManagement/getOrders"
-        );
+        const response = await axios.get("http://localhost:8081/orderManagement/getOrders");
         setOrders(response.data);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -62,9 +60,7 @@ export default function Page() {
 
     const fetchMenuData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8081/orderManagement/getMenuData"
-        );
+        const response = await axios.get("http://localhost:8081/orderManagement/getMenuData");
         setMenuData(response.data);
       } catch (error) {
         console.error("Error fetching menu data:", error);
@@ -74,42 +70,23 @@ export default function Page() {
 
     const fetchPayments = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8081/orderManagement/getPaymentDetails"
-        );
+        const response = await axios.get("http://localhost:8081/orderManagement/getPaymentDetails");
         if (response.data && response.data.length > 0) {
           setPayments(response.data);
         } else {
-          setPayments([]); // Set payments as an empty array if no results
+          setPayments([]); // Handle empty response
           console.warn("No payment details found");
         }
       } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          if (error.response && error.response.status === 404) {
-            // Handle 404 case without setting an error message
-            setPayments([]); // Treat as empty result
-            console.warn(
-              "No payment details found for orders with status other than Unpaid"
-            );
-          } else {
-            console.error("Error fetching payment details:", error);
-            setError("Error fetching payment details"); // For other types of errors
-          }
-        } else {
-          console.error("Unexpected error:", error);
-          setError("An unexpected error occurred");
-        }
+        console.error("Error fetching payment details:", error);
+        setError("Error fetching payment details");
       }
     };
 
     fetchOrders();
     fetchMenuData();
     fetchPayments();
-  }, []);
-
-  useEffect(() => {
-    console.log("Orders fetched:", orders);
-  }, [orders]);
+  }, []);  // Empty dependency ensures the fetch only runs once on page load
 
   if (loading) {
     return <div>Loading...</div>;
@@ -134,45 +111,19 @@ export default function Page() {
             </button>
           </Link>
         </Header>
+
         <div className="pb-3 w-full bg-tealGreen flex justify-center items-center">
           <div className="w-max grid grid-cols-3 sm:grid-cols-4 gap-x-5 gap-y-5 sm:pb-3">
             {/* Status Links */}
-            <Link href={"/order-management/unpaid"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
-                Unpaid
-              </div>
-            </Link>
-            <Link href={"/order-management/pending"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
-                Pending
-              </div>
-            </Link>
-            <Link href={"/order-management/completed"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
-                Completed
-              </div>
-            </Link>
-            <div className="sm:hidden"></div>
-            <Link href={"/order-management/cancelled"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
-                Cancelled
-              </div>
-            </Link>
+            <Link href={"/order-management/unpaid"}>Unpaid</Link>
+            <Link href={"/order-management/pending"}>Pending</Link>
+            <Link href={"/order-management/completed"}>Completed</Link>
+            <Link href={"/order-management/cancelled"}>Cancelled</Link>
           </div>
         </div>
 
         {orders.length === 0 ? (
-          <div className="text-center text-black mt-7">
-            No orders available.
-          </div>
+          <div className="text-center text-black mt-7">No orders available.</div>
         ) : (
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
             {orders.toReversed().map((order, orderIndex) => (
@@ -187,14 +138,13 @@ export default function Page() {
                   setOrderToEdit={setOrderToEdit}
                   payments={payments}
                   setOrderIDForStatusRecords={setOrderIDForStatusRecords}
-                  setStatusRecordsModalIsVisible={
-                    setStatusRecordsModalIsVisible
-                  }
+                  setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
                 />
               </div>
             ))}
           </div>
         )}
+
         <CancelOrderModal
           cancelOrderModalIsVisible={cancelOrderModalIsVisible}
           setCancelOrderModalVisibility={setCancelOrderModalVisibility}
@@ -209,7 +159,7 @@ export default function Page() {
           orderID={orderIDForStatusRecords}
           statusRecordsModalIsVisible={statusRecordsModalIsVisible}
           setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
-        ></StatusRecordsModal>
+        />
       </div>
     </div>
   );

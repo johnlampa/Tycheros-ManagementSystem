@@ -1,9 +1,22 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa"; // Import the FaArrowLeft icon
+import { useRouter } from "next/navigation";
 
 export default function MenuSelection() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (!loggedInEmployeeID) {
+        router.push("/login"); // Redirect to login page if not logged in
+      }
+    }
+  }, [router]);
+
   return (
     <>
       <div className="w-full flex justify-center items-center min-h-screen">
