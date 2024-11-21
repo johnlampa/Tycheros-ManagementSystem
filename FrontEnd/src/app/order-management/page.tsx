@@ -12,6 +12,7 @@ import axios from "axios";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
 
 import StatusRecordsModal from "@/components/StatusRecords.Modal";
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
 
 export default function Page() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -25,20 +26,27 @@ export default function Page() {
 
   const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] =
     useState(false);
-
   const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<
     number | undefined
   >(0);
 
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  const router = useRouter(); // Initialize the router for redirection
+
+  // Check if the user is logged in
   useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-      if (loggedInEmployeeID) {
-        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+
+      if (!loggedInEmployeeID) {
+        // Redirect to login if not logged in
+        router.push("/login");
+        return; // Exit the useEffect if not logged in
       }
+
+      setLoggedInEmployeeID(parseInt(loggedInEmployeeID)); // Set the logged-in employee ID
     }
-  }, []);
+  }, [router]);
 
   const [filterByDate, setFilterByDate] = useState("");
   const [filterByStatus, setFilterByStatus] = useState({
@@ -83,6 +91,7 @@ export default function Page() {
     console.log("loggedInEmployeeID: ", loggedInEmployeeID);
   }, [loggedInEmployeeID]);
 
+  // Fetch data only if the user is logged in
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -118,32 +127,19 @@ export default function Page() {
         if (response.data && response.data.length > 0) {
           setPayments(response.data);
         } else {
-          setPayments([]); // Set payments as an empty array if no results
+          setPayments([]); // Handle empty response
           console.warn("No payment details found");
         }
       } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          if (error.response && error.response.status === 404) {
-            // Handle 404 case without setting an error message
-            setPayments([]); // Treat as empty result
-            console.warn(
-              "No payment details found for orders with status other than Unpaid"
-            );
-          } else {
-            console.error("Error fetching payment details:", error);
-            setError("Error fetching payment details"); // For other types of errors
-          }
-        } else {
-          console.error("Unexpected error:", error);
-          setError("An unexpected error occurred");
-        }
+        console.error("Error fetching payment details:", error);
+        setError("Error fetching payment details");
       }
     };
 
     fetchOrders();
     fetchMenuData();
     fetchPayments();
-  }, []);
+  }, []); // Empty dependency ensures the fetch only runs once on page load
 
   useEffect(() => {
     console.log("Orders fetched:", unfilteredOrders);
