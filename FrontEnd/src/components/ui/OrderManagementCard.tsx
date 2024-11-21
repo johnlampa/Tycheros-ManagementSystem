@@ -136,7 +136,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               <span>{order.orderID}</span>
             </div>
             <div>
-              <span className="font-semibold">Date: </span>
+              <span className="font-semibold">Date created: </span>
               <span>{order.date.substring(0, 10)}</span>
             </div>
           </div>
