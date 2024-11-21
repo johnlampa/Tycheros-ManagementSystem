@@ -21,34 +21,14 @@ export type StockOut = {
 };
 
 export default function InventoryManagementPage() {
-  const [stockOutData, setStockOutData] = useState<StockOut[]>([
-    {
-      stockOutDateTime: "2024-11-02 16:41:51",
-      employeeFirstName: "Agustine",
-      employeeLastName: "Salcedo",
-      stockOutItems: [
-        {
-          stockOutItemName: "Apple",
-          reason: "Rotten",
-          quantity: 3,
-          unitOfMeasurement: "dozens",
-        },
-        {
-          stockOutItemName: "Banana",
-          reason: "Production discrepancy",
-          quantity: 3,
-          unitOfMeasurement: "pcs",
-        },
-      ],
-    },
-  ]);
+  const [stockOutData, setStockOutData] = useState<StockOut[]>([]);
 
-  // useEffect(() => {
-  //   fetch("http://localhost:8081/inventoryManagement/getStockOutRecords")
-  //     .then((response) => response.json())
-  //     .then((data) => setStockOutData(data))
-  //     .catch((error) => console.error("Error fetching menu data:", error));
-  // }, []);
+   useEffect(() => {
+     fetch("http://localhost:8081/inventoryManagement/getStockOutRecords")
+       .then((response) => response.json())
+       .then((data) => setStockOutData(data))
+       .catch((error) => console.error("Error fetching menu data:", error));
+   }, []);
 
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
