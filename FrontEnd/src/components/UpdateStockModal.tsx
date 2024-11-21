@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
-import { MultiItemUpdateStockData } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
+import {
+  InventoryItem,
+  MultiItemUpdateStockData,
+} from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 import axios from "axios";
 
@@ -23,6 +26,31 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
   handleInventoryChange,
   employees,
 }) => {
+  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data: InventoryItem[] = await response.json();
+        setInventoryData(data);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInventory();
+  }, []);
+
   const updateInventoryItem = (index: number, updatedItem: any) => {
     const newInventoryItems = [...inventoryItems];
     newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
@@ -71,7 +99,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
       !updateStockData.updateStockDateTime ||
       updateStockData.updateStockDateTime.trim() === ""
     ) {
-      missingFields.push("Update Stock Date");
+      missingFields.push("> Update Stock Date");
     }
 
     // Validate each inventory item
@@ -87,11 +115,26 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
       if (item.quantityToUpdate <= 0) {
         missingFields.push(`Quantity for ${inventoryName}`);
       }
+
+      const inventoryItem = inventoryData.find(
+        (inv) => inv.inventoryID === item.inventoryID
+      );
+
+      if (inventoryItem?.totalQuantity) {
+        if (item.quantityToUpdate <= inventoryItem?.totalQuantity) {
+          missingFields.push(
+            `> Quantity to update for ${inventoryItem?.inventoryName} should be greater than ${inventoryItem?.totalQuantity} ${inventoryItem?.unitOfMeasure}.`
+          );
+        }
+        console.log("chosen inventory item: ", item);
+        console.log("matching inventory item", inventoryItem);
+        console.log("total quantity: ", inventoryItem?.totalQuantity);
+      }
     });
 
     if (missingFields.length > 0) {
       setValidationMessage(
-        `Please fill out the following:\n${missingFields.join("\n")}`
+        `Please address the following:\n\n${missingFields.join("\n")}`
       );
       return false;
     }
@@ -226,31 +269,6 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
             </select>
             {item.expanded && (
               <div className="text-black">
-                Subinventory ID
-                <select
-                  value={item.subinventoryID}
-                  onChange={(e) => {
-                    const newSubinventoryID = parseInt(e.target.value);
-                    updateInventoryItem(index, {
-                      subinventoryID: newSubinventoryID,
-                    });
-                  }}
-                  className="mb-2 mt-2 p-2 w-full text-black border border-black"
-                >
-                  <option value="0" disabled>
-                    Select Subinventory ID
-                  </option>
-                  {detailedData[selectedInventories[index]]?.map(
-                    (subinv: any) => (
-                      <option
-                        key={subinv.subinventoryID}
-                        value={subinv.subinventoryID}
-                      >
-                        {subinv.subinventoryID}
-                      </option>
-                    )
-                  )}
-                </select>
                 <div className="mb-2">
                   <input
                     type="number"
