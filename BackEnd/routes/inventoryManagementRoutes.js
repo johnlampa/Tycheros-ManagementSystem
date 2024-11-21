@@ -815,4 +815,64 @@ router.get('/getStockInRecords', async (req, res) => {
   }
 });
 
+router.get('/getStockOutRecords', async (req, res) => {
+  const query = `
+    SELECT 
+      DATE(so.stockOutDateTime) AS stockOutDate,
+      so.stockOutDateTime,
+      e.firstName AS employeeFirstName,
+      e.lastName AS employeeLastName,
+      i.inventoryName AS stockOutItemName,
+      CAST(so.reason AS CHAR) AS reason, -- Convert reason from BLOB to CHAR
+      so.quantity,
+      uom.UoM AS unitOfMeasurement
+    FROM 
+      stockout so
+    JOIN 
+      subinventory si ON so.subinventoryID = si.subinventoryID
+    JOIN 
+      inventory i ON si.inventoryID = i.inventoryID
+    JOIN 
+      employees e ON so.employeeID = e.employeeID
+    JOIN 
+      unitofmeasurement uom ON i.unitOfMeasurementID = uom.unitOfMeasurementID
+    ORDER BY 
+      so.stockOutDateTime DESC;
+  `;
+
+  try {
+    const [results] = await pool.query(query);
+
+    const groupedStockOutRecords = results.reduce((acc, record) => {
+      const dateKey = record.stockOutDate;
+
+      if (!acc[dateKey]) {
+        acc[dateKey] = {
+          stockOutDate: dateKey,
+          stockOutDateTime: record.stockOutDateTime,
+          employeeFirstName: record.employeeFirstName,
+          employeeLastName: record.employeeLastName,
+          stockOutItems: [],
+        };
+      }
+
+      acc[dateKey].stockOutItems.push({
+        stockOutItemName: record.stockOutItemName,
+        reason: record.reason, // Now it's a readable string
+        quantity: record.quantity,
+        unitOfMeasurement: record.unitOfMeasurement,
+      });
+
+      return acc;
+    }, {});
+
+    const groupedStockOutArray = Object.values(groupedStockOutRecords);
+
+    res.status(200).json(groupedStockOutArray);
+  } catch (err) {
+    console.error('Error fetching stock out records:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 module.exports = router;
