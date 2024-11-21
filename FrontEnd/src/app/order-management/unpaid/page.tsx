@@ -64,6 +64,16 @@ export default function Page() {
     fetchMenuData();
   }, []);
 
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+  }, []);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -119,6 +129,7 @@ export default function Page() {
           orderToEdit={orderToEdit}
           orders={orders}
           setOrders={setOrders}
+          loggedInEmployeeID={loggedInEmployeeID}
         />
         <StatusRecordsModal
           orderID={orderIDForStatusRecords}
