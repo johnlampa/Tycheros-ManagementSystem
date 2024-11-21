@@ -118,12 +118,12 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
 
 // ADD INVENTORY ITEM ENDPOINT Configured
 router.post('/postInventoryItem', async (req, res) => {
-  const { inventoryName, inventoryCategory, unitOfMeasure, reorderPoint, inventoryStatus } = req.body;
+  const { inventoryName, inventoryCategory, unitOfMeasurementID, reorderPoint, inventoryStatus } = req.body;
 
   const newInventoryItem = {
     inventoryName,
     inventoryCategory,
-    unitOfMeasurementID: unitOfMeasure,
+    unitOfMeasurementID,
     reorderPoint,
     inventoryStatus,
   };
@@ -741,6 +741,76 @@ router.put('/editUoM/:unitOfMeasurementID', async (req, res) => {
     });
   } catch (err) {
     console.error('Error updating UoM:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/getStockInRecords', async (req, res) => {
+  const query = `
+    SELECT 
+        po.purchaseOrderID,
+        po.stockInDateTime,
+        e.firstName AS employeeFirstName,
+        e.lastName AS employeeLastName,
+        s.supplierName,
+        poi.purchaseOrderItemID,
+        poi.quantityOrdered,
+        poi.pricePerPOUoM,
+        poi.expiryDate,
+        uom.UoM AS unitOfMeasurement,
+        inv.inventoryName AS purchaseOrderItemName
+    FROM 
+        purchaseorder po
+    LEFT JOIN 
+        employees e ON po.employeeID = e.employeeID
+    LEFT JOIN 
+        supplier s ON po.supplierID = s.supplierID
+    LEFT JOIN 
+        purchaseorderitem poi ON po.purchaseOrderID = poi.purchaseOrderID
+    LEFT JOIN 
+        subinventory si ON si.subinventoryID = poi.purchaseOrderItemID -- Join with subinventory
+    LEFT JOIN 
+        inventory inv ON si.inventoryID = inv.inventoryID -- Join subinventory to inventory
+    LEFT JOIN 
+        unitofmeasurement uom ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
+    ORDER BY 
+        po.purchaseOrderID ASC, 
+        poi.expiryDate ASC;
+  `;
+
+  try {
+    const [results] = await pool.query(query);
+
+    // Group data by purchaseOrderID
+    const groupedData = results.reduce((acc, row) => {
+      let record = acc.find(item => item.purchaseOrderID === row.purchaseOrderID);
+      if (!record) {
+        record = {
+          purchaseOrderID: row.purchaseOrderID,
+          stockInDateTime: row.stockInDateTime,
+          employeeFirstName: row.employeeFirstName,
+          employeeLastName: row.employeeLastName,
+          supplierName: row.supplierName,
+          purchaseOrderItems: []
+        };
+        acc.push(record);
+      }
+
+      record.purchaseOrderItems.push({
+        purchaseOrderItemID: row.purchaseOrderItemID,
+        quantityOrdered: row.quantityOrdered,
+        pricePerPOUoM: row.pricePerPOUoM,
+        expiryDate: row.expiryDate,
+        unitOfMeasurement: row.unitOfMeasurement,
+        purchaseOrderItemName: row.purchaseOrderItemName
+      });
+
+      return acc;
+    }, []);
+
+    res.status(200).json(groupedData);
+  } catch (err) {
+    console.error('Error fetching purchase orders:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

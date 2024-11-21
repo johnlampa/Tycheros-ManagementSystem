@@ -110,7 +110,7 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
           <div className="text-center text-xl font-bold text-black mb-4 ">
             Status Records
           </div>
-          <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm gap-x-1">
+          <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm gap-x-1 text-black">
             <div className="flex justify-center items-center">Status</div>
             <div className="flex justify-center items-center text-center">
               Date
@@ -124,7 +124,7 @@ const StatusRecordsModal: React.FC<StatusRecordsModal> = ({
             return (
               <div
                 key={statusRecordIndex}
-                className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 gap-x-1"
+                className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 gap-x-1 text-black"
               >
                 <div className="flex justify-center items-center">
                   {statusRecord.status}

@@ -284,7 +284,7 @@ router.post('/cancelOrder', (req, res) => {
       return res.status(500).send("Error starting transaction");
     }
 
-    // Check if the order status is 'Unpaid'
+    // Check if the order exists and get its current status
     const checkOrderStatusQuery = `
       SELECT orderStatus
       FROM orderstatus
@@ -305,15 +305,14 @@ router.post('/cancelOrder', (req, res) => {
       }
 
       const currentStatus = result[0].orderStatus;
-      console.log("Current Status: ", currentStatus)
 
-      if (currentStatus !== 'Unpaid') {
-        console.error("Order cannot be canceled because it is not unpaid:", orderID);
-        return db.rollback(() => res.status(400).send("Order can only be canceled if it is unpaid"));
+      if (currentStatus === 'Cancelled') {
+        console.error("Order is already cancelled:", orderID);
+        return db.rollback(() => res.status(400).send("Order is already cancelled"));
       }
 
       // Insert a new row in the orderstatus table to mark the order as 'Cancelled'
-      const insertOrderStatusQuery = `  
+      const insertOrderStatusQuery = `
         INSERT INTO orderstatus (orderID, orderStatus, statusDateTime, reason, employeeID)
         VALUES (?, 'Cancelled', NOW(), ?, ?)
       `;
@@ -324,15 +323,143 @@ router.post('/cancelOrder', (req, res) => {
           return db.rollback(() => res.status(500).send("Error updating order status to cancelled"));
         }
 
-        // Commit the transaction
-        db.commit((err) => {
+        // Retrieve order items to replenish subinventory
+        const getOrderItemsQuery = `
+          SELECT oi.productID, oi.quantity AS orderQuantity, s.inventoryID, s.quantityNeeded
+          FROM orderitem oi
+          JOIN subitem s ON s.productID = oi.productID
+          WHERE oi.orderID = ?
+        `;
+
+        db.query(getOrderItemsQuery, [orderID], (err, orderItems) => {
           if (err) {
-            console.error("Error committing transaction:", err);
-            return db.rollback(() => res.status(500).send("Error committing transaction"));
+            console.error("Error fetching order items:", err);
+            return db.rollback(() => res.status(500).send("Error fetching order items"));
           }
 
-          console.log("Order cancellation transaction committed successfully.");
-          res.status(200).send("Order cancelled successfully");
+          const replenishSubinventory = (inventoryID, quantityToReplenish) => {
+            return new Promise((resolve, reject) => {
+              const getSubinventoryQuery = `
+                SELECT 
+                  si.subinventoryID, 
+                  si.quantityRemaining, 
+                  (poi.quantityOrdered * uom.ratio) AS quantityOrdered, 
+                  poi.expiryDate
+                FROM 
+                  subinventory si
+                JOIN 
+                  purchaseorderitem poi 
+                  ON si.subinventoryID = poi.purchaseOrderItemID
+                JOIN 
+                  unitofmeasurement uom 
+                  ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
+                WHERE 
+                  si.inventoryID = ?
+                ORDER BY 
+                  CASE WHEN si.quantityRemaining > 0 THEN 0 ELSE 1 END, 
+                  poi.expiryDate ASC;
+              `;
+          
+              db.query(getSubinventoryQuery, [inventoryID], (err, subinventories) => {
+                if (err) return reject(err);
+          
+                if (subinventories.length === 0) {
+                  console.warn(`No subinventory found for inventoryID: ${inventoryID}`);
+                  return resolve();
+                }
+          
+                let remainingQuantity = quantityToReplenish;
+          
+                // Iterate over subinventories to update quantities
+                const updatePromises = subinventories.map((subinventory) => {
+                  return new Promise((innerResolve, innerReject) => {
+                    if (remainingQuantity <= 0) return innerResolve(); // No more replenishment needed
+          
+                    const { subinventoryID, quantityRemaining, quantityOrdered } = subinventory;
+          
+                    // Calculate how much can be replenished into this subinventory
+                    const availableSpace = quantityOrdered - quantityRemaining;
+                    console.log("Quantity Ordered: ", quantityOrdered, " quantityRemaining: ", quantityRemaining)
+                    console.log("Available Space: ", availableSpace);
+                    const replenishQuantity = Math.min(remainingQuantity, availableSpace);
+          
+                    if (replenishQuantity > 0) {
+                      const updateSubinventoryQuery = `
+                        UPDATE subinventory
+                        SET quantityRemaining = quantityRemaining + ?
+                        WHERE subinventoryID = ?
+                      `;
+                      db.query(updateSubinventoryQuery, [replenishQuantity, subinventoryID], (err) => {
+                        if (err) return innerReject(err);
+          
+                        console.log(`Replenished ${replenishQuantity} to subinventoryID: ${subinventoryID}`);
+                        remainingQuantity -= replenishQuantity;
+                        innerResolve();
+                      });
+                    } else {
+                      innerResolve();
+                    }
+                  });
+                });
+          
+                // Handle any excess stock by adding it to subinventory with the latest expiry date
+                Promise.all(updatePromises).then(() => {
+                  if (remainingQuantity > 0) {
+                    const latestExpirySubinventory = subinventories
+                      .filter((si) => si.quantityRemaining < si.quantityOrdered) // Allow subinventories with space
+                      .sort((a, b) => new Date(b.expiryDate) - new Date(a.expiryDate))[0];
+          
+                    if (latestExpirySubinventory) {
+                      const { subinventoryID, quantityOrdered, quantityRemaining } = latestExpirySubinventory;
+          
+                      const availableSpace = quantityOrdered - quantityRemaining;
+                      const replenishQuantity = Math.min(remainingQuantity, availableSpace);
+          
+                      const updateExcessQuery = `
+                        UPDATE subinventory
+                        SET quantityRemaining = quantityRemaining + ?
+                        WHERE subinventoryID = ?
+                      `;
+                      db.query(updateExcessQuery, [replenishQuantity, subinventoryID], (err) => {
+                        if (err) return reject(err);
+          
+                        console.log(
+                          `Excess of ${replenishQuantity} added to subinventoryID: ${subinventoryID}`
+                        );
+                        resolve();
+                      });
+                    } else {
+                      console.warn(`No subinventory with available space for inventoryID: ${inventoryID}`);
+                      resolve();
+                    }
+                  } else {
+                    resolve();
+                  }
+                });
+              });
+            });
+          };
+
+          const updateSubinventoryPromises = orderItems.map((item) =>
+            replenishSubinventory(item.inventoryID, item.orderQuantity * item.quantityNeeded)
+          );
+
+          Promise.all(updateSubinventoryPromises)
+            .then(() => {
+              db.commit((err) => {
+                if (err) {
+                  console.error("Error committing transaction:", err);
+                  return db.rollback(() => res.status(500).send("Error committing transaction"));
+                }
+
+                console.log("Order cancellation and inventory replenishment committed successfully.");
+                res.status(200).send("Order cancelled and inventory replenished successfully");
+              });
+            })
+            .catch((err) => {
+              console.error("Error in replenishment process:", err);
+              db.rollback(() => res.status(500).send("Error in replenishment process"));
+            });
         });
       });
     });

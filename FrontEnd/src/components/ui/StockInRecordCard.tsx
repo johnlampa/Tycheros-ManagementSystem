@@ -23,6 +23,7 @@ const StockInRecordCard: React.FC<StockInRecordCardProps> = ({
   stockInData,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  console.log("StockIn Data:", stockInData);
 
   return (
     <>

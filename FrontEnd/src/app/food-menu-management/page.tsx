@@ -19,7 +19,6 @@ export default function Page() {
     useState<ProductDataTypes | null>(null);
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
 
-  //@adgramirez - add useeffect to fetch categories and populate this categories array
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
 
   const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =

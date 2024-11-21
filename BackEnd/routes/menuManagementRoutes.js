@@ -371,6 +371,36 @@ router.get('/getPriceHistory/:productID', (req, res) => {
   });
 });
 
+// GET /getAllCategories
+router.get('/getAllCategories', (req, res) => {
+  const query = `
+    SELECT 
+      c.categoryID,
+      c.categoryName,
+      c.status,
+      s.system AS systemName
+    FROM 
+      category c
+    LEFT JOIN 
+      \`system\` s ON c.systemID = s.systemID
+    ORDER BY 
+      c.categoryName ASC;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching all categories:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No categories found' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
 // GET /getCategoriesBySystem
 router.get('/getCategoriesBySystem/:systemName', (req, res) => {
   const { systemName } = req.params;

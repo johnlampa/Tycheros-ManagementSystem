@@ -29,20 +29,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   setProductIDForPriceRecords,
   setPriceRecordsModalIsVisible,
 }) => {
-  const categoryMap: { [key: string]: number } = {
-    Appetizers: 1,
-    Entrees: 2,
-    Snacks: 3,
-    "Combo Meals": 4,
-    Wings: 5,
-    Salads: 6,
-    "Milk Tea": 7,
-    Beer: 8,
-    Coffee: 9,
-    Whiskey: 10,
-    Frappe: 11,
-    Tea: 12,
-  };
+  const [categoryMap, setCategoryMap] = useState<{ [key: string]: number }>({});
   const categoryID = categoryMap[categoryName] || 0;
 
   const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
@@ -58,6 +45,29 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const { edgestore } = useEdgeStore();
 
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+
+  // Fetch categories and populate categoryMap dynamically
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:8081/menuManagement/getAllCategories");
+        const categories = response.data;
+
+        // Create categoryMap dynamically
+        const dynamicCategoryMap: { [key: string]: number } = {};
+        categories.forEach((category: { categoryName: string; categoryID: number }) => {
+          dynamicCategoryMap[category.categoryName] = category.categoryID;
+        });
+
+        setCategoryMap(dynamicCategoryMap);
+        console.log("Category Map:", dynamicCategoryMap);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     console.log(inventoryData);
