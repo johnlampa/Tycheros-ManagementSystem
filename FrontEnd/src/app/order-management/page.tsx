@@ -86,6 +86,45 @@ export default function Page() {
     applyFilters();
   }, [filterByDate, filterByStatus, unfilteredOrders]);
 
+  const [filterByDate, setFilterByDate] = useState("");
+  const [filterByStatus, setFilterByStatus] = useState({
+    Unpaid: false,
+    Pending: false,
+    Completed: false,
+    Cancelled: false,
+  });
+
+  const [unfilteredOrders, setUnfilteredOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = unfilteredOrders;
+
+      // Apply date filter if filterByDate has a value
+      if (filterByDate) {
+        filtered = filtered.filter(
+          (order) => order.date.substring(0, 10) === filterByDate
+        );
+      }
+
+      // Apply status filter if any status is active
+      const activeStatuses = Object.entries(filterByStatus)
+        .filter(([_, isActive]) => isActive) // Filter for active statuses
+        .map(([status]) => status); // Extract the status names
+
+      if (activeStatuses.length > 0) {
+        filtered = filtered.filter((order) =>
+          activeStatuses.includes(order.status)
+        );
+      }
+
+      console.log(activeStatuses);
+      setFilteredOrders(filtered);
+    };
+
+    applyFilters();
+  }, [filterByDate, filterByStatus, unfilteredOrders]);
+
   useEffect(() => {
     console.log("loggedInEmployeeID: ", loggedInEmployeeID);
   }, [loggedInEmployeeID]);
