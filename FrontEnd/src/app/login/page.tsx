@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import { useRouter } from "next/navigation";
@@ -10,22 +10,13 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
-  // Redirect if the user is already logged in
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-      if (loggedInEmployeeID) {
-        router.push("/employee-home"); // Redirect to employee home if logged in
-      }
-    }
-  }, [router]);
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
 
     try {
       const response = await fetch("http://localhost:8081/login/login", {
+        // Replace with backend URL in production
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,21 +25,20 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json(); // Parse error response (if JSON)
         setErrorMessage(errorData.message || "Login failed. Please try again.");
         return;
       }
 
-      const data = await response.json();
+      const data = await response.json(); // Parse successful response
 
-      // Store logged in user data in localStorage
       localStorage.setItem("loggedInEmployeeID", employeeID);
-      localStorage.setItem("designation", data.employee.designation);
 
-      // Redirect to employee home page after successful login
-      router.push("/employee-home");
+      router.push("/employee-home"); // Redirect to employee-home on success
     } catch (error) {
-      setErrorMessage("An error occurred while logging in. Please try again.");
+      setErrorMessage(
+        "text-red An error occurred while logging in. Please try again."
+      );
     }
   };
 
