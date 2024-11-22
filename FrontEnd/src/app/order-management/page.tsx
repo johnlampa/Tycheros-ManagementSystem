@@ -12,12 +12,16 @@ import axios from "axios";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
 import StatusRecordsModal from "@/components/StatusRecords.Modal";
 import { useRouter } from "next/navigation"; // Import useRouter for redirection
+import FlowBiteSideBar from "@/components/FlowBiteSideBar";
+import { GiHamburgerMenu } from "react-icons/gi";
 
 export default function Page() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [sideBarVisibility, setSideBarVisibility] = useState(false);
 
   const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
     useState<boolean>(false);
@@ -153,12 +157,20 @@ export default function Page() {
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen">
         <Header text="Orders" color={"tealGreen"} type={"orders"}>
-          <Link href={"/employee-home"} className="z-100">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
-          </Link>
+          <button
+            className="mr-3 flex items-center justify-center"
+            onClick={() => {
+              setSideBarVisibility(true);
+            }}
+          >
+            <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
+          </button>
         </Header>
+        {sideBarVisibility && (
+          <FlowBiteSideBar
+            setSideBarVisibility={setSideBarVisibility}
+          ></FlowBiteSideBar>
+        )}
 
         <div className="pb-3 w-full bg-tealGreen px-2 sm:px-5">
           <div className="w-full flex justify-center items-center ">

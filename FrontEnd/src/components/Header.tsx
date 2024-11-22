@@ -8,7 +8,7 @@ const headerStyles = cva("w-full h-[90px] flex justify-center items-center", {
       cream: "bg-[#EDE9D8] text-black",
     },
     type: {
-      home: "text-3xl ml-[-25px] sm:ml-0",
+      home: "lg:text-5xl md:text-4xl text-3xl ml-[-25px] sm:ml-0",
       order_summary: "text-3xl ml-[-25px] sm:ml-0",
       checkout: "text-3xl ml-[-60px] sm:ml-0",
       orders: "text-4xl ml-[-60px] sm:ml-0",

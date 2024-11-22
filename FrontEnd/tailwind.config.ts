@@ -20,6 +20,14 @@ module.exports = {
         pacifico: ['var(--font-pacifico)'],
         inter: ['var(--font-inter)']
       },
+      backdropBlur: {
+        xs: '1px',
+        sm: '2px',
+        md: '4px',
+        lg: '8px',
+        xl: '12px',
+        '2xl': '16px',
+      },
     },
     colors: {
       cream: "#EDE9D8",

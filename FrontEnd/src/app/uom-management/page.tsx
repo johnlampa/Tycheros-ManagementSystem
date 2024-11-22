@@ -12,8 +12,12 @@ import EditUOMCategoryModal from "@/components/EditUOMCategoryModal";
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import AddUOMModal from "@/components/AddUOMModal";
 import EditUOMModal from "@/components/EditUOMModal";
+import { GiHamburgerMenu } from "react-icons/gi";
+import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
 export default function Page() {
+  const [sideBarVisibility, setSideBarVisibility] = useState(false);
+
   const [addUOMCategoryModalIsVisible, setAddUOMCategoryModalIsVisible] =
     useState<boolean>(false);
 
@@ -98,12 +102,20 @@ export default function Page() {
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Units of Measurement" color={"tealGreen"} type={"orders"}>
-          <Link href={"/inventory-management"} className="z-10">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
-          </Link>
+          <button
+            className="mr-3 flex items-center justify-center"
+            onClick={() => {
+              setSideBarVisibility(true);
+            }}
+          >
+            <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
+          </button>
         </Header>
+        {sideBarVisibility && (
+          <FlowBiteSideBar
+            setSideBarVisibility={setSideBarVisibility}
+          ></FlowBiteSideBar>
+        )}
 
         <button
           onClick={() => setAddUOMCategoryModalIsVisible(true)}

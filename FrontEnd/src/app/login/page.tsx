@@ -15,7 +15,7 @@ export default function Login() {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
       if (loggedInEmployeeID) {
-        router.push("/employee-home"); // Redirect to employee home if logged in
+        router.push("/order-management"); // Redirect to employee home if logged in
       }
     }
   }, [router]);
@@ -46,7 +46,7 @@ export default function Login() {
       localStorage.setItem("designation", data.employee.designation);
 
       // Redirect to employee home page after successful login
-      router.push("/employee-home");
+      router.push("/order-management");
     } catch (error) {
       setErrorMessage("An error occurred while logging in. Please try again.");
     }
@@ -60,12 +60,12 @@ export default function Login() {
         <div className="w-full">
           <div className="w-full h-[90px] flex justify-center items-center bg-[#59988D] text-white">
             <Link href="/">
-              <button className="left-4 relative border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-[#59988D] group">
+              <button className="left-10 relative border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-[#59988D] group">
                 <FaArrowLeft className="text-[#59988D] group-hover:text-white transition-colors duration-300" />
               </button>
             </Link>
             <h1 className="text-3xl font-bold text-center flex-grow right-2">
-              Admin Login
+              Administrator Login
             </h1>
           </div>
         </div>
