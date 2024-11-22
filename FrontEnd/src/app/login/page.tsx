@@ -60,7 +60,7 @@ export default function Login() {
         <div className="w-full">
           <div className="w-full h-[90px] flex justify-center items-center bg-[#59988D] text-white">
             <Link href="/">
-              <button className="left-4 relative border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-[#59988D] group">
+              <button className="left-10 relative border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-[#59988D] group">
                 <FaArrowLeft className="text-[#59988D] group-hover:text-white transition-colors duration-300" />
               </button>
             </Link>
