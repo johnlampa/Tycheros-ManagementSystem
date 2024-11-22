@@ -11,23 +11,65 @@ import CancelOrderModal from "@/components/CancelOrderModal";
 import axios from "axios";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
 import StatusRecordsModal from "@/components/StatusRecords.Modal";
-import { useRouter } from "next/navigation";  // Import useRouter for redirection
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
 
 export default function Page() {
-  const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] = useState<boolean>(false);
+  const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
+    useState<boolean>(false);
   const [orderToEdit, setOrderToEdit] = useState<Order>();
 
-  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] = useState(false);
-  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<number | undefined>(0);
+  const [statusRecordsModalIsVisible, setStatusRecordsModalIsVisible] =
+    useState(false);
+  const [orderIDForStatusRecords, setOrderIDForStatusRecords] = useState<
+    number | undefined
+  >(0);
 
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
-  const router = useRouter();  // Initialize the router for redirection
+  const router = useRouter(); // Initialize the router for redirection
+
+  const [filterByDate, setFilterByDate] = useState("");
+  const [filterByStatus, setFilterByStatus] = useState({
+    Unpaid: false,
+    Pending: false,
+    Completed: false,
+    Cancelled: false,
+  });
+
+  const [unfilteredOrders, setUnfilteredOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = unfilteredOrders;
+
+      // Apply date filter if filterByDate has a value
+      if (filterByDate) {
+        filtered = filtered.filter(
+          (order) => order.date.substring(0, 10) === filterByDate
+        );
+      }
+
+      // Apply status filter if any status is active
+      const activeStatuses = Object.entries(filterByStatus)
+        .filter(([_, isActive]) => isActive) // Filter for active statuses
+        .map(([status]) => status); // Extract the status names
+
+      if (activeStatuses.length > 0) {
+        filtered = filtered.filter((order) =>
+          activeStatuses.includes(order.status)
+        );
+      }
+
+      console.log(activeStatuses);
+      setFilteredOrders(filtered);
+    };
+
+    applyFilters();
+  }, [filterByDate, filterByStatus, unfilteredOrders]);
 
   // Check if the user is logged in
   useEffect(() => {
@@ -37,7 +79,7 @@ export default function Page() {
       if (!loggedInEmployeeID) {
         // Redirect to login if not logged in
         router.push("/login");
-        return;  // Exit the useEffect if not logged in
+        return; // Exit the useEffect if not logged in
       }
 
       setLoggedInEmployeeID(parseInt(loggedInEmployeeID)); // Set the logged-in employee ID
@@ -48,8 +90,10 @@ export default function Page() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/orderManagement/getOrders");
-        setOrders(response.data);
+        const response = await axios.get(
+          "http://localhost:8081/orderManagement/getOrders"
+        );
+        setUnfilteredOrders(response.data);
       } catch (error) {
         console.error("Error fetching orders:", error);
         setError("Error fetching orders");
@@ -60,7 +104,9 @@ export default function Page() {
 
     const fetchMenuData = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/orderManagement/getMenuData");
+        const response = await axios.get(
+          "http://localhost:8081/orderManagement/getMenuData"
+        );
         setMenuData(response.data);
       } catch (error) {
         console.error("Error fetching menu data:", error);
@@ -70,7 +116,9 @@ export default function Page() {
 
     const fetchPayments = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/orderManagement/getPaymentDetails");
+        const response = await axios.get(
+          "http://localhost:8081/orderManagement/getPaymentDetails"
+        );
         if (response.data && response.data.length > 0) {
           setPayments(response.data);
         } else {
@@ -86,7 +134,7 @@ export default function Page() {
     fetchOrders();
     fetchMenuData();
     fetchPayments();
-  }, []);  // Empty dependency ensures the fetch only runs once on page load
+  }, []); // Empty dependency ensures the fetch only runs once on page load
 
   if (loading) {
     return <div>Loading...</div>;
@@ -112,33 +160,140 @@ export default function Page() {
           </Link>
         </Header>
 
-        <div className="pb-3 w-full bg-tealGreen flex justify-center items-center">
-          <div className="w-max grid grid-cols-3 sm:grid-cols-4 gap-x-5 gap-y-5 sm:pb-3">
-            {/* Status Links */}
-            <Link href={"/order-management/unpaid"}>Unpaid</Link>
-            <Link href={"/order-management/pending"}>Pending</Link>
-            <Link href={"/order-management/completed"}>Completed</Link>
-            <Link href={"/order-management/cancelled"}>Cancelled</Link>
+        <div className="pb-3 w-full bg-tealGreen px-2 sm:px-5">
+          <div className="w-full flex justify-center items-center ">
+            <div className="text-xs w-16 md:text-md font-semibold text-white">
+              Filters:
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-x-3 sm:gap-y-3">
+              {/* Status Links */}
+
+              <Link href={""}>
+                <div
+                  className={`${
+                    filterByStatus.Unpaid === true
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                  onClick={() =>
+                    filterByStatus.Unpaid === false
+                      ? setFilterByStatus((prev) => ({ ...prev, Unpaid: true }))
+                      : setFilterByStatus((prev) => ({
+                          ...prev,
+                          Unpaid: false,
+                        }))
+                  }
+                >
+                  Unpaid
+                </div>
+              </Link>
+              <Link href={""}>
+                <div
+                  className={`${
+                    filterByStatus.Pending === true
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                  onClick={() =>
+                    filterByStatus.Pending === false
+                      ? setFilterByStatus((prev) => ({
+                          ...prev,
+                          Pending: true,
+                        }))
+                      : setFilterByStatus((prev) => ({
+                          ...prev,
+                          Pending: false,
+                        }))
+                  }
+                >
+                  Pending
+                </div>
+              </Link>
+              <Link href={""}>
+                <div
+                  className={`${
+                    filterByStatus.Completed === true
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                  onClick={() =>
+                    filterByStatus.Completed === false
+                      ? setFilterByStatus((prev) => ({
+                          ...prev,
+                          Completed: true,
+                        }))
+                      : setFilterByStatus((prev) => ({
+                          ...prev,
+                          Completed: false,
+                        }))
+                  }
+                >
+                  Completed
+                </div>
+              </Link>
+              <Link href={""}>
+                <div
+                  className={`${
+                    filterByStatus.Cancelled === true
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                  onClick={() =>
+                    filterByStatus.Cancelled === false
+                      ? setFilterByStatus((prev) => ({
+                          ...prev,
+                          Cancelled: true,
+                        }))
+                      : setFilterByStatus((prev) => ({
+                          ...prev,
+                          Cancelled: false,
+                        }))
+                  }
+                >
+                  Cancelled
+                </div>
+              </Link>
+              <input
+                placeholder=""
+                type="date"
+                id="dateFilter"
+                className="rounded-md border border-gray text-sm text-black text-center w-[120px] h-[25px] hidden md:block"
+                onChange={(e) => setFilterByDate(e.target.value)}
+              ></input>
+            </div>
+          </div>
+          <div className="flex justify-center mt-3">
+            <input
+              placeholder=""
+              type="date"
+              id="dateFilter"
+              className="rounded-md border border-gray text-sm text-black text-center w-[120px] h-[25px] block md:hidden"
+              onChange={(e) => setFilterByDate(e.target.value)}
+            ></input>
           </div>
         </div>
 
-        {orders.length === 0 ? (
-          <div className="text-center text-black mt-7">No orders available.</div>
+        {filteredOrders.length === 0 ? (
+          <div className="text-center text-black mt-7">
+            No orders available.
+          </div>
         ) : (
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
-            {orders.toReversed().map((order, orderIndex) => (
+            {filteredOrders.toReversed().map((order, orderIndex) => (
               <div key={orderIndex} className="mt-8 lg:mt-0">
                 <OrderManagementCard
                   order={order}
                   menuData={menuData}
-                  orders={orders}
-                  setOrders={setOrders}
+                  orders={filteredOrders}
+                  setOrders={setFilteredOrders}
                   type={"management"}
                   setCancelOrderModalVisibility={() => handleCancelOrder(order)}
                   setOrderToEdit={setOrderToEdit}
                   payments={payments}
                   setOrderIDForStatusRecords={setOrderIDForStatusRecords}
-                  setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
+                  setStatusRecordsModalIsVisible={
+                    setStatusRecordsModalIsVisible
+                  }
                 />
               </div>
             ))}
@@ -150,8 +305,8 @@ export default function Page() {
           setCancelOrderModalVisibility={setCancelOrderModalVisibility}
           modalTitle="Cancel Order"
           orderToEdit={orderToEdit}
-          orders={orders}
-          setOrders={setOrders}
+          orders={filteredOrders}
+          setOrders={setFilteredOrders}
           loggedInEmployeeID={loggedInEmployeeID}
         />
 
