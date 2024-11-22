@@ -16,11 +16,7 @@ export default function Home() {
                 pathname: "/login",
               }}
             >
-              <button className="mr-3 flex items-center justify-center overflow-hidden">
-                <GiHamburgerMenu
-                  style={{ color: "tealGreen", fontSize: "5vh" }}
-                />
-              </button>
+              <div className="underline font-semibold">Login</div>
             </Link>
           </Header>
 

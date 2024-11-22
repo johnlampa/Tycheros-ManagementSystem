@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import StockInRecordCard from "@/components/ui/StockInRecordCard";
+import { GiHamburgerMenu } from "react-icons/gi";
+import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
 export type StockIn = {
   purchaseOrderID: number;
@@ -25,24 +27,33 @@ export type StockIn = {
 
 export default function InventoryManagementPage() {
   const [stockInData, setStockInData] = useState<StockIn[]>([]);
+  const [sideBarVisibility, setSideBarVisibility] = useState(false);
 
   useEffect(() => {
-     fetch("http://localhost:8081/inventoryManagement/getStockInRecords")
-       .then((response) => response.json())
-       .then((data) => setStockInData(data))
-       .catch((error) => console.error("Error fetching menu data:", error));
-   }, []);
+    fetch("http://localhost:8081/inventoryManagement/getStockInRecords")
+      .then((response) => response.json())
+      .then((data) => setStockInData(data))
+      .catch((error) => console.error("Error fetching menu data:", error));
+  }, []);
 
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Stock In Records" color={"tealGreen"} type={"orders"}>
-          <Link href={"/inventory-management"} className="z-10">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
-          </Link>
+          <button
+            className="mr-3 flex items-center justify-center"
+            onClick={() => {
+              setSideBarVisibility(true);
+            }}
+          >
+            <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
+          </button>
         </Header>
+        {sideBarVisibility && (
+          <FlowBiteSideBar
+            setSideBarVisibility={setSideBarVisibility}
+          ></FlowBiteSideBar>
+        )}
 
         <div className="flex justify-center items-center md:mt-6 lg:mt-12">
           {stockInData.length === 0 ? (

@@ -15,7 +15,7 @@ export default function Login() {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
       if (loggedInEmployeeID) {
-        router.push("/employee-home"); // Redirect to employee home if logged in
+        router.push("/order-management"); // Redirect to employee home if logged in
       }
     }
   }, [router]);
@@ -46,7 +46,7 @@ export default function Login() {
       localStorage.setItem("designation", data.employee.designation);
 
       // Redirect to employee home page after successful login
-      router.push("/employee-home");
+      router.push("/order-management");
     } catch (error) {
       setErrorMessage("An error occurred while logging in. Please try again.");
     }
@@ -65,7 +65,7 @@ export default function Login() {
               </button>
             </Link>
             <h1 className="text-3xl font-bold text-center flex-grow right-2">
-              Admin Login
+              Administrator Login
             </h1>
           </div>
         </div>

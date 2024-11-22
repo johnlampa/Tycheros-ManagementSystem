@@ -18,11 +18,13 @@ import Toggle from "react-toggle";
 import "react-toggle/style.css";
 import InventoryManagementCard from "@/components/ui/InventoryManagementCard";
 import Notification from "@/components/Notification";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+import { GiHamburgerMenu } from "react-icons/gi";
+import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
@@ -40,6 +42,8 @@ export default function InventoryManagementPage() {
   const [status, setStatus] = useState<{ [key: number]: boolean }>({});
   const router = useRouter();
 
+  const [sideBarVisibility, setSideBarVisibility] = useState(false);
+
   // Ensure the user is logged in before they can access this page
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -49,7 +53,6 @@ export default function InventoryManagementPage() {
       }
     }
   }, [router]);
-  
 
   const initialItemState = {
     inventoryName: "",
@@ -499,11 +502,14 @@ export default function InventoryManagementPage() {
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Inventory" color={"tealGreen"} type={"orders"}>
-          <Link href={"/employee-home"} className="z-10">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
-          </Link>
+          <button
+            className="mr-3 flex items-center justify-center"
+            onClick={() => {
+              setSideBarVisibility(true);
+            }}
+          >
+            <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
+          </button>
         </Header>
         <div className="h-[80px] w-full bg-tealGreen flex justify-center items-center">
           <div className=" grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -515,24 +521,14 @@ export default function InventoryManagementPage() {
                 Units of Measurement
               </div>
             </Link>
-            <Link href={"/stock-in-records"}>
-              <div
-                className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
-                font-pattaya text-white`}
-              >
-                Stock In Records
-              </div>
-            </Link>
-            <Link href={"/stock-out-records"}>
-              <div
-                className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
-                font-pattaya text-white`}
-              >
-                Stock Out Records
-              </div>
-            </Link>
           </div>
         </div>
+
+        {sideBarVisibility && (
+          <FlowBiteSideBar
+            setSideBarVisibility={setSideBarVisibility}
+          ></FlowBiteSideBar>
+        )}
 
         <div className="p-4">
           <div className="w-[320px]">

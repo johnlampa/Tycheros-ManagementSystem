@@ -12,7 +12,9 @@ import Header from "@/components/Header";
 import AddCategoryModal from "@/components/AddCategoryModal";
 import EditCategoryModal from "@/components/EditCategoryModal";
 import PriceRecordsModal from "@/components/PriceRecordsModal";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+import { GiHamburgerMenu } from "react-icons/gi";
+import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -22,6 +24,8 @@ export default function Page() {
 
   //@adgramirez - add useeffect to fetch categories and populate this categories array
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
+
+  const [sideBarVisibility, setSideBarVisibility] = useState(false);
 
   const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
     useState(false);
@@ -84,12 +88,20 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header text="Bar Menu" color={"tealGreen"} type={"orders"}>
-        <Link href={"/menu-selection"} className="z-100">
-          <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-            <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-          </button>
-        </Link>
+        <button
+          className="mr-3 flex items-center justify-center"
+          onClick={() => {
+            setSideBarVisibility(true);
+          }}
+        >
+          <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
+        </button>
       </Header>
+      {sideBarVisibility && (
+        <FlowBiteSideBar
+          setSideBarVisibility={setSideBarVisibility}
+        ></FlowBiteSideBar>
+      )}
 
       <div className="flex-grow flex flex-col items-center bg-white text-black">
         <button

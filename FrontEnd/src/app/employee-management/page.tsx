@@ -5,10 +5,12 @@ import ValidationDialog from "@/components/ValidationDialog";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import Header from "@/components/Header";
-import { useRouter } from "next/navigation";  // Import useRouter for redirection
+import { useRouter } from "next/navigation"; // Import useRouter for redirection
+import { GiHamburgerMenu } from "react-icons/gi";
+import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
 export default function EmployeeManagement() {
-  const router = useRouter();  // Hook for programmatic navigation
+  const router = useRouter(); // Hook for programmatic navigation
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -33,6 +35,8 @@ export default function EmployeeManagement() {
   const [validationMessage, setValidationMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const [sideBarVisibility, setSideBarVisibility] = useState(false);
+
   useEffect(() => {
     // Check if the user is logged in by checking localStorage
     const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
@@ -40,7 +44,7 @@ export default function EmployeeManagement() {
     if (!loggedInEmployeeID) {
       // Redirect to the login page if not logged in
       router.push("/login");
-      return;  // Prevent further code execution
+      return; // Prevent further code execution
     }
 
     const fetchEmployees = async () => {
@@ -218,12 +222,20 @@ export default function EmployeeManagement() {
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Employees" color={"tealGreen"} type={"orders"}>
-          <Link href={"/employee-home"} className="z-100">
-            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-            </button>
-          </Link>
+          <button
+            className="mr-3 flex items-center justify-center"
+            onClick={() => {
+              setSideBarVisibility(true);
+            }}
+          >
+            <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
+          </button>
         </Header>
+        {sideBarVisibility && (
+          <FlowBiteSideBar
+            setSideBarVisibility={setSideBarVisibility}
+          ></FlowBiteSideBar>
+        )}
 
         <div className="flex flex-col space-y-2 my-4 w-[310px]">
           <button
