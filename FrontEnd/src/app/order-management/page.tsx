@@ -10,6 +10,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
 import axios from "axios";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
+
 import StatusRecordsModal from "@/components/StatusRecords.Modal";
 import { useRouter } from "next/navigation"; // Import useRouter for redirection
 
@@ -345,7 +346,6 @@ export default function Page() {
             ))}
           </div>
         )}
-
         <CancelOrderModal
           cancelOrderModalIsVisible={cancelOrderModalIsVisible}
           setCancelOrderModalVisibility={setCancelOrderModalVisibility}
@@ -360,7 +360,7 @@ export default function Page() {
           orderID={orderIDForStatusRecords}
           statusRecordsModalIsVisible={statusRecordsModalIsVisible}
           setStatusRecordsModalIsVisible={setStatusRecordsModalIsVisible}
-        />
+        ></StatusRecordsModal>
       </div>
     </div>
   );

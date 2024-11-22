@@ -18,7 +18,6 @@ import Toggle from "react-toggle";
 import "react-toggle/style.css";
 import InventoryManagementCard from "@/components/ui/InventoryManagementCard";
 import Notification from "@/components/Notification";
-import { useRouter } from "next/navigation"; 
 
 import Header from "@/components/Header";
 import Link from "next/link";
@@ -38,18 +37,6 @@ export default function InventoryManagementPage() {
   const [validationDialogVisible, setValidationDialogVisible] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [status, setStatus] = useState<{ [key: number]: boolean }>({});
-  const router = useRouter();
-
-  // Ensure the user is logged in before they can access this page
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-      if (!loggedInEmployeeID) {
-        router.push("/login"); // Redirect to login page if not logged in
-      }
-    }
-  }, [router]);
-  
 
   const initialItemState = {
     inventoryName: "",
