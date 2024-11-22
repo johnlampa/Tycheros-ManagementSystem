@@ -1,14 +1,13 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { Employee } from "../../../lib/types/EmployeeDataTypes";
 import ValidationDialog from "@/components/ValidationDialog";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import Header from "@/components/Header";
-import { useRouter } from "next/navigation";  // Import useRouter for redirection
 
-export default function EmployeeManagement() {
-  const router = useRouter();  // Hook for programmatic navigation
+export default function Home() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -34,15 +33,6 @@ export default function EmployeeManagement() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    // Check if the user is logged in by checking localStorage
-    const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-
-    if (!loggedInEmployeeID) {
-      // Redirect to the login page if not logged in
-      router.push("/login");
-      return;  // Prevent further code execution
-    }
-
     const fetchEmployees = async () => {
       try {
         const response = await fetch(
@@ -61,7 +51,7 @@ export default function EmployeeManagement() {
     };
 
     fetchEmployees();
-  }, [router]); // Add `router` as dependency to ensure re-run if the component is re-rendered
+  }, []);
 
   const handleAddEmployee = async () => {
     if (newEmployee.employeeID === undefined || isNaN(newEmployee.employeeID)) {
@@ -275,7 +265,7 @@ export default function EmployeeManagement() {
                     {employee.contactInformation}
                   </p>
                   <p>
-                    <strong>Status:</strong> {employee.status}
+                    <strong>Password:</strong> {employee.password}
                   </p>
                 </div>
               </div>

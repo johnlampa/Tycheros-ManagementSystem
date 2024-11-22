@@ -12,7 +12,6 @@ import Header from "@/components/Header";
 import AddCategoryModal from "@/components/AddCategoryModal";
 import EditCategoryModal from "@/components/EditCategoryModal";
 import PriceRecordsModal from "@/components/PriceRecordsModal";
-import { useRouter } from "next/navigation"; 
 
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -36,18 +35,6 @@ export default function Page() {
   const [productIDForPriceRecords, setProductIDForPriceRecords] = useState<
     number | undefined
   >(0);
-
-  const router = useRouter(); // Initialize the router
-
-  // Check if the user is logged in
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-      if (!loggedInEmployeeID) {
-        router.push("/login"); // Redirect to login page if not logged in
-      }
-    }
-  }, [router]);
 
   useEffect(() => {
     // Fetch Inventory Data
