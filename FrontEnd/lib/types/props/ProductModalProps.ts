@@ -11,13 +11,16 @@ export type ProductModalProps = {
   inventoryData: InventoryDataTypes[];
 
   menuProductToEdit?: ProductDataTypes;
-  
-  setMenuProductHolder?: React.Dispatch<React.SetStateAction<ProductDataTypes | null>>;
+  setMenuProductHolder?: React.Dispatch<
+    React.SetStateAction<ProductDataTypes | null>
+  >;
 
   menuData: ProductDataTypes[];
   setMenuData: React.Dispatch<React.SetStateAction<ProductDataTypes[]>>;
 
-  setProductIDForPriceRecords: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setPriceRecordsModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>
-
-}
+  setProductIDForPriceRecords: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
+  setPriceRecordsModalIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  onSuccess?: (message: string) => void; // Add this line
+};

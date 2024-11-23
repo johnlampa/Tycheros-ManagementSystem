@@ -90,11 +90,11 @@ const PriceRecordsModal: React.FC<PriceRecordsModal> = ({
           Price Records
         </div>
         <div className="grid grid-cols-[1fr_1fr_1fr] font-semibold text-sm gap-x-1">
-          <div className="flex justify-center items-center">Price</div>
-          <div className="flex justify-center items-center text-center">
+          <div className="flex justify-center items-center text-black">Price</div>
+          <div className="flex justify-center items-center text-center text-black">
             Date Changed
           </div>
-          <div className="flex justify-center items-center">Employee</div>
+          <div className="flex justify-center items-center text-black">Employee</div>
         </div>
         {priceRecordsForProduct.map((priceRecord, priceRecordIndex) => {
           const employee = employees.find(

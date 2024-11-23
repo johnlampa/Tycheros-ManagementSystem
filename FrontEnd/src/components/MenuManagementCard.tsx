@@ -5,6 +5,7 @@ import ProductModal from "@/components/ProductModal";
 import type { ProductDataTypes } from "../../lib/types/ProductDataTypes";
 import type { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
 import { MenuManagementCardProps } from "../../lib/types/props/MenuManagementCardProps";
+import Notification from "./Notification";
 
 const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   menuData,
@@ -20,6 +21,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   const [modalType, setModalType] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [productModalIsVisible, setProductModalVisibility] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [menuProductToEdit, setMenuProductToEdit] =
     useState<ProductDataTypes>();
 
@@ -114,7 +116,14 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
           setMenuData={setMenuData}
           setProductIDForPriceRecords={setProductIDForPriceRecords}
           setPriceRecordsModalIsVisible={setPriceRecordsModalIsVisible}
+          onSuccess={(message: string) => setSuccessMessage(message)} // Pass the callback
         ></ProductModal>
+      )}
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)} // Clear message when notification is closed
+        />
       )}
     </>
   );

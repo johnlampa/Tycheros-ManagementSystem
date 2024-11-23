@@ -109,77 +109,79 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   };
 
   return (
-    <Modal
-      modalIsVisible={editCategoryModalIsVisible}
-      setModalVisibility={setEditCategoryModalIsVisible}
-    >
-      <form
-        id="editCategoryForm"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSave();
-        }}
-        className="w-[340px] p-6 mx-auto rounded"
+    <>
+      <Modal
+        modalIsVisible={editCategoryModalIsVisible}
+        setModalVisibility={setEditCategoryModalIsVisible}
       >
-        <p className="text-center text-xl font-bold text-black mb-4">
-          {modalTitle}
-        </p>
-
-        <div className="flex justify-between items-center mb-4 text-black">
-          <label htmlFor="categoryName" className="pr-4">
-            Category Name
-          </label>
-        </div>
-
-        <input
-          type="text"
-          name="categoryName"
-          id="categoryName"
-          placeholder="Enter category name"
-          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          value={categoryName}
-          onChange={(e) => setCategoryName(e.target.value)}
-        />
-
-        <div className="flex gap-x-2 text-black mb-5">
-          <p>Active: </p>
-          <Toggle
-            checked={isChecked}
-            icons={false}
-            onChange={(e) => setIsChecked(e.target.checked)}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5"
+        <form
+          id="editCategoryForm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
+          }}
+          className="w-[340px] p-6 mx-auto rounded"
         >
-          Save
-        </button>
+          <p className="text-center text-xl font-bold text-black mb-4">
+            {modalTitle}
+          </p>
 
-        <div className="mt-2 text-center">
+          <div className="flex justify-between items-center mb-4 text-black">
+            <label htmlFor="categoryName" className="pr-4">
+              Category Name
+            </label>
+          </div>
+
+          <input
+            type="text"
+            name="categoryName"
+            id="categoryName"
+            placeholder="Enter category name"
+            className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+          />
+
+          <div className="flex gap-x-2 text-black mb-5">
+            <p>Active: </p>
+            <Toggle
+              checked={isChecked}
+              icons={false}
+              onChange={(e) => setIsChecked(e.target.checked)}
+            />
+          </div>
+
           <button
-            type="button"
-            className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
-            onClick={handleCancel}
+            type="submit"
+            className="bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5"
           >
-            Cancel
+            Save
           </button>
-        </div>
-      </form>
-      {validationMessage && (
-        <ValidationDialog
-          message={validationMessage}
-          onClose={() => setValidationMessage(null)}
-        />
-      )}
+
+          <div className="mt-2 text-center">
+            <button
+              type="button"
+              className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        {validationMessage && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={() => setValidationMessage(null)}
+          />
+        )}  
+      </Modal>
       {successMessage && (
-        <Notification
-          message={successMessage}
-          onClose={() => setSuccessMessage(null)}
-        />
-      )}      
-    </Modal>
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}    
+    </>
   );
 };
 
