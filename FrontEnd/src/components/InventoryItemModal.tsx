@@ -87,7 +87,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
         </div>
 
         <div>
-          <div className="mb-2">Inventory name</div>
+          <div className="mb-2 text-black">Inventory name</div>
           <input
             type="text"
             placeholder="Enter inventory Name"
@@ -100,7 +100,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
             }
             className="mb-5 p-2 w-full text-black border border-gray rounded"
           />
-          <div className="mb-2">Inventory category</div>
+          <div className="mb-2 text-black">Inventory category</div>
           <select
             value={inventoryItemData.inventoryCategory}
             onChange={(e) =>
@@ -124,7 +124,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
             <option value="Condiments">Condiments</option>
             <option value="Beverages">Beverages</option>
           </select>
-          <div className="mb-2">Reorder point</div>
+          <div className="mb-2 text-black">Reorder point</div>
           <input
             type="number"
             placeholder="Enter reorder Point"
@@ -143,7 +143,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
             className=" p-2 w-full text-black border border-gray rounded mb-5"
             min="0"
           />
-          <div className="mb-2">Unit of Measurement</div>
+          <div className="mb-2 text-black">Unit of Measurement</div>
           <select
             value={inventoryItemData.unitOfMeasurementID || 0}
             onChange={(e) =>

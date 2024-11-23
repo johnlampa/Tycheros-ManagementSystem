@@ -164,6 +164,7 @@ router.get('/getSpecificSubitems/:productID', (req, res) => {
         unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
     WHERE 
         si.productID = ?
+        AND i.inventoryStatus = 1
   `;
 
   db.query(query, [productID], (err, result) => {
