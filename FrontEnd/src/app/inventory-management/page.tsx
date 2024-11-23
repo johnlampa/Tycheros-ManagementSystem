@@ -311,7 +311,7 @@ export default function InventoryManagementPage() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Adjust this as needed
+  const itemsPerPage = 9; // Adjust this as needed
 
   const [filterByCategory, setFilterByCategory] = useState("");
   const [filterByStatus, setFilterByStatus] = useState<number | null>(null);
@@ -713,55 +713,94 @@ export default function InventoryManagementPage() {
           ></FlowBiteSideBar>
         )}
 
-        <div className="p-4">
-          <input
-            type="search"
-            placeholder="&#x1F50D; Search Inventory Name"
-            className="border border-black py-2 px-3 text-sm rounded w-full mb-4"
-            onChange={(e) => setSearchByName(e.target.value)}
-          ></input>
-
-          <div className="w-[320px]">
-            <button
-              onClick={() => setShowAddOverlay(true)}
-              className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-full"
-            >
-              Add Inventory Item
-            </button>
-
-            <div className="grid grid-cols-2 gap-x-2 mt-2">
-              <button
-                onClick={() => setShowStockInOverlay(true)}
-                className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
-              >
-                Stock In
-              </button>
-
-              <button
-                onClick={() => setShowStockOutOverlay(true)}
-                className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
-              >
-                Stock Out
-              </button>
-            </div>
-            <button
-              onClick={() => {
-                setShowUpdateStockOverlay(true);
-                // if (inventoryItem?.inventoryID !== null) {
-                //   handleUpdateStock(inventoryItem.inventoryID.toString()); // Use the selected radio button's inventory ID
-                // }
-              }}
-              className="mt-2 bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
-            >
-              Update Stock
-            </button>
-          </div>
-        </div>
-
         {filteredInventoryData.length === 0 ? (
           <p className="text-sm text-black">No inventory items found</p>
         ) : (
           <div>
+            <div className="p-4 md:hidden">
+              <input
+                type="search"
+                placeholder="&#x1F50D; Search Inventory Name"
+                className="border border-black py-2 px-3 text-sm rounded w-full mb-4"
+                onChange={(e) => setSearchByName(e.target.value)}
+              ></input>
+
+              <div className="w-[320px]">
+                <button
+                  onClick={() => setShowAddOverlay(true)}
+                  className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-full"
+                >
+                  Add Inventory Item
+                </button>
+
+                <div className="grid grid-cols-2 gap-x-2 mt-2">
+                  <button
+                    onClick={() => setShowStockInOverlay(true)}
+                    className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
+                  >
+                    Stock In
+                  </button>
+
+                  <button
+                    onClick={() => setShowStockOutOverlay(true)}
+                    className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
+                  >
+                    Stock Out
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowUpdateStockOverlay(true);
+                    // if (inventoryItem?.inventoryID !== null) {
+                    //   handleUpdateStock(inventoryItem.inventoryID.toString()); // Use the selected radio button's inventory ID
+                    // }
+                  }}
+                  className="mt-2 bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
+                >
+                  Update Stock
+                </button>
+              </div>
+            </div>
+            <div className="hidden w-full md:flex flex-col gap-y-3 mt-10 mb-10">
+              <div className="w-full flex justify-end">
+                <input
+                  type="search"
+                  placeholder="&#x1F50D; Search Inventory Name"
+                  className="border border-black py-2 px-3 text-sm rounded w-[320px]"
+                  onChange={(e) => setSearchByName(e.target.value)}
+                ></input>
+              </div>
+              <div className="flex justify-between">
+                <div className="flex gap-x-3">
+                  <button
+                    onClick={() => setShowStockInOverlay(true)}
+                    className="bg-tealGreen text-white py-2 px-3 text-xs font-semibold rounded w-[92px]"
+                  >
+                    Stock In
+                  </button>
+                  <button
+                    onClick={() => setShowStockOutOverlay(true)}
+                    className="bg-white text-red border-2 border-red border- py-2 px-3  text-xs font-semibold rounded w-[92px]"
+                  >
+                    Stock Out
+                  </button>
+                  <button
+                    onClick={() => setShowUpdateStockOverlay(true)}
+                    className="bg-white text-black border-2 border-black py-2 px-3 text-xs font-semibold rounded w-[111px]"
+                  >
+                    Update Stock
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => setShowAddOverlay(true)}
+                    className="bg-tealGreen text-white border-2 border-tealGreen py-2 px-3 text-sm font-semibold rounded w-[320px]"
+                  >
+                    Add Inventory Item
+                  </button>
+                </div>
+              </div>
+            </div>
             <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-9 md:mt-5">
               {currentData.map((item) => (
                 <div key={item.inventoryID} className="mt-8 md:mt-0">
