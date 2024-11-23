@@ -222,22 +222,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-black">Update Stock</h2>
           <div className="flex items-center">
-            <label htmlFor="updateStockDate" className="text-black mr-2">
-              Date:
-            </label>
-            <input
-              type="date"
-              id="updateStockDate"
-              onChange={(e) => {
-                const newValue = e.target.value;
-                setUpdateStockData({
-                  ...updateStockData,
-                  updateStockDateTime: newValue,
-                });
-              }}
-              defaultValue={new Date().toISOString().split("T")[0]} // Sets to current date in 'YYYY-MM-DD' format
-              className="p-2 text-black border border-black"
-            />
+            Date: {updateStockData.updateStockDateTime}
           </div>
         </div>
         <div className="mb-3 text-black">

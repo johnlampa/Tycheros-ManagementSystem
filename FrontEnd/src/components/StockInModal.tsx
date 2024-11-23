@@ -180,19 +180,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-black">Stock In</h2>
           <div className="flex items-center">
-            <label htmlFor="stockInDate" className="text-black mr-2">
-              Date:
-            </label>
-            <input
-              type="date"
-              id="stockInDate"
-              onChange={(e) => {
-                const newValue = e.target.value;
-                setStockInData({ ...stockInData, stockInDateTime: newValue });
-              }}
-              defaultValue={new Date().toISOString().split("T")[0]} // Sets to current date in 'YYYY-MM-DD' format
-              className="p-2 text-black border border-black"
-            />
+            Date: {stockInData.stockInDateTime}
           </div>
         </div>
         <div>
@@ -313,6 +301,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   <label className="text-black">Expiry Date </label>
                   <input
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     placeholder="Expiry Date"
                     value={
                       item.expiryDate === "dd/mm/yyyy" ? "" : item.expiryDate

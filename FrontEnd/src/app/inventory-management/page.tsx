@@ -90,7 +90,7 @@ export default function InventoryManagementPage() {
   const [stockInData, setStockInData] = useState<MultiItemStockInData>({
     supplierName: "",
     employeeID: "",
-    stockInDateTime: "",
+    stockInDateTime: new Date().toISOString().split("T")[0],
     inventoryItems: [
       {
         inventoryID: 0,
@@ -105,7 +105,7 @@ export default function InventoryManagementPage() {
   const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
   const [stockOutData, setStockOutData] = useState<MultiItemStockOutData>({
     employeeID: "",
-    stockOutDateTime: "",
+    stockOutDateTime: new Date().toISOString().split("T")[0],
     inventoryItems: [
       {
         inventoryID: 0,
@@ -177,7 +177,7 @@ export default function InventoryManagementPage() {
   const [updateStockData, setUpdateStockData] =
     useState<MultiItemUpdateStockData>({
       employeeID: "",
-      updateStockDateTime: "",
+      updateStockDateTime: new Date().toISOString().split("T")[0],
       inventoryItems: [
         {
           inventoryID: 0,
