@@ -10,6 +10,7 @@ import OrderCard from "@/components/OrderCard";
 import OrderManagementCard from "@/components/ui/OrderManagementCard";
 import { FaArrowLeft } from "react-icons/fa";
 import ValidationDialog from "@/components/ValidationDialog";
+import Notification from "@/components/Notification";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
 
 function PaymentDetailsPage() {
@@ -31,6 +32,7 @@ function PaymentDetailsPage() {
 
   const [showDialog, setShowDialog] = useState(false); // State for dialog visibility
   const [validationMessage, setValidationMessage] = useState(""); // Message for the dialog
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [orders, setOrders] = useState<Order[]>([]); //for component purposes. to remove when OrderManagementCard is refactored
 
@@ -109,6 +111,15 @@ function PaymentDetailsPage() {
   }, [order, menuData]);
 
   const handleConfirmPayment = async () => {
+     // Check if discount amount exceeds the total
+    if (discountAmount > total) {
+      setValidationMessage(
+        "Discount amount cannot be greater than the total amount."
+      );
+      setShowDialog(true);
+      return; // Stop further processing
+    }
+    
     // Check if discount type is entered without a discount amount
     if (discountType && discountAmount === 0) {
       setValidationMessage("Please provide the discount amount.");
@@ -116,6 +127,21 @@ function PaymentDetailsPage() {
       return; // Stop further processing
     } else if (!discountType && discountAmount > 0) {
       setValidationMessage("Please provide the discount type.");
+      setShowDialog(true);
+      return; // Stop further processing
+    }
+
+    if (!paymentMethod) {
+      setValidationMessage("Please select a payment method.");
+      setShowDialog(true);
+      return; // Stop further processing
+    }
+
+    // Check if reference number is required but not provided
+    if ((paymentMethod === "GCash" || paymentMethod === "Card") && !referenceNumber.trim()) {
+      setValidationMessage(
+        "Reference number is required for GCash or Card payments."
+      );
       setShowDialog(true);
       return; // Stop further processing
     }
@@ -160,9 +186,10 @@ function PaymentDetailsPage() {
       if (!paymentResponse.ok) {
         throw new Error("Failed to process payment");
       }
-
-      alert("Payment processed and order status updated successfully");
-      router.push("/order-management");
+      setSuccessMessage(`Payment processed and order status updated successfully`);
+      setTimeout(() => {
+        router.push("/order-management");
+      }, 3000);
     } catch (error) {
       console.error("Error:", error);
       alert("Error processing payment or updating order status");
@@ -187,6 +214,11 @@ function PaymentDetailsPage() {
     if (isNaN(parsedValue)) {
       setValidationMessage(
         "Invalid discount amount. Please enter a valid number."
+      );
+      setShowDialog(true); // Show validation dialog
+    } else if (parsedValue > total) {
+      setValidationMessage(
+        "Invalid discount amount. Discount cannot be greater than the total."
       );
       setShowDialog(true); // Show validation dialog
     } else if (parsedValue < 0) {
@@ -369,6 +401,12 @@ function PaymentDetailsPage() {
             </div>
           </div>
         </div>
+        {successMessage && (
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}
       </div>
     </div>
   );

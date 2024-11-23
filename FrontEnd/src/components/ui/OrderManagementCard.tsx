@@ -4,6 +4,7 @@ import { OrderManagementCardProps } from "../../../lib/types/props/OrderManageme
 import Link from "next/link";
 import { Order } from "../../../lib/types/OrderDataTypes";
 import { Payment } from "../../../lib/types/PaymentDataTypes";
+import Notification from "../Notification";
 
 const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
   ({
@@ -21,6 +22,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
   }) => {
     const [total, setTotal] = useState(0);
     const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const payment = payments?.find(
       (p: Payment) => p.paymentID === order.paymentID
@@ -78,8 +80,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
         if (!response.ok) {
           throw new Error("Failed to update order status");
         }
-
-        alert(`Order status updated to ${newStatus}`);
+        setSuccessMessage(`Order status updated to ${newStatus}`);
 
         // Update the UI locally
         const updatedOrder: Order = {
@@ -290,6 +291,12 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             </>
           )}
         </div>
+        {successMessage && (
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}
       </>
     );
   }

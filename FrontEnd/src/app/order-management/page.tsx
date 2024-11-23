@@ -14,6 +14,7 @@ import StatusRecordsModal from "@/components/StatusRecords.Modal";
 import { useRouter } from "next/navigation"; // Import useRouter for redirection
 import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { AxiosError } from "axios";
 
 export default function Page() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -123,17 +124,33 @@ export default function Page() {
         const response = await axios.get(
           "http://localhost:8081/orderManagement/getPaymentDetails"
         );
-        if (response.data && response.data.length > 0) {
+        if (response.status === 200 && response.data && response.data.length > 0) {
           setPayments(response.data);
         } else {
-          setPayments([]); // Handle empty response
-          console.warn("No payment details found");
+          setPayments([]); // Default to an empty array if no data is returned
+          console.log("No payment details available."); // Log instead of showing an error
         }
-      } catch (error: unknown) {
-        console.error("Error fetching payment details:", error);
-        setError("Error fetching payment details");
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          // Handle AxiosError specifically
+          if (error.response && error.response.status === 404) {
+            setPayments([]);
+            console.log(error.response.data.message); // Log the no-data message
+          } else {
+            console.error("Error fetching payment details:", error.message);
+            setError("Error fetching payment details.");
+          }
+        } else if (error instanceof Error) {
+          // Handle generic errors
+          console.error("Error fetching payment details:", error.message);
+          setError(error.message);
+        } else {
+          // Handle unknown errors
+          console.error("An unknown error occurred:", error);
+          setError("An unknown error occurred.");
+        }
       }
-    };
+    };    
 
     fetchOrders();
     fetchMenuData();
