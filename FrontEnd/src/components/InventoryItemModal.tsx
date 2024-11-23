@@ -32,8 +32,12 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
   inventoryData,
   itemToEditID,
 }) => {
-  const [validationMessage, setValidationMessage] = useState<string | null>(null);
-  const [isChecked, setIsChecked] = useState(inventoryItemData.inventoryStatus === 1);
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
+  const [isChecked, setIsChecked] = useState(
+    inventoryItemData.inventoryStatus === 1
+  );
 
   useEffect(() => {
     setIsChecked(inventoryItemData.inventoryStatus === 1);
@@ -77,18 +81,26 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-5 rounded-lg w-72">
-        <h2 className="text-black">{modalTitle}</h2>
+      <div className="bg-white p-5 rounded-lg w-[340px]">
+        <div className="flex justify-center mb-5">
+          <p className="text-black font-semibold text-xl">{modalTitle}</p>
+        </div>
+
         <div>
+          <div className="mb-2">Inventory name</div>
           <input
             type="text"
-            placeholder="Inventory Name"
+            placeholder="Enter inventory Name"
             value={inventoryItemData.inventoryName}
             onChange={(e) =>
-              setInventoryItemData({ ...inventoryItemData, inventoryName: e.target.value })
+              setInventoryItemData({
+                ...inventoryItemData,
+                inventoryName: e.target.value,
+              })
             }
-            className="mb-2 p-2 w-full text-black"
+            className="mb-5 p-2 w-full text-black border border-gray rounded"
           />
+          <div className="mb-2">Inventory category</div>
           <select
             value={inventoryItemData.inventoryCategory}
             onChange={(e) =>
@@ -97,7 +109,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
                 inventoryCategory: e.target.value,
               })
             }
-            className="mb-2 p-2 w-full text-black"
+            className="mb-5 p-2 w-full text-black border border-gray rounded"
           >
             <option value="" disabled>
               Select Inventory Category
@@ -112,41 +124,52 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
             <option value="Condiments">Condiments</option>
             <option value="Beverages">Beverages</option>
           </select>
+          <div className="mb-2">Reorder point</div>
           <input
             type="number"
-            placeholder="Reorder Point"
-            value={inventoryItemData.reorderPoint === 0 ? "" : inventoryItemData.reorderPoint}
+            placeholder="Enter reorder Point"
+            value={
+              inventoryItemData.reorderPoint === 0
+                ? ""
+                : inventoryItemData.reorderPoint
+            }
             onChange={(e) =>
               setInventoryItemData({
                 ...inventoryItemData,
-                reorderPoint: e.target.value === "" ? 0 : Number(e.target.value),
+                reorderPoint:
+                  e.target.value === "" ? 0 : Number(e.target.value),
               })
             }
-            className="mb-2 p-2 w-full text-black"
+            className=" p-2 w-full text-black border border-gray rounded mb-5"
             min="0"
           />
-
+          <div className="mb-2">Unit of Measurement</div>
           <select
-            value={inventoryItemData.unitOfMeasurementID || 0} 
+            value={inventoryItemData.unitOfMeasurementID || 0}
             onChange={(e) =>
               setInventoryItemData({
                 ...inventoryItemData,
-                unitOfMeasurementID: e.target.value ? Number(e.target.value) : undefined,
+                unitOfMeasurementID: e.target.value
+                  ? Number(e.target.value)
+                  : undefined,
               })
             }
-            className="mb-2 p-2 w-full text-black"
+            className="mb-5 p-2 w-full text-black border border-gray rounded"
           >
             <option value="0" disabled>
-              Select Unit of Measure
+              Select UoM
             </option>
             {unitOfMeasurements.map((uom) => (
-              <option key={uom.unitOfMeasurementID} value={uom.unitOfMeasurementID}>
+              <option
+                key={uom.unitOfMeasurementID}
+                value={uom.unitOfMeasurementID}
+              >
                 {uom.UoM}
               </option>
             ))}
           </select>
 
-          <div className="flex gap-x-2 text-black mb-5">
+          <div className="flex gap-x-2 text-black mb-7">
             <p>Status: </p>
             <Toggle
               checked={isChecked}
