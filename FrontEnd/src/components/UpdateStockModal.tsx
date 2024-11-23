@@ -6,6 +6,7 @@ import {
 } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 import axios from "axios";
+import { FaTrashAlt } from "react-icons/fa";
 
 interface UpdateStockModalProps {
   updateStockData: MultiItemUpdateStockData;
@@ -83,6 +84,10 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
         expanded: true,
       },
     ]);
+  };
+
+  const handleDeleteInventoryItem = (index: number) => {
+    setInventoryItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
 
   const toggleExpandItem = (index: number) => {
@@ -243,9 +248,21 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
           <div key={index} className="mb-4 p-2 border border-black bg-cream">
             <div className="flex justify-between items-center text-black">
               <div>Inventory Item</div>
-              <button onClick={() => toggleExpandItem(index)}>
-                {item.expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
-              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteInventoryItem(index)}
+                  className="text-black ml-4"
+                >
+                  <FaTrashAlt />
+                </button>
+                <button
+                  onClick={() => toggleExpandItem(index)}
+                  className="ml-2"
+                >
+                  {item.expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                </button>
+              </div>
             </div>
             <select
               value={item.inventoryID}
@@ -267,6 +284,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
                 </option>
               ))}
             </select>
+
             {item.expanded && (
               <div className="text-black">
                 <div className="mb-2">

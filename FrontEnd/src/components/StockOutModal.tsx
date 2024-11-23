@@ -6,6 +6,7 @@ import {
 } from "../../lib/types/InventoryItemDataTypes"; // Assuming your type for multi-item stock out
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 import { WiDirectionDown } from "react-icons/wi";
+import { FaTrashAlt } from "react-icons/fa";
 
 interface StockOutModalProps {
   stockOutData: MultiItemStockOutData;
@@ -72,6 +73,10 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
         expanded: true,
       },
     ]);
+  };
+
+  const handleDeleteInventoryItem = (index: number) => {
+    setInventoryItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
 
   const toggleExpandItem = (index: number) => {
@@ -243,7 +248,15 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
                 ))}
               </select>
 
-              <button onClick={() => toggleExpandItem(index)}>
+              <button
+                type="button"
+                onClick={() => handleDeleteInventoryItem(index)}
+                className="text-black ml-4"
+              >
+                <FaTrashAlt />
+              </button>
+
+              <button onClick={() => toggleExpandItem(index)} className="ml-2">
                 {item.expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
               </button>
             </div>
