@@ -4,6 +4,7 @@ import { CategoriesDataTypes } from "../../lib/types/CategoriesDataTypes";
 import React from "react";
 import Toggle from "react-toggle";
 import ValidationDialog from "@/components/ValidationDialog";
+import Notification from "./Notification";
 
 interface EditCategoryModalProps {
   editCategoryModalIsVisible: boolean;
@@ -39,6 +40,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSave = async () => {
     const validationErrors: string[] = [];
@@ -79,6 +81,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   
       const result = await response.json();
       console.log("Category updated successfully:", result);
+
   
       // Update the category list or UI state
       if (setCategoryHolder) {
@@ -91,7 +94,10 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
       }
   
       setEditCategoryModalIsVisible(false);
-      window.location.reload();
+      setSuccessMessage(`Menu category updated successfully`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (error) {
       console.error("Error updating category:", error);
       setValidationMessage("Failed to update category. Please try again.");
@@ -167,6 +173,12 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
           onClose={() => setValidationMessage(null)}
         />
       )}
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}      
     </Modal>
   );
 };

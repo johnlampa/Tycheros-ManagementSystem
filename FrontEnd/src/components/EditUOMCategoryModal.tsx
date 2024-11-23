@@ -6,6 +6,7 @@ import { UOM, UOMCategory } from "../../lib/types/UOMDataTypes";
 import Toggle from "react-toggle";
 import ValidationDialog from "@/components/ValidationDialog";
 import "react-toggle/style.css";
+import Notification from "./Notification";
 
 interface EditUOMCategoryModalProps {
   editUOMCategoryModalIsVisible: boolean;
@@ -29,6 +30,7 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Reset state when categoryToEdit changes
@@ -62,9 +64,11 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
       );
 
       if (response.status === 200) {
-        alert("Category updated successfully!");
+        setSuccessMessage(`UoM category updated successfully`);
         setEditUOMCategoryModalVisibility(false);
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       }
     } catch (error) {
       console.error("Error updating category:", error);
@@ -143,6 +147,13 @@ const EditUOMCategoryModal: React.FC<EditUOMCategoryModalProps> = ({
           />
         )}
       </Modal>
+
+      {successMessage && (
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}
     </>
   );
 };
