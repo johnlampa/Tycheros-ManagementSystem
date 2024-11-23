@@ -618,7 +618,7 @@ export default function InventoryManagementPage() {
               <select
                 value={filterByCategory}
                 onChange={(e) => setFilterByCategory(e.target.value)}
-                className="h-[25px] text-sm w-min text-black"
+                className="h-[25px] text-sm w-min text-black rounded-sm px-1"
               >
                 <option value="">All Categories</option>
                 <option value="Produce">Produce</option>
