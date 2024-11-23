@@ -27,7 +27,6 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
 export default function InventoryManagementPage() {
-  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [selectedInventoryID, setSelectedInventoryID] = useState<number | null>(
@@ -207,7 +206,7 @@ export default function InventoryManagementPage() {
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
-        setInventoryData(updatedInventory);
+        setUnfilteredInventoryData(updatedInventory);
         window.location.reload();
       } else {
         const errorData = await response.json();
@@ -257,7 +256,7 @@ export default function InventoryManagementPage() {
       const updatedInventory = await fetch(
         "http://localhost:8081/inventoryManagement/getInventoryItem"
       ).then((res) => res.json());
-      setInventoryData(updatedInventory);
+      setUnfilteredInventoryData(updatedInventory);
 
       alert("Item stocked in successfully");
 
@@ -308,6 +307,20 @@ export default function InventoryManagementPage() {
     }
   };
 
+  const [filterByCategory, setFilterByCategory] = useState("");
+  const [filterByStatus, setFilterByStatus] = useState<number | null>(null);
+  const [filterByStockCount, setFilterByStockCount] = useState({
+    lowStock: false,
+    noStock: false,
+  });
+
+  const [unfilteredInventoryData, setUnfilteredInventoryData] = useState<
+    InventoryItem[]
+  >([]);
+  const [filteredInventoryData, setFilteredInventoryData] = useState<
+    InventoryItem[]
+  >([]);
+
   useEffect(() => {
     const fetchInventory = async () => {
       try {
@@ -318,7 +331,7 @@ export default function InventoryManagementPage() {
           throw new Error("Network response was not ok");
         }
         const data: InventoryItem[] = await response.json();
-        setInventoryData(data);
+        setUnfilteredInventoryData(data);
       } catch (error) {
         setError(error as Error);
       } finally {
@@ -328,6 +341,53 @@ export default function InventoryManagementPage() {
 
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = unfilteredInventoryData;
+
+      if (filterByStatus !== null) {
+        filtered = filtered.filter(
+          (inventoryItem) => inventoryItem.inventoryStatus === filterByStatus
+        );
+      }
+
+      if (filterByCategory) {
+        filtered = filtered.filter(
+          (inventoryItem) =>
+            inventoryItem.inventoryCategory === filterByCategory
+        );
+      }
+
+      if (filterByStockCount.noStock || filterByStockCount.lowStock) {
+        filtered = filtered.filter((inventoryItem) => {
+          const totalQuantity = Number(inventoryItem.totalQuantity);
+          const reorderPoint = Number(inventoryItem.reorderPoint);
+
+          // Handle "no stock" and "low stock" independently
+          const isNoStock = filterByStockCount.noStock && totalQuantity === 0;
+          const isLowStock =
+            filterByStockCount.lowStock &&
+            totalQuantity <= reorderPoint &&
+            totalQuantity !== 0;
+
+          // Keep the item if either condition is true
+          return isNoStock || isLowStock;
+        });
+      }
+
+      console.log("unfiltered inv data: ", unfilteredInventoryData);
+
+      setFilteredInventoryData(filtered);
+    };
+
+    applyFilters();
+  }, [
+    filterByCategory,
+    filterByStatus,
+    filterByStockCount,
+    unfilteredInventoryData,
+  ]);
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -355,14 +415,14 @@ export default function InventoryManagementPage() {
       const updatedInventory = await fetch(
         "http://localhost:8081/inventoryManagement/getInventoryItem"
       ).then((res) => res.json());
-      setInventoryData(updatedInventory);
+      setUnfilteredInventoryData(updatedInventory);
     } catch (error) {
       console.error("Error adding inventory item:", error);
     }
   };
 
   const handleEditItem = async (id: number) => {
-    const item = inventoryData.find((item) => item.inventoryID === id);
+    const item = filteredInventoryData.find((item) => item.inventoryID === id);
     if (item) {
       setItemToEdit(item);
       setItemToEditID(item.inventoryID);
@@ -397,7 +457,7 @@ export default function InventoryManagementPage() {
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
-        setInventoryData(updatedInventory);
+        setUnfilteredInventoryData(updatedInventory);
 
         setShowEditOverlay(false);
         alert("Inventory item updated successfully");
@@ -458,7 +518,7 @@ export default function InventoryManagementPage() {
         }
       );
 
-      setInventoryData((prevData) =>
+      setUnfilteredInventoryData((prevData) =>
         prevData.map((item) =>
           item.inventoryID === inventoryID
             ? { ...item, inventoryStatus: updatedStatus }
@@ -511,16 +571,104 @@ export default function InventoryManagementPage() {
             <GiHamburgerMenu style={{ fontSize: "5vh", color: "white" }} />
           </button>
         </Header>
-        <div className="h-[80px] w-full bg-tealGreen flex justify-center items-center">
-          <div className=" grid grid-cols-2 md:grid-cols-3 gap-3">
-            <Link href={"/uom-management"}>
-              <div
-                className={`w-[150px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 text-md
-                font-pattaya text-white`}
-              >
-                Units of Measurement
+        <div className="pb-3 w-full bg-tealGreen px-2 sm:px-5">
+          <div className="w-full flex justify-center items-center">
+            <div className="flex flex-col md:flex-row items-center gap-3">
+              {/* Filters Label */}
+              <div className="text-xs w-16 md:text-md font-semibold text-white flex justify-center">
+                Filters:
               </div>
-            </Link>
+
+              {/* Category Dropdown */}
+              <select
+                value={filterByCategory}
+                onChange={(e) => setFilterByCategory(e.target.value)}
+                className="h-[25px] text-sm w-min text-black"
+              >
+                <option value="">All Categories</option>
+                <option value="Produce">Produce</option>
+                <option value="Dairy and Eggs">Dairy and Eggs</option>
+                <option value="Meat and Poultry">Meat and Poultry</option>
+                <option value="Seafood">Seafood</option>
+                <option value="Canned Goods">Canned Goods</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Sauces">Sauces</option>
+                <option value="Condiments">Condiments</option>
+                <option value="Beverages">Beverages</option>
+              </select>
+
+              {/* Divider */}
+              <div className="text-white hidden md:block mx-3">|</div>
+
+              {/* Stock Buttons */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div
+                  className={`${
+                    filterByStockCount.lowStock
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  onClick={() =>
+                    setFilterByStockCount((prev) => ({
+                      ...prev,
+                      lowStock: !prev.lowStock,
+                    }))
+                  }
+                >
+                  Low Stock
+                </div>
+                <div
+                  className={`${
+                    filterByStockCount.noStock
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  onClick={() =>
+                    setFilterByStockCount((prev) => ({
+                      ...prev,
+                      noStock: !prev.noStock,
+                    }))
+                  }
+                >
+                  No Stock
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="text-white hidden md:block mx-3">|</div>
+
+              {/* Status Buttons */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div
+                  className={`${
+                    filterByStatus === 1
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  onClick={() =>
+                    setFilterByStatus((prevStatus) =>
+                      prevStatus === 1 ? null : 1
+                    )
+                  }
+                >
+                  Active
+                </div>
+                <div
+                  className={`${
+                    filterByStatus === 0
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  onClick={() =>
+                    setFilterByStatus((prevStatus) =>
+                      prevStatus === 0 ? null : 0
+                    )
+                  }
+                >
+                  Inactive
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -568,11 +716,11 @@ export default function InventoryManagementPage() {
           </div>
         </div>
 
-        {inventoryData.length === 0 ? (
+        {filteredInventoryData.length === 0 ? (
           <p className="text-sm text-black">No inventory items found</p>
         ) : (
           <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-9 md:mt-5">
-            {inventoryData.map((item) => (
+            {filteredInventoryData.map((item) => (
               <div key={item.inventoryID} className="mt-8 md:mt-0">
                 <InventoryManagementCard
                   inventoryItem={item}
@@ -616,7 +764,7 @@ export default function InventoryManagementPage() {
             }}
             onCancel={() => setShowEditOverlay(false)}
             handleStatusToggle={handleStatusToggle}
-            inventoryData={inventoryData}
+            inventoryData={filteredInventoryData}
             itemToEditID={itemToEditID}
             unitOfMeasurements={unitOfMeasurements} // Pass the fetched data here
           />

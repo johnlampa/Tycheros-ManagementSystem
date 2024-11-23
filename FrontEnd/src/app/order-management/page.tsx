@@ -178,93 +178,88 @@ export default function Page() {
               Filters:
             </div>
             <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-x-3 sm:gap-y-3">
-              {/* Status Links */}
+              <div
+                className={`${
+                  filterByStatus.Unpaid === true
+                    ? "bg-white !text-tealGreen font-semibold"
+                    : ""
+                } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                onClick={() =>
+                  filterByStatus.Unpaid === false
+                    ? setFilterByStatus((prev) => ({ ...prev, Unpaid: true }))
+                    : setFilterByStatus((prev) => ({
+                        ...prev,
+                        Unpaid: false,
+                      }))
+                }
+              >
+                Unpaid
+              </div>
 
-              <Link href={""}>
-                <div
-                  className={`${
-                    filterByStatus.Unpaid === true
-                      ? "bg-white !text-tealGreen font-semibold"
-                      : ""
-                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
-                  onClick={() =>
-                    filterByStatus.Unpaid === false
-                      ? setFilterByStatus((prev) => ({ ...prev, Unpaid: true }))
-                      : setFilterByStatus((prev) => ({
-                          ...prev,
-                          Unpaid: false,
-                        }))
-                  }
-                >
-                  Unpaid
-                </div>
-              </Link>
-              <Link href={""}>
-                <div
-                  className={`${
-                    filterByStatus.Pending === true
-                      ? "bg-white !text-tealGreen font-semibold"
-                      : ""
-                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
-                  onClick={() =>
-                    filterByStatus.Pending === false
-                      ? setFilterByStatus((prev) => ({
-                          ...prev,
-                          Pending: true,
-                        }))
-                      : setFilterByStatus((prev) => ({
-                          ...prev,
-                          Pending: false,
-                        }))
-                  }
-                >
-                  Pending
-                </div>
-              </Link>
-              <Link href={""}>
-                <div
-                  className={`${
-                    filterByStatus.Completed === true
-                      ? "bg-white !text-tealGreen font-semibold"
-                      : ""
-                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
-                  onClick={() =>
-                    filterByStatus.Completed === false
-                      ? setFilterByStatus((prev) => ({
-                          ...prev,
-                          Completed: true,
-                        }))
-                      : setFilterByStatus((prev) => ({
-                          ...prev,
-                          Completed: false,
-                        }))
-                  }
-                >
-                  Completed
-                </div>
-              </Link>
-              <Link href={""}>
-                <div
-                  className={`${
-                    filterByStatus.Cancelled === true
-                      ? "bg-white !text-tealGreen font-semibold"
-                      : ""
-                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
-                  onClick={() =>
-                    filterByStatus.Cancelled === false
-                      ? setFilterByStatus((prev) => ({
-                          ...prev,
-                          Cancelled: true,
-                        }))
-                      : setFilterByStatus((prev) => ({
-                          ...prev,
-                          Cancelled: false,
-                        }))
-                  }
-                >
-                  Cancelled
-                </div>
-              </Link>
+              <div
+                className={`${
+                  filterByStatus.Pending === true
+                    ? "bg-white !text-tealGreen font-semibold"
+                    : ""
+                } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                onClick={() =>
+                  filterByStatus.Pending === false
+                    ? setFilterByStatus((prev) => ({
+                        ...prev,
+                        Pending: true,
+                      }))
+                    : setFilterByStatus((prev) => ({
+                        ...prev,
+                        Pending: false,
+                      }))
+                }
+              >
+                Pending
+              </div>
+
+              <div
+                className={`${
+                  filterByStatus.Completed === true
+                    ? "bg-white !text-tealGreen font-semibold"
+                    : ""
+                } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                onClick={() =>
+                  filterByStatus.Completed === false
+                    ? setFilterByStatus((prev) => ({
+                        ...prev,
+                        Completed: true,
+                      }))
+                    : setFilterByStatus((prev) => ({
+                        ...prev,
+                        Completed: false,
+                      }))
+                }
+              >
+                Completed
+              </div>
+
+              <div
+                className={`${
+                  filterByStatus.Cancelled === true
+                    ? "bg-white !text-tealGreen font-semibold"
+                    : ""
+                } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white `}
+                onClick={() =>
+                  filterByStatus.Cancelled === false
+                    ? setFilterByStatus((prev) => ({
+                        ...prev,
+                        Cancelled: true,
+                      }))
+                    : setFilterByStatus((prev) => ({
+                        ...prev,
+                        Cancelled: false,
+                      }))
+                }
+              >
+                Cancelled
+              </div>
+              <div className="text-white">|</div>
+
               <input
                 placeholder=""
                 type="date"
