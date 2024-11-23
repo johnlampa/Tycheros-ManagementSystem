@@ -214,7 +214,6 @@ router.post('/stockInInventoryItem', async (req, res) => {
   const {
     supplierName,
     employeeID,
-    stockInDateTime,
     inventoryItems,
   } = req.body;
   const connection = await pool.getConnection();
@@ -242,8 +241,8 @@ router.post('/stockInInventoryItem', async (req, res) => {
 
     // 2. Insert into the purchaseorder table
     const [purchaseOrderResult] = await connection.query(
-      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDateTime) VALUES (?, ?, ?)`,
-      [supplierID, employeeID, stockInDateTime]
+      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDateTime) VALUES (?, ?, CONVERT_TZ(NOW(), '+00:00', '-08:00'))`,
+      [supplierID, employeeID]
     );
     const purchaseOrderID = purchaseOrderResult.insertId;
 
@@ -301,7 +300,7 @@ router.post('/stockInInventoryItem', async (req, res) => {
 });
 
 router.post('/stockOutInventoryItem', async (req, res) => {
-  const { inventoryItems, stockOutDateTime, employeeID } = req.body; // Assume an array of inventory items with quantities and reasons
+  const { inventoryItems, employeeID } = req.body; // Assume an array of inventory items with quantities and reasons
 
   const connection = await pool.getConnection();
 
@@ -338,8 +337,8 @@ router.post('/stockOutInventoryItem', async (req, res) => {
         // Insert a record into the stockout table
         await connection.query(`
           INSERT INTO stockout (subinventoryID, quantity, reason, stockOutDateTime, employeeID)
-          VALUES (?, ?, ?, ?, ?)
-        `, [entry.subinventoryID, deductQuantity, reason, stockOutDateTime, employeeID]);
+          VALUES (?, ?, ?, NOW(), ?)
+        `, [entry.subinventoryID, deductQuantity, reason, employeeID]);
       }
 
       if (remainingQuantity > 0) {
@@ -833,8 +832,8 @@ router.get('/getStockInRecords', async (req, res) => {
 router.get('/getStockOutRecords', async (req, res) => {
   const query = `
     SELECT 
-      DATE(so.stockOutDateTime) AS stockOutDate,
-      so.stockOutDateTime,
+      DATE_FORMAT(so.stockOutDateTime, '%Y-%m-%d') AS stockOutDate, -- Format the date only
+      DATE_FORMAT(so.stockOutDateTime, '%Y-%m-%d %h:%i:%s %p') AS stockOutDateTime, -- Format the full datetime with AM/PM
       e.firstName AS employeeFirstName,
       e.lastName AS employeeLastName,
       i.inventoryName AS stockOutItemName,

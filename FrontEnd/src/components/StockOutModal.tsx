@@ -54,7 +54,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
       } finally {
         setLoading(false);
       }
-    };
+    }; 
 
     fetchInventory();
   }, []);
@@ -95,6 +95,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
   const validateForm = () => {
     const missingFields: string[] = [];
     const quantityExceedsFields: string[] = [];
+    const missingReasonFields: string[] = [];
     const processedInventoryIDs = new Set<number>();
 
     // Validate general fields
@@ -132,6 +133,10 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
       if (item.quantityToStockOut <= 0) {
         missingFields.push(`Quantity for ${inventoryName}`);
+      }
+
+      if (!item.reason || item.reason.trim() === "") {
+        missingReasonFields.push(`Reason for ${inventoryName}`);
       }
 
       // Check if aggregated quantity exceeds the available total and avoid duplicate messages
@@ -201,13 +206,13 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <p className="text-black text-xl font-semibold">Stock Out</p>
-          <div className="flex items-center">
+          <h2 className="text-black">Stock Out</h2>
+          <div className="flex items-center text-black">
             Date: {stockOutData.stockOutDateTime}
           </div>
         </div>
 
-        <div className="mb-3">
+        <div className="mb-3 text-black">
           Employee: {loggedInEmployeeName || "No employee found."}
         </div>
 
