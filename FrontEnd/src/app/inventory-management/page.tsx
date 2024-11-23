@@ -26,6 +26,8 @@ import { FaArrowLeft } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 
+import { IoIosSearch } from "react-icons/io";
+
 export default function InventoryManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -314,6 +316,8 @@ export default function InventoryManagementPage() {
     noStock: false,
   });
 
+  const [searchByName, setSearchByName] = useState("");
+
   const [unfilteredInventoryData, setUnfilteredInventoryData] = useState<
     InventoryItem[]
   >([]);
@@ -345,6 +349,15 @@ export default function InventoryManagementPage() {
   useEffect(() => {
     const applyFilters = () => {
       let filtered = unfilteredInventoryData;
+
+      if (searchByName !== "") {
+        filtered = filtered.filter(
+          (inventoryItem) =>
+            inventoryItem.inventoryName
+              .toLowerCase() // Convert the item name to lowercase
+              .startsWith(searchByName.toLowerCase()) // Check if it starts with the search term
+        );
+      }
 
       if (filterByStatus !== null) {
         filtered = filtered.filter(
@@ -383,6 +396,7 @@ export default function InventoryManagementPage() {
 
     applyFilters();
   }, [
+    searchByName,
     filterByCategory,
     filterByStatus,
     filterByStockCount,
@@ -679,6 +693,13 @@ export default function InventoryManagementPage() {
         )}
 
         <div className="p-4">
+          <input
+            type="search"
+            placeholder="&#x1F50D; Search Inventory Name"
+            className="border border-black py-2 px-3 text-sm rounded w-full mb-4"
+            onChange={(e) => setSearchByName(e.target.value)}
+          ></input>
+
           <div className="w-[320px]">
             <button
               onClick={() => setShowAddOverlay(true)}
