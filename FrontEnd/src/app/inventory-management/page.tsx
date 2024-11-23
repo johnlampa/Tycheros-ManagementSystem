@@ -316,6 +316,7 @@ export default function InventoryManagementPage() {
   const [filterByCategory, setFilterByCategory] = useState("");
   const [filterByStatus, setFilterByStatus] = useState<number | null>(null);
   const [filterByStockCount, setFilterByStockCount] = useState({
+    sufficientStock: false,
     lowStock: false,
     noStock: false,
   });
@@ -354,21 +355,23 @@ export default function InventoryManagementPage() {
     const applyFilters = () => {
       let filtered = unfilteredInventoryData;
 
+      // Filter by name
       if (searchByName !== "") {
-        filtered = filtered.filter(
-          (inventoryItem) =>
-            inventoryItem.inventoryName
-              .toLowerCase() // Convert the item name to lowercase
-              .startsWith(searchByName.toLowerCase()) // Check if it starts with the search term
+        filtered = filtered.filter((inventoryItem) =>
+          inventoryItem.inventoryName
+            .toLowerCase()
+            .startsWith(searchByName.toLowerCase())
         );
       }
 
+      // Filter by status
       if (filterByStatus !== null) {
         filtered = filtered.filter(
           (inventoryItem) => inventoryItem.inventoryStatus === filterByStatus
         );
       }
 
+      // Filter by category
       if (filterByCategory) {
         filtered = filtered.filter(
           (inventoryItem) =>
@@ -376,24 +379,30 @@ export default function InventoryManagementPage() {
         );
       }
 
-      if (filterByStockCount.noStock || filterByStockCount.lowStock) {
+      // Filter by stock count
+      if (
+        filterByStockCount.noStock ||
+        filterByStockCount.lowStock ||
+        filterByStockCount.sufficientStock
+      ) {
         filtered = filtered.filter((inventoryItem) => {
           const totalQuantity = Number(inventoryItem.totalQuantity);
           const reorderPoint = Number(inventoryItem.reorderPoint);
 
-          // Handle "no stock" and "low stock" independently
           const isNoStock = filterByStockCount.noStock && totalQuantity === 0;
           const isLowStock =
             filterByStockCount.lowStock &&
-            totalQuantity <= reorderPoint &&
-            totalQuantity !== 0;
+            totalQuantity > 0 &&
+            totalQuantity <= reorderPoint;
+          const isSufficientStock =
+            filterByStockCount.sufficientStock && totalQuantity > reorderPoint;
 
-          // Keep the item if either condition is true
-          return isNoStock || isLowStock;
+          // Keep the item if any condition is true
+          return isNoStock || isLowStock || isSufficientStock;
         });
       }
 
-      console.log("unfiltered inv data: ", unfilteredInventoryData);
+      console.log("Filtered Inventory Data: ", filtered);
 
       setFilteredInventoryData(filtered);
     };
@@ -608,7 +617,7 @@ export default function InventoryManagementPage() {
         </Header>
         <div className="pb-3 w-full bg-tealGreen px-2 sm:px-5">
           <div className="w-full flex justify-center items-center">
-            <div className="flex flex-col md:flex-row items-center gap-3">
+            <div className="flex flex-col lg:flex-row items-center gap-3">
               {/* Filters Label */}
               <div className="text-xs w-16 md:text-md font-semibold text-white flex justify-center">
                 Filters:
@@ -633,16 +642,31 @@ export default function InventoryManagementPage() {
               </select>
 
               {/* Divider */}
-              <div className="text-white hidden md:block mx-3">|</div>
+              <div className="text-white hidden lg:block mx-3">|</div>
 
               {/* Stock Buttons */}
               <div className="flex flex-wrap items-center gap-3">
                 <div
                   className={`${
+                    filterByStockCount.sufficientStock
+                      ? "bg-white !text-tealGreen font-semibold"
+                      : ""
+                  } w-[120px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  onClick={() =>
+                    setFilterByStockCount((prev) => ({
+                      ...prev,
+                      sufficientStock: !prev.sufficientStock,
+                    }))
+                  }
+                >
+                  Sufficient Stock
+                </div>
+                <div
+                  className={`${
                     filterByStockCount.lowStock
                       ? "bg-white !text-tealGreen font-semibold"
                       : ""
-                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  } w-[120px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
                   onClick={() =>
                     setFilterByStockCount((prev) => ({
                       ...prev,
@@ -657,7 +681,7 @@ export default function InventoryManagementPage() {
                     filterByStockCount.noStock
                       ? "bg-white !text-tealGreen font-semibold"
                       : ""
-                  } w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
+                  } w-[120px] h-[25px] rounded-sm border border-white flex justify-center items-center text-sm text-white`}
                   onClick={() =>
                     setFilterByStockCount((prev) => ({
                       ...prev,
@@ -670,7 +694,7 @@ export default function InventoryManagementPage() {
               </div>
 
               {/* Divider */}
-              <div className="text-white hidden md:block mx-3">|</div>
+              <div className="text-white hidden lg:block mx-3">|</div>
 
               {/* Status Buttons */}
               <div className="flex flex-wrap items-center gap-3">
