@@ -203,22 +203,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-black">Stock Out</h2>
           <div className="flex items-center">
-            <label htmlFor="stockOutDate" className="text-black mr-2">
-              Date:
-            </label>
-            <input
-              type="date"
-              id="stockOutDate"
-              onChange={(e) => {
-                const newValue = e.target.value;
-                setStockOutData({
-                  ...stockOutData,
-                  stockOutDateTime: newValue,
-                });
-              }}
-              defaultValue={new Date().toISOString().split("T")[0]} // Sets to current date in 'YYYY-MM-DD' format
-              className="p-2 text-black border border-black"
-            />
+            Date: {stockOutData.stockOutDateTime}
           </div>
         </div>
 
