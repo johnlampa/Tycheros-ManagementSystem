@@ -220,7 +220,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-black">Update Stock</h2>
+          <p className="text-black text-xl font-semibold">Update Stock</p>
           <div className="flex items-center">
             Date: {updateStockData.updateStockDateTime}
           </div>
@@ -230,7 +230,10 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
         </div>
 
         {inventoryItems.map((item, index) => (
-          <div key={index} className="mb-4 p-2 border border-black bg-cream">
+          <div
+            key={index}
+            className="mb-4 p-2 border border-black bg-cream rounded"
+          >
             <div className="flex justify-between items-center text-black">
               <div>Inventory Item</div>
               <div>
@@ -258,7 +261,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
                 updateSelectedInventories(index, newInventoryID); // Update selected inventories
                 populateDetailedData(newInventoryID); // Fetch detailed data
               }}
-              className="mb-2 mt-2 p-2 w-full text-black border border-black"
+              className="mb-2 mt-2 p-2 w-full text-black border border-black rounded"
             >
               <option value="0" disabled>
                 Select Inventory Item
@@ -285,7 +288,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
                         quantityToUpdate: parseInt(e.target.value) || 0, // Ensure it updates correctly
                       })
                     }
-                    className="p-2 w-full text-black border border-black"
+                    className="p-2 w-full text-black border border-black rounded"
                   />
                 </div>
               </div>

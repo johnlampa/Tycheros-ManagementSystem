@@ -178,7 +178,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-black">Stock In</h2>
+          <p className="text-black text-xl font-semibold">Stock In</p>
           <div className="flex items-center">
             Date: {stockInData.stockInDateTime}
           </div>
@@ -195,13 +195,13 @@ const StockInModal: React.FC<StockInModalProps> = ({
               const newValue = e.target.value;
               setStockInData({ ...stockInData, supplierName: newValue });
             }}
-            className="mb-2 p-2 w-full text-black border border-black"
+            className="mb-2 p-2 w-full text-black border border-black rounded"
           />
 
           {inventoryItems.map((item, index) => (
             <div
               key={index}
-              className="inventoryItem mb-4 border border-black bg-cream p-2"
+              className="inventoryItem mb-4 border border-black bg-cream p-2 rounded"
             >
               <div className="flex justify-between items-center">
                 <select
@@ -211,7 +211,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     updateInventoryItem(index, { inventoryID: newInventoryID });
                     handleInventoryChange(newInventoryID, index); // Call handleInventoryChange after updating
                   }}
-                  className="mb-2 mt-2 p-2 w-full text-black border border-black"
+                  className="mb-2 mt-2 p-2 w-full text-black border border-black rounded"
                 >
                   <option value="0" disabled>
                     Select Item
@@ -247,7 +247,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
               </div>
               {item.expanded && (
                 <div>
-                  <div className="flex gap-2 mb-2 items-center">
+                  <div className="grid grid-cols-[3fr_2fr] gap-2 mb-2">
                     <input
                       type="number"
                       placeholder="Quantity Ordered"
@@ -260,7 +260,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                           quantityOrdered: parseInt(e.target.value),
                         })
                       }
-                      className="p-2 text-black border border-black h-10 flex-grow" // Takes remaining space
+                      className="p-2 text-black border border-black h-10 w-full rounded" // Takes remaining space
                     />
 
                     <select
@@ -270,10 +270,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
                           unitOfMeasurementID: parseInt(e.target.value),
                         })
                       }
-                      className="p-2 text-black border border-black h-10 w-7/12" // Adjusted to 1/4 of the container
+                      className="p-2 text-black border border-black h-10 w-full rounded" // Adjusted to 1/4 of the container
                     >
                       <option value="0" disabled>
-                        UoM
+                        Select UoM
                       </option>
                       {(uomOptions[index] || []).map((uom) => (
                         <option
@@ -296,7 +296,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                         pricePerPOUoM: parseFloat(e.target.value),
                       })
                     }
-                    className="mb-2 p-2 w-full text-black border border-black"
+                    className="mb-2 p-2 w-full text-black border border-black rounded"
                   />
                   <label className="text-black">Expiry Date </label>
                   <input
@@ -311,7 +311,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                         expiryDate: e.target.value,
                       })
                     }
-                    className="mb-2 p-2 w-full text-black border border-black"
+                    className="mb-2 p-2 w-full text-black border border-black rounded"
                   />
                 </div>
               )}

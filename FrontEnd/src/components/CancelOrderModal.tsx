@@ -76,44 +76,47 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
+
     if (!orderToEdit) {
       console.error("orderToEdit is not defined. Cannot proceed with update.");
       return;
     }
-  
+
     // Prepare cancellation data for /cancelOrder API
     const cancellationReason =
       orderToEdit.status === "Unpaid"
         ? "Cancelled Order"
         : (e.target as any).cancellationReason.value;
-  
+
     const cancellationType = orderToEdit.status;
-  
+
     let updatedSubitemsUsed: SubitemUsed[] = [];
-  
+
     // Handle subitems logic based on order status
     if (orderToEdit.status === "Pending") {
       // Use user input for subitem quantity
       updatedSubitemsUsed = subitemsUsed.map((subitemUsed, index) => ({
         subitemID: parseInt((e.target as any)[`subitemUsed-${index}`].value),
-        quantityUsed: parseFloat((e.target as any)[`quantityUsed-${index}`].value),
+        quantityUsed: parseFloat(
+          (e.target as any)[`quantityUsed-${index}`].value
+        ),
       }));
     } else if (orderToEdit.status === "Completed") {
       // Create a map to quickly lookup the quantity by productID from orderItems
       const orderItemQuantities: { [productID: number]: number } = {};
-  
+
       if (orderToEdit.orderItems) {
         orderToEdit.orderItems.forEach((orderItem) => {
           orderItemQuantities[orderItem.productID] = orderItem.quantity;
         });
       }
-  
+
       // Calculate the quantity used for each subitem
       updatedSubitemsUsed = subitems.map((subitem) => ({
         subitemID: subitem.subitemID,
         quantityUsed:
-          subitem.quantityNeeded * (orderItemQuantities[subitem.productID] || 1),
+          subitem.quantityNeeded *
+          (orderItemQuantities[subitem.productID] || 1),
       }));
     } else if (orderToEdit.status === "Unpaid") {
       // If the order is unpaid, set quantityUsed to 0
@@ -122,7 +125,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
         quantityUsed: 0,
       }));
     }
-  
+
     const cancelOrderData = {
       orderID: orderToEdit.orderID,
       cancellationReason,
@@ -130,22 +133,22 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       subitemsUsed: updatedSubitemsUsed,
       employeeID: loggedInEmployeeID,
     };
-  
+
     try {
       // Call the /cancelOrder API
       const response = await axios.post(
         "http://localhost:8081/orderManagement/cancelOrder",
         cancelOrderData
       );
-  
+
       if (response.status === 200) {
         console.log("Order cancelled successfully");
-  
+
         const updatedOrder: Order = {
           ...orderToEdit,
           status: "Cancelled",
         };
-  
+
         // Update the orders state
         setOrders?.(
           orders.map((o) =>
@@ -174,24 +177,17 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
         <p className="text-center text-xl font-bold text-black mb-4">
           {modalTitle}
         </p>
-        <label htmlFor="cancellationReason" className="block mb-2 text-black">
-          Reason
-        </label>
-        <input
-          type="text"
-          name="cancellationReason"
-          id="cancellationReason"
-          value={orderToEdit?.status === "Unpaid" ? "Cancelled Order" : undefined}
-          placeholder="Enter reason"
-          className="border border-gray-300 rounded w-full p-3 mb-4 text-black placeholder-gray-400"
-          required
-          disabled={orderToEdit?.status === "Unpaid"}
-        />
+        <div className="mb-5">
+          Are you sure you want to cancel order ID {orderToEdit?.orderID}?
+        </div>
         {orderToEdit?.status === "Pending" && (
           <div>
             <label className="block mb-2 text-black">Subitems Used</label>
             {subitemsUsed.map((subitemUsed, index) => (
-              <div key={index} className="flex justify-between items-center mb-4">
+              <div
+                key={index}
+                className="flex justify-between items-center mb-4"
+              >
                 <select
                   className="border border-gray-300 rounded w-[60%] p-3 text-black"
                   name={`subitemUsed-${index}`}
@@ -201,17 +197,22 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
                     Choose
                   </option>
                   {subitems
-                    .filter(
-                      (subitem) =>
-                        inventoryData.some((item) => item.inventoryID === subitem.inventoryID)
+                    .filter((subitem) =>
+                      inventoryData.some(
+                        (item) => item.inventoryID === subitem.inventoryID
+                      )
                     )
                     .map((subitem) => {
                       const inventory = inventoryData.find(
                         (item) => item.inventoryID === subitem.inventoryID
                       );
                       return (
-                        <option value={subitem.subitemID} key={subitem.subitemID}>
-                          {inventory?.inventoryName} ({inventory?.unitOfMeasure})
+                        <option
+                          value={subitem.subitemID}
+                          key={subitem.subitemID}
+                        >
+                          {inventory?.inventoryName} ({inventory?.unitOfMeasure}
+                          )
                         </option>
                       );
                     })}
@@ -238,17 +239,17 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
         )}
         <div className="flex justify-between">
           <button
-            type="submit"
-            className="border border-black px-6 py-3 rounded bg-gray-300 hover:bg-gray-400 text-black"
+            onClick={() => setCancelOrderModalVisibility(false)}
+            className="border border-black px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-black"
           >
-            Save
+            Cancel
           </button>
 
           <button
-            onClick={() => setCancelOrderModalVisibility(false)}
-            className="border border-black px-6 py-3 rounded bg-gray-300 hover:bg-gray-400 text-black"
+            type="submit"
+            className="bg-black px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-white"
           >
-            Cancel
+            Confirm
           </button>
         </div>
       </form>
