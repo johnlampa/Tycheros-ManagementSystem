@@ -749,14 +749,14 @@ router.get('/getStockInRecords', async (req, res) => {
   const query = `
     SELECT 
         po.purchaseOrderID,
-        po.stockInDateTime,
+        CONVERT_TZ(po.stockInDateTime, '+00:00', @@session.time_zone) AS stockInDateTime,
         e.firstName AS employeeFirstName,
         e.lastName AS employeeLastName,
         s.supplierName,
         poi.purchaseOrderItemID,
         poi.quantityOrdered,
         poi.pricePerPOUoM,
-        poi.expiryDate,
+        CONVERT_TZ(poi.expiryDate, '+00:00', @@session.time_zone) AS expiryDate,
         uom.UoM AS unitOfMeasurement,
         inv.inventoryName AS purchaseOrderItemName
     FROM 
@@ -768,9 +768,9 @@ router.get('/getStockInRecords', async (req, res) => {
     LEFT JOIN 
         purchaseorderitem poi ON po.purchaseOrderID = poi.purchaseOrderID
     LEFT JOIN 
-        subinventory si ON si.subinventoryID = poi.purchaseOrderItemID -- Join with subinventory
+        subinventory si ON si.subinventoryID = poi.purchaseOrderItemID
     LEFT JOIN 
-        inventory inv ON si.inventoryID = inv.inventoryID -- Join subinventory to inventory
+        inventory inv ON si.inventoryID = inv.inventoryID
     LEFT JOIN 
         unitofmeasurement uom ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
     ORDER BY 
@@ -787,7 +787,16 @@ router.get('/getStockInRecords', async (req, res) => {
       if (!record) {
         record = {
           purchaseOrderID: row.purchaseOrderID,
-          stockInDateTime: row.stockInDateTime,
+          // Format stockInDateTime to a readable format
+          stockInDateTime: new Date(row.stockInDateTime).toLocaleString('en-US', {
+            timeZone: 'Asia/Manila',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
           employeeFirstName: row.employeeFirstName,
           employeeLastName: row.employeeLastName,
           supplierName: row.supplierName,
@@ -800,7 +809,13 @@ router.get('/getStockInRecords', async (req, res) => {
         purchaseOrderItemID: row.purchaseOrderItemID,
         quantityOrdered: row.quantityOrdered,
         pricePerPOUoM: row.pricePerPOUoM,
-        expiryDate: row.expiryDate,
+        // Format expiryDate to a readable format
+        expiryDate: new Date(row.expiryDate).toLocaleDateString('en-US', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }),
         unitOfMeasurement: row.unitOfMeasurement,
         purchaseOrderItemName: row.purchaseOrderItemName
       });
