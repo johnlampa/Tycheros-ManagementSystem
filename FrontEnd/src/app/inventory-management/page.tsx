@@ -309,6 +309,10 @@ export default function InventoryManagementPage() {
     }
   };
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Adjust this as needed
+
   const [filterByCategory, setFilterByCategory] = useState("");
   const [filterByStatus, setFilterByStatus] = useState<number | null>(null);
   const [filterByStockCount, setFilterByStockCount] = useState({
@@ -402,6 +406,23 @@ export default function InventoryManagementPage() {
     filterByStockCount,
     unfilteredInventoryData,
   ]);
+
+  // Calculate the data for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredInventoryData.slice(startIndex, endIndex);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredInventoryData.length / itemsPerPage);
+
+  // Handle page navigation
+  const goToPreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -740,20 +761,46 @@ export default function InventoryManagementPage() {
         {filteredInventoryData.length === 0 ? (
           <p className="text-sm text-black">No inventory items found</p>
         ) : (
-          <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-9 md:mt-5">
-            {filteredInventoryData.map((item) => (
-              <div key={item.inventoryID} className="mt-8 md:mt-0">
-                <InventoryManagementCard
-                  inventoryItem={item}
-                  handleEditItem={handleEditItem}
-                  expandedRow={expandedRow}
-                  setExpandedRow={setExpandedRow}
-                  toggleRow={toggleRow}
-                  detailedData={detailedData}
-                  setDetailedData={setDetailedData}
-                />
-              </div>
-            ))}
+          <div>
+            <div className="md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-9 md:mt-5">
+              {currentData.map((item) => (
+                <div key={item.inventoryID} className="mt-8 md:mt-0">
+                  <InventoryManagementCard
+                    inventoryItem={item}
+                    handleEditItem={handleEditItem}
+                    expandedRow={expandedRow}
+                    setExpandedRow={setExpandedRow}
+                    toggleRow={toggleRow}
+                    detailedData={detailedData}
+                    setDetailedData={setDetailedData}
+                  />
+                </div>
+              ))}
+            </div>
+            {/* Pagination Controls */}
+            <div className="flex justify-center items-center mt-6 space-x-4">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 text-sm w-[65px] ${
+                  currentPage === 1 ? "text-white" : "underline"
+                }`}
+              >
+                Back
+              </button>
+              <span className="text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 text-sm w-[65px] ${
+                  currentPage === totalPages ? "text-white" : "underline"
+                }`}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
 
