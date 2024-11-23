@@ -217,7 +217,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
 
           {type === "payment" && (
             <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 text-black">
-              <div className="text-sm">Discount </div>
+              <div className="text-sm">Discount</div>
               <div></div>
               <div></div>
               <div className="text-right text-[12px]">
@@ -242,7 +242,11 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             <div></div>
             <div></div>
             <div className="text-right text-[12px] font-bold">
-              &#8369; {total.toFixed(2)}
+              {discountAmount ? (
+                <>&#8369; {(total - discountAmount).toFixed(2)}</>
+              ) : (
+                <>&#8369; {total.toFixed(2)}</>
+              )}
             </div>
           </div>
 

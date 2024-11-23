@@ -269,7 +269,13 @@ function PaymentDetailsPage() {
                           GCash
                         </label>
                       </div>
-                      <div>&#8369; {total.toFixed(2)}</div>
+                      <div>
+                        {discountAmount ? (
+                          <>&#8369; {(total - discountAmount).toFixed(2)}</>
+                        ) : (
+                          <>&#8369; {total.toFixed(2)}</>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex justify-between items-center">
@@ -286,7 +292,13 @@ function PaymentDetailsPage() {
                           Card
                         </label>
                       </div>
-                      <div>&#8369; {total.toFixed(2)}</div>
+                      <div>
+                        {discountAmount ? (
+                          <>&#8369; {(total - discountAmount).toFixed(2)}</>
+                        ) : (
+                          <>&#8369; {total.toFixed(2)}</>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex justify-between items-center mb-3">
@@ -303,7 +315,13 @@ function PaymentDetailsPage() {
                           Cash
                         </label>
                       </div>
-                      <div>&#8369; {total.toFixed(2)}</div>
+                      <div>
+                        {discountAmount ? (
+                          <>&#8369; {(total - discountAmount).toFixed(2)}</>
+                        ) : (
+                          <>&#8369; {total.toFixed(2)}</>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-3 mt-4">
