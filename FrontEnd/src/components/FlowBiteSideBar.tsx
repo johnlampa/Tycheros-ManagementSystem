@@ -1,4 +1,5 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect } from "react";
 import { useState } from "react";
 
 interface FlowBiteSideBarProps {
@@ -33,6 +34,47 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
       alert("Logout failed. Please try again later.");
     }
   };
+
+  const [employees, setEmployees] = useState<
+    { employeeID: number; firstName: string; lastName: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8081/employeemanagement/getEmployee"
+        );
+        setEmployees(response.data);
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(1);
+  const [loggedInEmployeeName, setLoggedInEmployeeName] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+      }
+    }
+
+    // Find employee with matching ID
+    const employee = employees.find(
+      (emp) => emp.employeeID === loggedInEmployeeID
+    );
+
+    if (employee) {
+      // Set the employee's name in state
+      setLoggedInEmployeeName(employee.lastName + ", " + employee.firstName);
+    }
+  }, [employees, loggedInEmployeeID]);
 
   return (
     <>
@@ -410,6 +452,12 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
 
                   <span className="flex-1 ms-3 whitespace-nowrap">Log Out</span>
                 </button>
+              </li>
+              <li>
+                <div className="flex-1 ms-3 whitespace-nowrap text-xs">
+                  Logged in as:{" "}
+                  <span className="font-semibold">{loggedInEmployeeName}</span>
+                </div>
               </li>
             </ul>
           </div>
