@@ -357,43 +357,102 @@ router.post('/stockOutInventoryItem', async (req, res) => {
   }
 });
 
-// UPDATE SUBINVENTORY ITEM QUANTITY Configured
 router.put('/updateSubinventoryQuantity', async (req, res) => {
-  const { inventoryID, quantity } = req.body;
+  const { employeeID, updateStockDateTime, inventoryItems } = req.body;
+
+  if (!inventoryItems || !Array.isArray(inventoryItems)) {
+    return res.status(400).send("Invalid or missing inventoryItems");
+  }
 
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Find the subinventory entry with the oldest expiry date
-    const [subinventoryEntries] = await connection.query(`
-      SELECT si.subinventoryID, si.quantityRemaining
-      FROM subinventory si
-      JOIN purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
-      WHERE si.inventoryID = ?
-      ORDER BY poi.expiryDate ASC
-      LIMIT 1
-    `, [inventoryID]);
+    console.log("Inventory Items:", inventoryItems); // Debugging
 
-    if (subinventoryEntries.length === 0) {
-      throw new Error('No subinventory found for the given inventoryID.');
-    }
+    const replenishSubinventory = async (inventoryID, targetQuantity) => {
+      const getSubinventoryQuery = `
+        SELECT 
+          si.subinventoryID, 
+          si.quantityRemaining, 
+          (poi.quantityOrdered * uom.ratio) AS quantityOrdered, 
+          poi.expiryDate
+        FROM 
+          subinventory si
+        JOIN 
+          purchaseorderitem poi 
+          ON si.subinventoryID = poi.purchaseOrderItemID
+        JOIN 
+          unitofmeasurement uom 
+          ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
+        WHERE 
+          si.inventoryID = ?
+          AND poi.expiryDate >= CURDATE() -- Only include subinventories with valid expiry dates
+        ORDER BY 
+          CASE WHEN si.quantityRemaining > 0 THEN 0 ELSE 1 END, 
+          poi.expiryDate DESC;
+      `;
 
-    const subinventoryID = subinventoryEntries[0].subinventoryID;
+      const [subinventories] = await connection.query(getSubinventoryQuery, [inventoryID]);
 
-    // Update the quantityRemaining
-    await connection.query(`
-      UPDATE subinventory
-      SET quantityRemaining = ?
-      WHERE subinventoryID = ?
-    `, [quantity, subinventoryID]);
+      if (subinventories.length === 0) {
+        console.warn(`No subinventory found for inventoryID: ${inventoryID}`);
+        return;
+      }
+
+      // Calculate the difference between the target quantity and the current total stock
+      const currentTotalStock = subinventories.reduce(
+        (total, subinventory) => total + subinventory.quantityRemaining,
+        0
+      );
+      const quantityToAdd = targetQuantity - currentTotalStock;
+
+      if (quantityToAdd <= 0) {
+        console.log(`No stock adjustment needed for inventoryID: ${inventoryID}`);
+        return;
+      }
+
+      let remainingQuantity = quantityToAdd;
+
+      for (const subinventory of subinventories) {
+        if (remainingQuantity <= 0) break;
+
+        const { subinventoryID, quantityRemaining, quantityOrdered } = subinventory;
+
+        // Calculate the available space for replenishment
+        const availableSpace = quantityOrdered - quantityRemaining;
+        const replenishQuantity = Math.min(remainingQuantity, availableSpace);
+
+        if (replenishQuantity > 0) {
+          const updateSubinventoryQuery = `
+            UPDATE subinventory
+            SET quantityRemaining = quantityRemaining + ?
+            WHERE subinventoryID = ?
+          `;
+          await connection.query(updateSubinventoryQuery, [replenishQuantity, subinventoryID]);
+
+          console.log(`Replenished ${replenishQuantity} to subinventoryID: ${subinventoryID}`);
+          remainingQuantity -= replenishQuantity;
+        }
+      }
+
+      if (remainingQuantity > 0) {
+        console.warn(`Excess quantity of ${remainingQuantity} could not be replenished for inventoryID: ${inventoryID}`);
+      }
+    };
+
+    const updateSubinventoryPromises = inventoryItems.map(({ inventoryID, quantityToUpdate }) =>
+      replenishSubinventory(inventoryID, quantityToUpdate)
+    );
+
+    await Promise.all(updateSubinventoryPromises);
 
     await connection.commit();
-    res.status(200).send('Quantity updated successfully');
+    res.status(200).send("Subinventory quantities updated successfully.");
   } catch (err) {
     await connection.rollback();
-    console.error('Error updating subinventory quantity:', err);
-    res.status(500).send(`Error updating subinventory quantity: ${err.message}`);
+    console.error("Error updating subinventory quantities:", err);
+    res.status(500).send(`Error updating subinventory quantities: ${err.message}`);
   } finally {
     connection.release();
   }

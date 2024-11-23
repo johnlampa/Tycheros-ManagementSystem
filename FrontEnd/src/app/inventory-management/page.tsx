@@ -189,7 +189,7 @@ export default function InventoryManagementPage() {
 
   //@adgramirez revise so it accommodates updating multiple stocks
   const handleUpdateStockSubmit = async () => {
-    console.log(updateStockData);
+    console.log("Update Stock Data", updateStockData);
 
     try {
       const response = await fetch(
