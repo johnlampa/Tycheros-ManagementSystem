@@ -3,6 +3,7 @@ import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { format } from "date-fns";
 import { MultiItemStockInData } from "../../lib/types/InventoryItemDataTypes";
 import ValidationDialog from "@/components/ValidationDialog";
+import { FaTrashAlt } from "react-icons/fa";
 
 interface StockInModalProps {
   stockInData: MultiItemStockInData;
@@ -82,6 +83,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
         expanded: true,
       },
     ]);
+  };
+
+  const handleDeleteInventoryItem = (index: number) => {
+    setInventoryItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
 
   const toggleExpandItem = (index: number) => {
@@ -232,6 +237,14 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     </option>
                   ))}
                 </select>
+
+                <button
+                  type="button"
+                  onClick={() => handleDeleteInventoryItem(index)}
+                  className="text-black ml-4"
+                >
+                  <FaTrashAlt />
+                </button>
 
                 <button
                   onClick={() => toggleExpandItem(index)}
