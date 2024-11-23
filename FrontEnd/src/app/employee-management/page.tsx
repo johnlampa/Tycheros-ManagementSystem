@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import { useRouter } from "next/navigation"; // Import useRouter for redirection
 import { GiHamburgerMenu } from "react-icons/gi";
 import FlowBiteSideBar from "@/components/FlowBiteSideBar";
+import Notification from "@/components/Notification";
 
 export default function EmployeeManagement() {
   const router = useRouter(); // Hook for programmatic navigation
@@ -34,6 +35,7 @@ export default function EmployeeManagement() {
   const [showValidationDialog, setShowValidationDialog] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [sideBarVisibility, setSideBarVisibility] = useState(false);
 
@@ -103,8 +105,9 @@ export default function EmployeeManagement() {
         "http://localhost:8081/employeeManagement/getEmployee"
       ).then((res) => res.json());
       setEmployees(updatedEmployees);
-
-      alert("Employee added successfully");
+      
+      setShowAddOverlay(false); // Close the modal
+      setSuccessMessage(`Employee added successfully`);
     } catch (error) {
       console.error("Error adding employee:", error);
     }
@@ -200,10 +203,11 @@ export default function EmployeeManagement() {
       }
 
       const updatedEmployees = await fetch(
-        "http://localhost:3000/employeeManagement/getEmployee"
+        "http://localhost:8081/employeeManagement/getEmployee"
       ).then((res) => res.json());
       setEmployees(updatedEmployees);
 
+      setSuccessMessage(`Employee updated successfully`);
       setShowEditOverlay(false);
     } catch (error) {
       console.error("Error updating employee:", error);
@@ -221,6 +225,12 @@ export default function EmployeeManagement() {
   return (
     <div className="flex justify-center items-center w-full min-h-screen">
       <div className="w-full flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
+        {successMessage && (
+            <Notification
+              message={successMessage}
+              onClose={() => setSuccessMessage(null)} // Clear success message on close
+            />
+          )}
         <Header text="Employees" color={"tealGreen"} type={"orders"}>
           <button
             className="mr-3 flex items-center justify-center"
@@ -415,7 +425,6 @@ export default function EmployeeManagement() {
                       const emptyFields = getEmptyAddEmployeeFields();
                       if (emptyFields.length === 0) {
                         handleAddEmployee();
-                        setShowAddOverlay(false); // Assuming this is part of your existing logic
                       } else {
                         setValidationMessage(
                           `Please fill out the following fields: ${emptyFields.join(
@@ -631,7 +640,6 @@ export default function EmployeeManagement() {
                       const emptyFields = getEmptyEditEmployeeFields(); // Logic to specify what field is empty
                       if (emptyFields.length === 0) {
                         handleSaveChanges();
-                        setShowEditOverlay(false); // Assuming you have a state for controlling the overlay visibility
                       } else {
                         setValidationMessage(
                           `Please fill out the following fields: ${emptyFields.join(
@@ -647,9 +655,7 @@ export default function EmployeeManagement() {
                   </button>
                   <button
                     onClick={() => {
-                      setEmployeeToEdit(null);
-                      setShowEditOverlay(false);
-                    }}
+                      setEmployeeToEdit(null);                    }}
                     className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                   >
                     Cancel
@@ -659,6 +665,12 @@ export default function EmployeeManagement() {
                   <ValidationDialog
                     message={validationMessage}
                     onClose={() => setShowValidationDialog(false)}
+                  />
+                )}
+                {successMessage && (
+                  <Notification
+                    message={successMessage}
+                    onClose={() => setSuccessMessage(null)}
                   />
                 )}
               </div>
