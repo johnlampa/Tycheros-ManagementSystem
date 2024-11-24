@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import Notification from "./Notification";
+import Link from "next/link";
 
 interface FlowBiteSideBarProps {
   setSideBarVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -144,7 +145,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                 </button>
               </li>
               <li>
-                <a
+                <Link
                   href="/order-management"
                   className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
@@ -160,7 +161,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
                   </svg>
                   <span className="flex-1 ms-3 whitespace-nowrap">Orders</span>
-                </a>
+                </Link>
               </li>
 
               <li>
@@ -233,7 +234,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                 {menuSubCatsVisibility && (
                   <ul id="dropdown-example" className=" py-2 space-y-2">
                     <li>
-                      <a
+                      <Link
                         href="/food-menu-management"
                         className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                       >
@@ -254,10 +255,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                         </svg>
 
                         <div className="ml-2">Food Menu</div>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
+                      <Link
                         href="/bar-menu-management"
                         className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                       >
@@ -278,7 +279,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                         </svg>
 
                         <div className="ml-2">Bar Menu</div>
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 )}
@@ -301,12 +302,12 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     />
                     <path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 1 1 0 4H4a2 2 0 0 1-2-2Z" />
                   </svg>
-                  <a
+                  <Link
                     href="/inventory-management"
                     className="flex-1 ml-2 whitespace-nowrap"
                   >
                     Inventory
-                  </a>
+                  </Link>
                   <button
                     type="button"
                     aria-controls="dropdown-example"
@@ -358,7 +359,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                 {inventorySubCatsVisibility && (
                   <ul id="dropdown-example" className=" py-2 space-y-2">
                     <li>
-                      <a
+                      <Link
                         href="/uom-management"
                         className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                       >
@@ -374,10 +375,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                           <path d="M4 6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h11.613a2 2 0 0 0 1.346-.52l4.4-4a2 2 0 0 0 0-2.96l-4.4-4A2 2 0 0 0 15.613 6H4Z" />
                         </svg>
                         <div className="ml-2">Units of Measurement</div>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
+                      <Link
                         href="/stock-in-records"
                         className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                       >
@@ -398,10 +399,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                         </svg>
 
                         <div className="ml-2">Stock In Records</div>
-                      </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
+                      <Link
                         href="/stock-out-records"
                         className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                       >
@@ -418,14 +419,14 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                         </svg>
 
                         <div className="ml-2">Stock Out Records</div>
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 )}
               </li>
               {designation !== "Staff" && (
                 <li>
-                  <a
+                  <Link
                     href="/employee-management"
                     className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                   >
@@ -441,7 +442,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <span className="flex-1 ms-3 whitespace-nowrap">
                       Employees
                     </span>
-                  </a>
+                  </Link>
                 </li>
               )}
             </ul>
