@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { SubitemDataTypes } from "../../lib/types/ProductDataTypes";
 import { InventoryItem } from "../../lib/types/InventoryItemDataTypes";
 import axios from "axios";
+import Notification from "./Notification";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
@@ -20,6 +21,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
   const [quantity, setQuantity] = useState(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(Infinity);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -243,11 +245,14 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         "Cart saved to localStorage:",
         JSON.parse(localStorage.getItem("cart") || "[]")
       );
+      setSuccessMessage(`${quantity}x ${productToAdd.productName} successfully added to the cart!`);
     }
 
     setQuantityModalVisibility(false);
     setQuantity(0);
-    window.location.reload();
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   };
 
   return (
@@ -294,6 +299,12 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
           </button>
         </div>
       </Modal>
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}
     </div>
   );
 };
