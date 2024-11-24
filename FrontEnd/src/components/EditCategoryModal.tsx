@@ -4,6 +4,7 @@ import { CategoriesDataTypes } from "../../lib/types/CategoriesDataTypes";
 import React from "react";
 import Toggle from "react-toggle";
 import ValidationDialog from "@/components/ValidationDialog";
+import Notification from "./Notification";
 
 interface EditCategoryModalProps {
   editCategoryModalIsVisible: boolean;
@@ -39,6 +40,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSave = async () => {
     const validationErrors: string[] = [];
@@ -79,6 +81,7 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   
       const result = await response.json();
       console.log("Category updated successfully:", result);
+
   
       // Update the category list or UI state
       if (setCategoryHolder) {
@@ -91,7 +94,10 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
       }
   
       setEditCategoryModalIsVisible(false);
-      window.location.reload();
+      setSuccessMessage(`Menu category updated successfully`);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (error) {
       console.error("Error updating category:", error);
       setValidationMessage("Failed to update category. Please try again.");
@@ -103,71 +109,79 @@ const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
   };
 
   return (
-    <Modal
-      modalIsVisible={editCategoryModalIsVisible}
-      setModalVisibility={setEditCategoryModalIsVisible}
-    >
-      <form
-        id="editCategoryForm"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSave();
-        }}
-        className="w-[340px] p-6 mx-auto rounded"
+    <>
+      <Modal
+        modalIsVisible={editCategoryModalIsVisible}
+        setModalVisibility={setEditCategoryModalIsVisible}
       >
-        <p className="text-center text-xl font-bold text-black mb-4">
-          {modalTitle}
-        </p>
-
-        <div className="flex justify-between items-center mb-4 text-black">
-          <label htmlFor="categoryName" className="pr-4">
-            Category Name
-          </label>
-        </div>
-
-        <input
-          type="text"
-          name="categoryName"
-          id="categoryName"
-          placeholder="Enter category name"
-          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          value={categoryName}
-          onChange={(e) => setCategoryName(e.target.value)}
-        />
-
-        <div className="flex gap-x-2 text-black mb-5">
-          <p>Active: </p>
-          <Toggle
-            checked={isChecked}
-            icons={false}
-            onChange={(e) => setIsChecked(e.target.checked)}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5"
+        <form
+          id="editCategoryForm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
+          }}
+          className="w-[340px] p-6 mx-auto rounded"
         >
-          Save
-        </button>
+          <p className="text-center text-xl font-bold text-black mb-4">
+            {modalTitle}
+          </p>
 
-        <div className="mt-2 text-center">
+          <div className="flex justify-between items-center mb-4 text-black">
+            <label htmlFor="categoryName" className="pr-4">
+              Category Name
+            </label>
+          </div>
+
+          <input
+            type="text"
+            name="categoryName"
+            id="categoryName"
+            placeholder="Enter category name"
+            className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+          />
+
+          <div className="flex gap-x-2 text-black mb-5">
+            <p>Active: </p>
+            <Toggle
+              checked={isChecked}
+              icons={false}
+              onChange={(e) => setIsChecked(e.target.checked)}
+            />
+          </div>
+
           <button
-            type="button"
-            className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
-            onClick={handleCancel}
+            type="submit"
+            className="bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5"
           >
-            Cancel
+            Save
           </button>
-        </div>
-      </form>
-      {validationMessage && (
-        <ValidationDialog
-          message={validationMessage}
-          onClose={() => setValidationMessage(null)}
-        />
-      )}
-    </Modal>
+
+          <div className="mt-2 text-center">
+            <button
+              type="button"
+              className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        {validationMessage && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={() => setValidationMessage(null)}
+          />
+        )}  
+      </Modal>
+      {successMessage && (
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}    
+    </>
   );
 };
 

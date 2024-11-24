@@ -214,7 +214,6 @@ router.post('/stockInInventoryItem', async (req, res) => {
   const {
     supplierName,
     employeeID,
-    stockInDateTime,
     inventoryItems,
   } = req.body;
   const connection = await pool.getConnection();
@@ -242,8 +241,8 @@ router.post('/stockInInventoryItem', async (req, res) => {
 
     // 2. Insert into the purchaseorder table
     const [purchaseOrderResult] = await connection.query(
-      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDateTime) VALUES (?, ?, ?)`,
-      [supplierID, employeeID, stockInDateTime]
+      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDateTime) VALUES (?, ?, CONVERT_TZ(NOW(), '+00:00', '-08:00'))`,
+      [supplierID, employeeID]
     );
     const purchaseOrderID = purchaseOrderResult.insertId;
 
@@ -301,7 +300,7 @@ router.post('/stockInInventoryItem', async (req, res) => {
 });
 
 router.post('/stockOutInventoryItem', async (req, res) => {
-  const { inventoryItems, stockOutDateTime, employeeID } = req.body; // Assume an array of inventory items with quantities and reasons
+  const { inventoryItems, employeeID } = req.body; // Assume an array of inventory items with quantities and reasons
 
   const connection = await pool.getConnection();
 
@@ -338,8 +337,8 @@ router.post('/stockOutInventoryItem', async (req, res) => {
         // Insert a record into the stockout table
         await connection.query(`
           INSERT INTO stockout (subinventoryID, quantity, reason, stockOutDateTime, employeeID)
-          VALUES (?, ?, ?, ?, ?)
-        `, [entry.subinventoryID, deductQuantity, reason, stockOutDateTime, employeeID]);
+          VALUES (?, ?, ?, NOW(), ?)
+        `, [entry.subinventoryID, deductQuantity, reason, employeeID]);
       }
 
       if (remainingQuantity > 0) {
@@ -358,43 +357,102 @@ router.post('/stockOutInventoryItem', async (req, res) => {
   }
 });
 
-// UPDATE SUBINVENTORY ITEM QUANTITY Configured
 router.put('/updateSubinventoryQuantity', async (req, res) => {
-  const { inventoryID, quantity } = req.body;
+  const { employeeID, updateStockDateTime, inventoryItems } = req.body;
+
+  if (!inventoryItems || !Array.isArray(inventoryItems)) {
+    return res.status(400).send("Invalid or missing inventoryItems");
+  }
 
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
-    // Find the subinventory entry with the oldest expiry date
-    const [subinventoryEntries] = await connection.query(`
-      SELECT si.subinventoryID, si.quantityRemaining
-      FROM subinventory si
-      JOIN purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
-      WHERE si.inventoryID = ?
-      ORDER BY poi.expiryDate ASC
-      LIMIT 1
-    `, [inventoryID]);
+    console.log("Inventory Items:", inventoryItems); // Debugging
 
-    if (subinventoryEntries.length === 0) {
-      throw new Error('No subinventory found for the given inventoryID.');
-    }
+    const replenishSubinventory = async (inventoryID, targetQuantity) => {
+      const getSubinventoryQuery = `
+        SELECT 
+          si.subinventoryID, 
+          si.quantityRemaining, 
+          (poi.quantityOrdered * uom.ratio) AS quantityOrdered, 
+          poi.expiryDate
+        FROM 
+          subinventory si
+        JOIN 
+          purchaseorderitem poi 
+          ON si.subinventoryID = poi.purchaseOrderItemID
+        JOIN 
+          unitofmeasurement uom 
+          ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
+        WHERE 
+          si.inventoryID = ?
+          AND poi.expiryDate >= CURDATE() -- Only include subinventories with valid expiry dates
+        ORDER BY 
+          CASE WHEN si.quantityRemaining > 0 THEN 0 ELSE 1 END, 
+          poi.expiryDate DESC;
+      `;
 
-    const subinventoryID = subinventoryEntries[0].subinventoryID;
+      const [subinventories] = await connection.query(getSubinventoryQuery, [inventoryID]);
 
-    // Update the quantityRemaining
-    await connection.query(`
-      UPDATE subinventory
-      SET quantityRemaining = ?
-      WHERE subinventoryID = ?
-    `, [quantity, subinventoryID]);
+      if (subinventories.length === 0) {
+        console.warn(`No subinventory found for inventoryID: ${inventoryID}`);
+        return;
+      }
+
+      // Calculate the difference between the target quantity and the current total stock
+      const currentTotalStock = subinventories.reduce(
+        (total, subinventory) => total + subinventory.quantityRemaining,
+        0
+      );
+      const quantityToAdd = targetQuantity - currentTotalStock;
+
+      if (quantityToAdd <= 0) {
+        console.log(`No stock adjustment needed for inventoryID: ${inventoryID}`);
+        return;
+      }
+
+      let remainingQuantity = quantityToAdd;
+
+      for (const subinventory of subinventories) {
+        if (remainingQuantity <= 0) break;
+
+        const { subinventoryID, quantityRemaining, quantityOrdered } = subinventory;
+
+        // Calculate the available space for replenishment
+        const availableSpace = quantityOrdered - quantityRemaining;
+        const replenishQuantity = Math.min(remainingQuantity, availableSpace);
+
+        if (replenishQuantity > 0) {
+          const updateSubinventoryQuery = `
+            UPDATE subinventory
+            SET quantityRemaining = quantityRemaining + ?
+            WHERE subinventoryID = ?
+          `;
+          await connection.query(updateSubinventoryQuery, [replenishQuantity, subinventoryID]);
+
+          console.log(`Replenished ${replenishQuantity} to subinventoryID: ${subinventoryID}`);
+          remainingQuantity -= replenishQuantity;
+        }
+      }
+
+      if (remainingQuantity > 0) {
+        console.warn(`Excess quantity of ${remainingQuantity} could not be replenished for inventoryID: ${inventoryID}`);
+      }
+    };
+
+    const updateSubinventoryPromises = inventoryItems.map(({ inventoryID, quantityToUpdate }) =>
+      replenishSubinventory(inventoryID, quantityToUpdate)
+    );
+
+    await Promise.all(updateSubinventoryPromises);
 
     await connection.commit();
-    res.status(200).send('Quantity updated successfully');
+    res.status(200).send("Subinventory quantities updated successfully.");
   } catch (err) {
     await connection.rollback();
-    console.error('Error updating subinventory quantity:', err);
-    res.status(500).send(`Error updating subinventory quantity: ${err.message}`);
+    console.error("Error updating subinventory quantities:", err);
+    res.status(500).send(`Error updating subinventory quantities: ${err.message}`);
   } finally {
     connection.release();
   }
@@ -749,14 +807,14 @@ router.get('/getStockInRecords', async (req, res) => {
   const query = `
     SELECT 
         po.purchaseOrderID,
-        po.stockInDateTime,
+        CONVERT_TZ(po.stockInDateTime, '+00:00', @@session.time_zone) AS stockInDateTime,
         e.firstName AS employeeFirstName,
         e.lastName AS employeeLastName,
         s.supplierName,
         poi.purchaseOrderItemID,
         poi.quantityOrdered,
         poi.pricePerPOUoM,
-        poi.expiryDate,
+        CONVERT_TZ(poi.expiryDate, '+00:00', @@session.time_zone) AS expiryDate,
         uom.UoM AS unitOfMeasurement,
         inv.inventoryName AS purchaseOrderItemName
     FROM 
@@ -768,9 +826,9 @@ router.get('/getStockInRecords', async (req, res) => {
     LEFT JOIN 
         purchaseorderitem poi ON po.purchaseOrderID = poi.purchaseOrderID
     LEFT JOIN 
-        subinventory si ON si.subinventoryID = poi.purchaseOrderItemID -- Join with subinventory
+        subinventory si ON si.subinventoryID = poi.purchaseOrderItemID
     LEFT JOIN 
-        inventory inv ON si.inventoryID = inv.inventoryID -- Join subinventory to inventory
+        inventory inv ON si.inventoryID = inv.inventoryID
     LEFT JOIN 
         unitofmeasurement uom ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
     ORDER BY 
@@ -787,7 +845,16 @@ router.get('/getStockInRecords', async (req, res) => {
       if (!record) {
         record = {
           purchaseOrderID: row.purchaseOrderID,
-          stockInDateTime: row.stockInDateTime,
+          // Format stockInDateTime to a readable format
+          stockInDateTime: new Date(row.stockInDateTime).toLocaleString('en-US', {
+            timeZone: 'Asia/Manila',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
           employeeFirstName: row.employeeFirstName,
           employeeLastName: row.employeeLastName,
           supplierName: row.supplierName,
@@ -800,7 +867,13 @@ router.get('/getStockInRecords', async (req, res) => {
         purchaseOrderItemID: row.purchaseOrderItemID,
         quantityOrdered: row.quantityOrdered,
         pricePerPOUoM: row.pricePerPOUoM,
-        expiryDate: row.expiryDate,
+        // Format expiryDate to a readable format
+        expiryDate: new Date(row.expiryDate).toLocaleDateString('en-US', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }),
         unitOfMeasurement: row.unitOfMeasurement,
         purchaseOrderItemName: row.purchaseOrderItemName
       });
@@ -818,8 +891,8 @@ router.get('/getStockInRecords', async (req, res) => {
 router.get('/getStockOutRecords', async (req, res) => {
   const query = `
     SELECT 
-      DATE(so.stockOutDateTime) AS stockOutDate,
-      so.stockOutDateTime,
+      DATE_FORMAT(so.stockOutDateTime, '%Y-%m-%d') AS stockOutDate, -- Format the date only
+      DATE_FORMAT(so.stockOutDateTime, '%Y-%m-%d %h:%i:%s %p') AS stockOutDateTime, -- Format the full datetime with AM/PM
       e.firstName AS employeeFirstName,
       e.lastName AS employeeLastName,
       i.inventoryName AS stockOutItemName,

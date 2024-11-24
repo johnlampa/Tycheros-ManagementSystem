@@ -7,6 +7,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import FlowBiteSideBar from "@/components/FlowBiteSideBar";
 import axios from "axios";
 import { Employee } from "../../../lib/types/EmployeeDataTypes";
+import { format } from "date-fns";
 
 export type StockIn = {
   purchaseOrderID: number;
@@ -78,8 +79,11 @@ export default function InventoryManagementPage() {
 
       // Apply date filter if filterByDate has a value
       if (filterByDate) {
+        const formattedFilterDate = format(filterByDate, "MM/dd/yyyy");
+
         filtered = filtered.filter(
-          (stockIn) => stockIn.stockInDateTime.substring(0, 10) === filterByDate
+          (stockIn) =>
+            stockIn.stockInDateTime.substring(0, 10) === formattedFilterDate
         );
       }
 

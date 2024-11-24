@@ -178,8 +178,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <p className="text-black text-xl font-semibold">Stock In</p>
-          <div className="flex items-center">
+          <h2 className="text-black">Stock In</h2>
+          <div className="flex items-center text-black">
             Date: {stockInData.stockInDateTime}
           </div>
         </div>

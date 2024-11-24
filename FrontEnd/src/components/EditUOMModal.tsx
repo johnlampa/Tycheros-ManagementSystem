@@ -6,6 +6,7 @@ import { UOM } from "../../lib/types/UOMDataTypes";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
 import axios from "axios";
+import Notification from "./Notification";
 
 interface EditUOMModalProps {
   editUOMModalIsVisible: boolean;
@@ -20,18 +21,16 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
   modalTitle,
   UOMToEdit,
 }) => {
-  const [UOMName, setUOMName] = useState("");
-  const [ratio, setRatio] = useState<number | undefined>();
-  const [isChecked, setIsChecked] = useState<boolean>();
-  const [validationMessage, setValidationMessage] = useState<string | null>(
-    null
-  );
+  const [UOMName, setUOMName] = useState(UOMToEdit?.UoM || "");
+  const [ratio, setRatio] = useState(UOMToEdit?.ratio || 1);
+  const [isChecked, setIsChecked] = useState(UOMToEdit?.status === 1 || false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    // Update state when UOMToEdit changes
     setUOMName(UOMToEdit?.UoM || "");
-    setRatio(UOMToEdit?.ratio);
-    setIsChecked(UOMToEdit?.status === 1);
+    setRatio(UOMToEdit?.ratio || 1);
+    setIsChecked(UOMToEdit?.status === 1 || false);
   }, [UOMToEdit]);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -42,7 +41,7 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
       return;
     }
 
-    if (ratio === undefined || ratio <= 0) {
+    if (ratio <= 0) {
       setValidationMessage("Ratio must be greater than 0.");
       return;
     }
@@ -60,9 +59,11 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
       );
 
       if (response.status === 200) {
-        alert("Unit of Measurement updated successfully!");
-        setEditUOMModalVisibility(false); // Close modal after success
-        window.location.reload(); // Reload the page to reflect changes
+        setSuccessMessage(`UoM updated successfully`);
+        setEditUOMModalVisibility(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       }
     } catch (error) {
       console.error("Error updating UOM:", error);
@@ -71,95 +72,100 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
   };
 
   const handleCancel = () => {
-    // Reset the values to their defaults from UOMToEdit
     setUOMName(UOMToEdit?.UoM || "");
-    setRatio(UOMToEdit?.ratio);
-    setIsChecked(UOMToEdit?.status === 1);
-
-    // Close the modal
+    setRatio(UOMToEdit?.ratio || 1);
+    setIsChecked(UOMToEdit?.status === 1 || false);
     setEditUOMModalVisibility(false);
   };
 
   return (
-    <Modal
-      modalIsVisible={editUOMModalIsVisible}
-      setModalVisibility={setEditUOMModalVisibility}
-    >
-      <form onSubmit={handleSave} className="w-[340px] p-6 mx-auto rounded">
-        <p className="text-center text-xl font-bold text-black mb-4">
-          {modalTitle}
-        </p>
+    <>
+      <Modal
+        modalIsVisible={editUOMModalIsVisible}
+        setModalVisibility={setEditUOMModalVisibility}
+      >
+        <form onSubmit={handleSave} className="w-[340px] p-6 mx-auto rounded">
+          <p className="text-center text-xl font-bold text-black mb-4">
+            {modalTitle}
+          </p>
 
-        <div className="flex justify-between items-center mb-4 text-black">
-          <label htmlFor="UOMName" className="pr-4">
-            Name
-          </label>
-        </div>
+          <div className="flex justify-between items-center mb-4 text-black">
+            <label htmlFor="UOMName" className="pr-4">
+              Name
+            </label>
+          </div>
 
-        <input
-          type="text"
-          name="UOMName"
-          id="UOMName"
-          placeholder="Enter name"
-          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          value={UOMName}
-          onChange={(e) => setUOMName(e.target.value)}
-        />
+          <input
+            type="text"
+            name="UOMName"
+            id="UOMName"
+            placeholder="Enter name"
+            className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
+            value={UOMName || ""}
+            onChange={(e) => setUOMName(e.target.value)}
+          />
 
-        {UOMToEdit?.ratio !== 1 && (
-          <>
-            <div className="flex justify-between items-center mb-4 text-black">
-              <label htmlFor="ratio" className="pr-4">
-                Ratio to Reference
-              </label>
-            </div>
-            <input
-              type="number"
-              name="ratio"
-              id="ratio"
-              placeholder="Enter ratio"
-              className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-              value={ratio}
-              onChange={(e) => setRatio(parseFloat(e.target.value))}
-            />
-            <div className="flex gap-x-2 text-black mb-5">
-              <p>Active: </p>
-              <Toggle
-                checked={isChecked}
-                icons={false}
-                onChange={(e) => {
-                  setIsChecked(e.target.checked);
-                }}
+          {UOMToEdit?.ratio !== 1 && (
+            <>
+              <div className="flex justify-between items-center mb-4 text-black">
+                <label htmlFor="ratio" className="pr-4">
+                  Ratio to Reference
+                </label>
+              </div>
+              <input
+                type="number"
+                name="ratio"
+                id="ratio"
+                placeholder="Enter ratio"
+                className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
+                value={ratio !== undefined ? ratio : ""}
+                onChange={(e) => setRatio(parseFloat(e.target.value) || 0)}
               />
-            </div>
-          </>
-        )}
+              <div className="flex gap-x-2 text-black mb-5">
+                <p>Active: </p>
+                <Toggle
+                  checked={isChecked}
+                  icons={false}
+                  onChange={(e) => {
+                    setIsChecked(e.target.checked);
+                  }}
+                />
+              </div>
+            </>
+          )}
 
-        <button
-          type="submit"
-          className="bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5"
-        >
-          Save
-        </button>
-
-        <div className="mt-2 text-center">
           <button
-            type="button"
-            className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
-            onClick={handleCancel}
+            type="submit"
+            className="bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5"
           >
-            Cancel
+            Save
           </button>
-        </div>
-      </form>
 
-      {validationMessage && (
-        <ValidationDialog
-          message={validationMessage}
-          onClose={() => setValidationMessage(null)}
+          <div className="mt-2 text-center">
+            <button
+              type="button"
+              className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        {validationMessage && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={() => setValidationMessage(null)}
+          />
+        )}
+      </Modal>
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
         />
       )}
-    </Modal>
+    </>
   );
 };
 

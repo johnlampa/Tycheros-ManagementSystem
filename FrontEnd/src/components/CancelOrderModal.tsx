@@ -5,6 +5,7 @@ import { Order, SubitemUsed } from "../../lib/types/OrderDataTypes";
 import axios from "axios";
 import { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
 import { SubitemForStockInDataTypes } from "../../lib/types/ProductDataTypes";
+import Notification from "./Notification";
 
 const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
   cancelOrderModalIsVisible,
@@ -18,6 +19,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
   const [subitemsUsed, setSubitemsUsed] = useState<SubitemUsed[]>([]);
   const [inventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
   const [subitems, setSubitems] = useState<SubitemForStockInDataTypes[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSubitems = async (productID: number) => {
@@ -143,6 +145,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
       if (response.status === 200) {
         console.log("Order cancelled successfully");
+        setSuccessMessage(`Order cancelled successfully`);
 
         const updatedOrder: Order = {
           ...orderToEdit,
@@ -165,95 +168,103 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
   };
 
   return (
-    <Modal
-      modalIsVisible={cancelOrderModalIsVisible}
-      setModalVisibility={setCancelOrderModalVisibility}
-    >
-      <form
-        id="cancelOrderForm"
-        onSubmit={handleSubmit}
-        className="w-[340px] p-6 mx-auto"
+    <>
+      <Modal
+        modalIsVisible={cancelOrderModalIsVisible}
+        setModalVisibility={setCancelOrderModalVisibility}
       >
-        <p className="text-center text-xl font-bold text-black mb-4">
-          {modalTitle}
-        </p>
-        <div className="mb-5">
-          Are you sure you want to cancel order ID {orderToEdit?.orderID}?
-        </div>
-        {orderToEdit?.status === "Pending" && (
-          <div>
-            <label className="block mb-2 text-black">Subitems Used</label>
-            {subitemsUsed.map((subitemUsed, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center mb-4"
-              >
-                <select
-                  className="border border-gray-300 rounded w-[60%] p-3 text-black"
-                  name={`subitemUsed-${index}`}
-                  id={`subitemUsed-${index}`}
+        <form
+          id="cancelOrderForm"
+          onSubmit={handleSubmit}
+          className="w-[340px] p-6 mx-auto"
+        >
+          <p className="text-center text-xl font-bold text-black mb-4">
+            {modalTitle}
+          </p>
+          <div className="mb-5 text-black">
+            Are you sure you want to cancel order ID {orderToEdit?.orderID}?
+          </div>
+          {orderToEdit?.status === "Pending" && (
+            <div>
+              <label className="block mb-2 text-black">Subitems Used</label>
+              {subitemsUsed.map((subitemUsed, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center mb-4"
                 >
-                  <option value="0" disabled>
-                    Choose
-                  </option>
-                  {subitems
-                    .filter((subitem) =>
-                      inventoryData.some(
-                        (item) => item.inventoryID === subitem.inventoryID
+                  <select
+                    className="border border-gray-300 rounded w-[60%] p-3 text-black"
+                    name={`subitemUsed-${index}`}
+                    id={`subitemUsed-${index}`}
+                  >
+                    <option value="0" disabled>
+                      Choose
+                    </option>
+                    {subitems
+                      .filter((subitem) =>
+                        inventoryData.some(
+                          (item) => item.inventoryID === subitem.inventoryID
+                        )
                       )
-                    )
-                    .map((subitem) => {
-                      const inventory = inventoryData.find(
-                        (item) => item.inventoryID === subitem.inventoryID
-                      );
-                      return (
-                        <option
-                          value={subitem.subitemID}
-                          key={subitem.subitemID}
-                        >
-                          {inventory?.inventoryName} ({inventory?.unitOfMeasure}
-                          )
-                        </option>
-                      );
-                    })}
-                </select>
+                      .map((subitem) => {
+                        const inventory = inventoryData.find(
+                          (item) => item.inventoryID === subitem.inventoryID
+                        );
+                        return (
+                          <option
+                            value={subitem.subitemID}
+                            key={subitem.subitemID}
+                          >
+                            {inventory?.inventoryName} ({inventory?.unitOfMeasure}
+                            )
+                          </option>
+                        );
+                      })}
+                  </select>
 
-                <input
-                  type="number"
-                  name={`quantityUsed-${index}`}
-                  id={`quantityUsed-${index}`}
-                  defaultValue={0}
-                  placeholder="Quantity"
-                  className="border border-gray-300 rounded w-[30%] p-3 text-black placeholder-gray-400"
-                />
-              </div>
-            ))}
+                  <input
+                    type="number"
+                    name={`quantityUsed-${index}`}
+                    id={`quantityUsed-${index}`}
+                    defaultValue={0}
+                    placeholder="Quantity"
+                    className="border border-gray-300 rounded w-[30%] p-3 text-black placeholder-gray-400"
+                  />
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={handleAddSubitemUsed}
+                className="border border-black rounded px-4 py-2 w-full mb-4 text-black"
+              >
+                Add Subitem
+              </button>
+            </div>
+          )}
+          <div className="flex justify-between">
             <button
-              type="button"
-              onClick={handleAddSubitemUsed}
-              className="border border-black rounded px-4 py-2 w-full mb-4 text-black"
+              onClick={() => setCancelOrderModalVisibility(false)}
+              className="border border-black px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-black"
             >
-              Add Subitem
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="bg-black px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-white"
+            >
+              Confirm
             </button>
           </div>
-        )}
-        <div className="flex justify-between">
-          <button
-            onClick={() => setCancelOrderModalVisibility(false)}
-            className="border border-black px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-black"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            className="bg-black px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-white"
-          >
-            Confirm
-          </button>
-        </div>
-      </form>
-    </Modal>
+        </form>
+      </Modal>
+    {successMessage && (
+      <Notification
+        message={successMessage}
+        onClose={() => setSuccessMessage(null)}
+      />
+    )}
+    </>
   );
 };
 

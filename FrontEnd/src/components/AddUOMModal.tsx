@@ -3,6 +3,7 @@ import Modal from "@/components/ui/Modal";
 import React from "react";
 import axios from "axios";
 import ValidationDialog from "@/components/ValidationDialog";
+import Notification from "./Notification";
 
 interface AddUOMModalProps {
   addUOMModalIsVisible: boolean;
@@ -22,6 +23,7 @@ const AddUOMModal: React.FC<AddUOMModalProps> = ({
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const validateForm = () => {
     if (!UOMName.trim()) {
@@ -57,11 +59,13 @@ const AddUOMModal: React.FC<AddUOMModalProps> = ({
       );
 
       if (response.status === 201) {
-        alert("Unit of Measurement added successfully!"); // Use alert for success
+        setSuccessMessage(`UoM added successfully`);
         setAddUOMModalVisibility(false);
         setUOMName(""); // Clear the input fields
         setRatio(0); // Reset ratio to default
-        window.location.reload(); // Reload the page to reflect changes
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000); // Reload the page to reflect changes
       }
     } catch (error) {
       console.error("Error adding UoM:", error);
@@ -135,12 +139,17 @@ const AddUOMModal: React.FC<AddUOMModalProps> = ({
             </button>
           </div>
         </form>
+        {validationMessage && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={() => setValidationMessage(null)}
+          />
+        )}
       </Modal>
-
-      {validationMessage && (
-        <ValidationDialog
-          message={validationMessage}
-          onClose={() => setValidationMessage(null)}
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
         />
       )}
     </>

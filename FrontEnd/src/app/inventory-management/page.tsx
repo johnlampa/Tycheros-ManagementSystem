@@ -189,7 +189,7 @@ export default function InventoryManagementPage() {
 
   //@adgramirez revise so it accommodates updating multiple stocks
   const handleUpdateStockSubmit = async () => {
-    console.log(updateStockData);
+    console.log("Update Stock Data", updateStockData);
 
     try {
       const response = await fetch(
@@ -204,7 +204,7 @@ export default function InventoryManagementPage() {
       );
 
       if (response.ok) {
-        alert("Stock updated successfully");
+        setSuccessMessage(`Stock Updated Successfully`);
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
@@ -260,7 +260,7 @@ export default function InventoryManagementPage() {
       ).then((res) => res.json());
       setUnfilteredInventoryData(updatedInventory);
 
-      alert("Item stocked in successfully");
+      setSuccessMessage(`Item stocked in successfully`);
 
       // Reset data only after successful stock-in
       setStockInData({
@@ -297,7 +297,7 @@ export default function InventoryManagementPage() {
       );
 
       if (response.ok) {
-        alert("Stock-out recorded successfully");
+        setSuccessMessage(`Item stocked out successfully`);
         window.location.reload();
       } else {
         const errorData = await response.json();
@@ -498,13 +498,13 @@ export default function InventoryManagementPage() {
           throw new Error("Failed to update inventory item");
         }
 
+        setSuccessMessage(`Successfully edited: ${itemToEdit.inventoryName}`);
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setUnfilteredInventoryData(updatedInventory);
 
         setShowEditOverlay(false);
-        alert("Inventory item updated successfully");
       } catch (error) {
         console.error("Error updating inventory item:", error);
       }

@@ -11,7 +11,7 @@ import React from "react";
 import { useEdgeStore } from "../../lib/edgestore";
 import Link from "next/link";
 import ValidationDialog from "@/components/ValidationDialog";
-
+import Notification from "./Notification";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
 
@@ -28,6 +28,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   setMenuData,
   setProductIDForPriceRecords,
   setPriceRecordsModalIsVisible,
+  onSuccess,
 }) => {
   const [categoryMap, setCategoryMap] = useState<{ [key: string]: number }>({});
   const categoryID = categoryMap[categoryName] || 0;
@@ -43,6 +44,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingMessage, setUploadingMessage] = useState<string | null>(null); // Upload message state
   const { edgestore } = useEdgeStore();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
 
@@ -238,13 +240,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
           `http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`,
           { ...updatedProduct, deletedSubitemIds }
         );
-        console.log("Product updated:", updatedProduct);
+        if (onSuccess) onSuccess(`Product updated: ${updatedProduct.productName}`);
       } else {
         await axios.post(
           "http://localhost:8081/menuManagement/postProduct",
           updatedProduct
         );
         console.log("Product added:", updatedProduct);
+        if (onSuccess) onSuccess(`Product added: ${updatedProduct.productName}`);
       }
 
       if (setMenuProductHolder) {
@@ -252,10 +255,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
       }
 
       console.log(updatedProduct);
-
-      form.reset();
-      setProductModalVisibility(false);
-      window.location.reload();
+        form.reset();
+        setProductModalVisibility(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
     } catch (error) {
       console.error("Error submitting product:", error);
     } finally {
@@ -316,199 +320,207 @@ const ProductModal: React.FC<ProductModalProps> = ({
   }, [subitems]);
 
   return (
-    <Modal
-      modalIsVisible={productModalIsVisible}
-      setModalVisibility={setProductModalVisibility}
-    >
-      <form
-        id="productForm"
-        onSubmit={handleSubmit}
-        className="w-[340px] p-6 mx-auto rounded"
+    <>
+      <Modal
+        modalIsVisible={productModalIsVisible}
+        setModalVisibility={setProductModalVisibility}
       >
-        <p className="text-center text-xl font-bold text-black mb-4">
-          {modalTitle}
-        </p>
-
-        <div className="flex justify-between items-center mb-4 text-black">
-          <label htmlFor="productName" className="pr-4">
-            Product Name
-          </label>
-        </div>
-
-        <input
-          type="text"
-          name="productName"
-          id="productName"
-          placeholder="Enter product name"
-          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
-        />
-
-        <div className="flex justify-between">
-          <label htmlFor="sellingPrice" className="block mb-2 text-black">
-            Price
-          </label>
-          <p className="underline font-semibold text-sm pt-1">
-            <button
-              className="underline font-semibold text-sm block"
-              onClick={(e) => {
-                e.preventDefault();
-                setProductIDForPriceRecords(menuProductToEdit?.productID);
-                setPriceRecordsModalIsVisible(true);
-              }}
-            >
-              Records
-            </button>
-          </p>
-        </div>
-
-        <input
-          type="number"
-          name="sellingPrice"
-          id="sellingPrice"
-          placeholder="Enter price"
-          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-          defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
-          onInput={(e) => {
-            const input = e.target as HTMLInputElement;
-            if (input.valueAsNumber < 0) {
-              input.value = "0"; // Reset the value to 0 if negative
-            }
-          }}
-        />
-
-        <label className="block mb-2 text-black">Subitems</label>
-        {subitems.map((subitem, index) => (
-          <div
-            key={subitem.inventoryID}
-            className="flex justify-between items-center mb-4"
-          >
-            <select
-              className="border border-gray rounded w-[60%] p-3 text-black mr-5 h-12"
-              defaultValue={subitem.inventoryID}
-              value={selectedInventories[index] || ""} // Bind value to selectedInventories
-              name={`subitem-${index}`}
-              id={`subitem-${index}`}
-              onChange={(e) =>
-                handleInventoryChange(index, parseInt(e.target.value))
-              }
-            >
-              <option value="">Choose</option>
-              {inventoryData
-                ?.filter(
-                  (item) =>
-                    (item.inventoryCategory === "Produce" ||
-                      item.inventoryCategory === "Dairy and Eggs" ||
-                      item.inventoryCategory === "Meat and Poultry" ||
-                      item.inventoryCategory === "Seafood" ||
-                      item.inventoryCategory === "Canned Goods" ||
-                      item.inventoryCategory === "Beverages") &&
-                    (!selectedInventories.includes(item.inventoryID) || // Allow unselected items
-                      selectedInventories[index] === item.inventoryID) // Allow reselecting current selection
-                )
-                .map((item) => (
-                  <option value={item.inventoryID} key={item.inventoryID}>
-                    {item.inventoryName} ({item.unitOfMeasure})
-                  </option>
-                ))}
-            </select>
-
-            <input
-              type="number"
-              name={`quantityNeeded-${index}`}
-              id={`quantityNeeded-${index}`}
-              placeholder="Quantity"
-              className="border border-gray rounded w-[30%] p-3 text-black"
-              defaultValue={subitem.quantityNeeded}
-              min={0}
-            />
-            <button
-              type="button"
-              onClick={() => handleDeleteSubitem(subitem.inventoryID)}
-              className="text-black ml-4"
-            >
-              <FaTrashAlt />
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={handleAddSubitem}
-          className="bg-white border-2 border-black hover:bg-black hover:text-white text-black text-sm font-semibold py-2 px-4 rounded w-full"
+        <form
+          id="productForm"
+          onSubmit={handleSubmit}
+          className="w-[340px] p-6 mx-auto rounded"
         >
-          Add New Subitem
-        </button>
+          <p className="text-center text-xl font-bold text-black mb-4">
+            {modalTitle}
+          </p>
 
-        <div className="mt-7 mb-5">
-          <label htmlFor="imageUpload" className="block mb-2 text-black">
-            Upload Image <span className="text-gray">(PNG or JPEG format)</span>
-          </label>
+          <div className="flex justify-between items-center mb-4 text-black">
+            <label htmlFor="productName" className="pr-4">
+              Product Name
+            </label>
+          </div>
+
           <input
-            id="imageUpload"
-            name="imageUpload"
-            type="file"
-            className="cursor-pointer"
-            onChange={(e) => {
-              const selectedFile = e.target.files?.[0];
-              if (selectedFile) {
-                // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
-                const maxSizeInBytes = 2 * 1024 * 1024;
-                if (selectedFile.size > maxSizeInBytes) {
-                  alert("File size exceeds 2MB. Please upload a smaller file.");
-                  e.target.value = ""; // Reset file input
-                  return;
-                }
-                setFile(selectedFile); // Proceed if file size is valid
+            type="text"
+            name="productName"
+            id="productName"
+            placeholder="Enter product name"
+            className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
+            defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
+          />
+
+          <div className="flex justify-between">
+            <label htmlFor="sellingPrice" className="block mb-2 text-black">
+              Price
+            </label>
+            <p className="underline font-semibold text-sm pt-1">
+              <button
+                className="underline font-semibold text-sm block"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setProductIDForPriceRecords(menuProductToEdit?.productID);
+                  setPriceRecordsModalIsVisible(true);
+                }}
+              >
+                Records
+              </button>
+            </p>
+          </div>
+
+          <input
+            type="number"
+            name="sellingPrice"
+            id="sellingPrice"
+            placeholder="Enter price"
+            className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
+            defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
+            onInput={(e) => {
+              const input = e.target as HTMLInputElement;
+              if (input.valueAsNumber < 0) {
+                input.value = "0"; // Reset the value to 0 if negative
               }
             }}
           />
-        </div>
 
-        {type === "edit" && (
-          <div className="flex gap-x-2 text-black mb-5">
-            <p>Active: </p>
-            <Toggle
-              checked={isChecked}
-              icons={false}
+          <label className="block mb-2 text-black">Subitems</label>
+          {subitems.map((subitem, index) => (
+            <div
+              key={subitem.inventoryID}
+              className="flex justify-between items-center mb-4"
+            >
+              <select
+                className="border border-gray rounded w-[60%] p-3 text-black mr-5 h-12"
+                defaultValue={subitem.inventoryID}
+                value={selectedInventories[index] || ""} // Bind value to selectedInventories
+                name={`subitem-${index}`}
+                id={`subitem-${index}`}
+                onChange={(e) =>
+                  handleInventoryChange(index, parseInt(e.target.value))
+                }
+              >
+                <option value="">Choose</option>
+                {inventoryData
+                  ?.filter(
+                    (item) =>
+                      (item.inventoryCategory === "Produce" ||
+                        item.inventoryCategory === "Dairy and Eggs" ||
+                        item.inventoryCategory === "Meat and Poultry" ||
+                        item.inventoryCategory === "Seafood" ||
+                        item.inventoryCategory === "Canned Goods" ||
+                        item.inventoryCategory === "Beverages") &&
+                      (!selectedInventories.includes(item.inventoryID) || // Allow unselected items
+                        selectedInventories[index] === item.inventoryID) // Allow reselecting current selection
+                  )
+                  .map((item) => (
+                    <option value={item.inventoryID} key={item.inventoryID}>
+                      {item.inventoryName} ({item.unitOfMeasure})
+                    </option>
+                  ))}
+              </select>
+
+              <input
+                type="number"
+                name={`quantityNeeded-${index}`}
+                id={`quantityNeeded-${index}`}
+                placeholder="Quantity"
+                className="border border-gray rounded w-[30%] p-3 text-black"
+                defaultValue={subitem.quantityNeeded}
+                min={0}
+              />
+              <button
+                type="button"
+                onClick={() => handleDeleteSubitem(subitem.inventoryID)}
+                className="text-black ml-4"
+              >
+                <FaTrashAlt />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddSubitem}
+            className="bg-white border-2 border-black hover:bg-black hover:text-white text-black text-sm font-semibold py-2 px-4 rounded w-full"
+          >
+            Add New Subitem
+          </button>
+
+          <div className="mt-7 mb-5">
+            <label htmlFor="imageUpload" className="block mb-2 text-black">
+              Upload Image <span className="text-gray">(PNG or JPEG format)</span>
+            </label>
+            <input
+              id="imageUpload"
+              name="imageUpload"
+              type="file"
+              className="cursor-pointer"
               onChange={(e) => {
-                setIsChecked(e.target.checked);
+                const selectedFile = e.target.files?.[0];
+                if (selectedFile) {
+                  // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
+                  const maxSizeInBytes = 2 * 1024 * 1024;
+                  if (selectedFile.size > maxSizeInBytes) {
+                    alert("File size exceeds 2MB. Please upload a smaller file.");
+                    e.target.value = ""; // Reset file input
+                    return;
+                  }
+                  setFile(selectedFile); // Proceed if file size is valid
+                }
               }}
             />
           </div>
-        )}
 
-        {/* Save button with conditional disabled state */}
-        <button
-          type="submit"
-          className={`bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5 ${
-            isUploading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          disabled={isUploading}
-        >
-          Save
-        </button>
+          {type === "edit" && (
+            <div className="flex gap-x-2 text-black mb-5">
+              <p>Active: </p>
+              <Toggle
+                checked={isChecked}
+                icons={false}
+                onChange={(e) => {
+                  setIsChecked(e.target.checked);
+                }}
+              />
+            </div>
+          )}
 
-        {/* Message indicating the upload status */}
-        {uploadingMessage && (
-          <p className="text-black text-center mt-4">{uploadingMessage}</p>
-        )}
-
-        <div className="mt-2 text-center">
+          {/* Save button with conditional disabled state */}
           <button
-            className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
-            onClick={handleCancel}
+            type="submit"
+            className={`bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5 ${
+              isUploading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isUploading}
           >
-            Cancel
+            Save
           </button>
-        </div>
-      </form>
-      {validationMessage && (
-        <ValidationDialog
-          message={validationMessage}
-          onClose={() => setValidationMessage(null)}
+
+          {/* Message indicating the upload status */}
+          {uploadingMessage && (
+            <p className="text-black text-center mt-4">{uploadingMessage}</p>
+          )}
+
+          <div className="mt-2 text-center">
+            <button
+              className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+        {validationMessage && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={() => setValidationMessage(null)}
+          />
+        )}
+      </Modal>
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
         />
-      )}
-    </Modal>
+      )}    
+    </>
   );
 };
 

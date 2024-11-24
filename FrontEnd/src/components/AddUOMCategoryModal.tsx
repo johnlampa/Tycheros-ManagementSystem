@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import React from "react";
 import ValidationDialog from "@/components/ValidationDialog";
+import Notification from "./Notification";
 
 interface AddUOMCategoryModalProps {
   addUOMCategoryModalIsVisible: boolean;
@@ -23,6 +24,7 @@ const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const validateForm = () => {
     if (!categoryName.trim()) {
@@ -71,13 +73,16 @@ const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
 
       const result = await response.json();
       console.log("Successfully added category and UOM:", result);
-      setValidationMessage("Category and UOM added successfully!");
-      window.location.reload();
+      setSuccessMessage(`Successfully added UoM category`);
 
       // Clear input fields and close modal
       setCategoryName("");
       setReferenceUOMName("");
       setAddUOMCategoryModalVisibility(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+      
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error adding category and UOM:", error.message);
@@ -162,6 +167,13 @@ const AddUOMCategoryModal: React.FC<AddUOMCategoryModalProps> = ({
         />
       )}
       </Modal>
+
+      {successMessage && (
+          <Notification
+            message={successMessage}
+            onClose={() => setSuccessMessage(null)}
+          />
+        )}
     </>
   );
 };
