@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect } from "react";
 import { useState } from "react";
+import Notification from "./Notification";
 
 interface FlowBiteSideBarProps {
   setSideBarVisibility: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,6 +15,8 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
   const [menuSubCatsVisibility, setMenuSubCatsVisibility] = useState(false);
 
   const [designation, setDesignation] = useState("");
+
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const loggedInDesignation = localStorage.getItem("designation");
@@ -33,10 +36,12 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
       });
 
       if (response.ok) {
-        alert("Logout successful");
-        localStorage.removeItem("loggedInEmployeeID");
-        localStorage.removeItem("designation");
-        window.location.href = "/login"; // Redirect to the login page
+        setSuccessMessage("Logout successful");
+        setTimeout(() => {
+          localStorage.removeItem("loggedInEmployeeID");
+          localStorage.removeItem("designation");
+          window.location.href = "/login"; // Redirect to the login page
+        }, 3000);
       } else {
         const errorData = await response.json();
         alert(`Logout failed: ${errorData.message}`);
@@ -477,6 +482,12 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
           </div>
         </aside>
       </div>
+      {successMessage && (
+        <Notification
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)} // Clear success message on close
+        />
+      )}
     </>
   );
 };
