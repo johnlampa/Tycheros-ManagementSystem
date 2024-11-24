@@ -8,7 +8,6 @@ export type ProductModalProps = {
   categoryName: string;
 
   modalTitle: string;
-  inventoryData: InventoryDataTypes[];
 
   menuProductToEdit?: ProductDataTypes;
   setMenuProductHolder?: React.Dispatch<

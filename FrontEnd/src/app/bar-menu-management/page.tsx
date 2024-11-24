@@ -18,7 +18,6 @@ export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [menuProductHolder, setMenuProductHolder] =
     useState<ProductDataTypes | null>(null);
-  const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
   const [sideBarVisibility, setSideBarVisibility] = useState(false);
   const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
@@ -52,16 +51,6 @@ export default function Page() {
   // Fetch data only if authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      // Fetch Inventory Data
-      axios
-        .get("http://localhost:8081/menuManagement/getAllInventoryItems")
-        .then((response) => {
-          setInventoryData(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching inventory data:", error);
-        });
-
       // Fetch Menu Data
       axios
         .get("http://localhost:8081/menuManagement/getProduct")
@@ -149,8 +138,6 @@ export default function Page() {
                   categoryName={category.categoryName}
                   menuData={MenuData}
                   setMenuData={setMenuData}
-                  inventoryData={InventoryData}
-                  setInventoryData={setInventoryData}
                   menuProductHolder={menuProductHolder}
                   setMenuProductHolder={setMenuProductHolder}
                   setProductIDForPriceRecords={setProductIDForPriceRecords}

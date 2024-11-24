@@ -14,13 +14,13 @@ import ValidationDialog from "@/components/ValidationDialog";
 import Notification from "./Notification";
 import Toggle from "react-toggle";
 import "react-toggle/style.css";
+import { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
 
 const ProductModal: React.FC<ProductModalProps> = ({
   productModalIsVisible,
   setProductModalVisibility,
   modalTitle,
   setMenuProductHolder,
-  inventoryData,
   type,
   menuProductToEdit,
   categoryName,
@@ -52,14 +52,18 @@ const ProductModal: React.FC<ProductModalProps> = ({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/menuManagement/getAllCategories");
+        const response = await axios.get(
+          "http://localhost:8081/menuManagement/getAllCategories"
+        );
         const categories = response.data;
 
         // Create categoryMap dynamically
         const dynamicCategoryMap: { [key: string]: number } = {};
-        categories.forEach((category: { categoryName: string; categoryID: number }) => {
-          dynamicCategoryMap[category.categoryName] = category.categoryID;
-        });
+        categories.forEach(
+          (category: { categoryName: string; categoryID: number }) => {
+            dynamicCategoryMap[category.categoryName] = category.categoryID;
+          }
+        );
 
         setCategoryMap(dynamicCategoryMap);
         console.log("Category Map:", dynamicCategoryMap);
@@ -89,6 +93,62 @@ const ProductModal: React.FC<ProductModalProps> = ({
   useEffect(() => {
     console.log("loggedInEmployeeID: ", loggedInEmployeeID);
   }, [loggedInEmployeeID]);
+
+  const [inventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
+  const [activeInventoryData, setActiveInventoryData] = useState<
+    InventoryDataTypes[]
+  >([]);
+  const [
+    activeInventoryPlusInactiveSubitemsData,
+    setActiveInventoryPlusInactiveSubitemsData,
+  ] = useState<InventoryDataTypes[]>([]);
+
+  useEffect(() => {
+    //Fetch All Inventory Items
+    axios
+      .get("http://localhost:8081/menuManagement/getAllInventoryItemsEdit")
+      .then((response) => {
+        setInventoryData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching inventory data:", error);
+      });
+
+    //Fetch Active Inventory Items
+    axios
+      .get("http://localhost:8081/menuManagement/getAllInventoryItemsAdd")
+      .then((response) => {
+        setActiveInventoryData(response.data);
+        setActiveInventoryPlusInactiveSubitemsData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching inventory data:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    const updatedData: InventoryDataTypes[] =
+      activeInventoryPlusInactiveSubitemsData;
+
+    subitems.forEach((subitem) => {
+      const matchedInventory = inventoryData.find(
+        (inventory) => inventory.inventoryID === subitem.inventoryID
+      );
+
+      if (matchedInventory) {
+        updatedData.push(matchedInventory);
+      }
+    });
+
+    setActiveInventoryPlusInactiveSubitemsData(updatedData);
+  }, [inventoryData]);
+
+  useEffect(() => {
+    console.log(
+      "activeInventoryPlusInactiveSubitemsData: ",
+      activeInventoryPlusInactiveSubitemsData
+    );
+  }, [activeInventoryPlusInactiveSubitemsData]);
 
   useEffect(() => {
     if (type === "edit" && menuProductToEdit?.productID) {
@@ -240,14 +300,16 @@ const ProductModal: React.FC<ProductModalProps> = ({
           `http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`,
           { ...updatedProduct, deletedSubitemIds }
         );
-        if (onSuccess) onSuccess(`Product updated: ${updatedProduct.productName}`);
+        if (onSuccess)
+          onSuccess(`Product updated: ${updatedProduct.productName}`);
       } else {
         await axios.post(
           "http://localhost:8081/menuManagement/postProduct",
           updatedProduct
         );
         console.log("Product added:", updatedProduct);
-        if (onSuccess) onSuccess(`Product added: ${updatedProduct.productName}`);
+        if (onSuccess)
+          onSuccess(`Product added: ${updatedProduct.productName}`);
       }
 
       if (setMenuProductHolder) {
@@ -255,11 +317,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
       }
 
       console.log(updatedProduct);
-        form.reset();
-        setProductModalVisibility(false);
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+      form.reset();
+      setProductModalVisibility(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (error) {
       console.error("Error submitting product:", error);
     } finally {
@@ -373,7 +435,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
             id="sellingPrice"
             placeholder="Enter price"
             className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
-            defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
+            defaultValue={
+              type === "edit" ? menuProductToEdit?.sellingPrice : ""
+            }
             onInput={(e) => {
               const input = e.target as HTMLInputElement;
               if (input.valueAsNumber < 0) {
@@ -382,60 +446,96 @@ const ProductModal: React.FC<ProductModalProps> = ({
             }}
           />
 
-          <label className="block mb-2 text-black">Subitems</label>
-          {subitems.map((subitem, index) => (
-            <div
-              key={subitem.inventoryID}
-              className="flex justify-between items-center mb-4"
-            >
-              <select
-                className="border border-gray rounded w-[60%] p-3 text-black mr-5 h-12"
-                defaultValue={subitem.inventoryID}
-                value={selectedInventories[index] || ""} // Bind value to selectedInventories
-                name={`subitem-${index}`}
-                id={`subitem-${index}`}
-                onChange={(e) =>
-                  handleInventoryChange(index, parseInt(e.target.value))
-                }
-              >
-                <option value="">Choose</option>
-                {inventoryData
-                  ?.filter(
-                    (item) =>
-                      (item.inventoryCategory === "Produce" ||
-                        item.inventoryCategory === "Dairy and Eggs" ||
-                        item.inventoryCategory === "Meat and Poultry" ||
-                        item.inventoryCategory === "Seafood" ||
-                        item.inventoryCategory === "Canned Goods" ||
-                        item.inventoryCategory === "Beverages") &&
-                      (!selectedInventories.includes(item.inventoryID) || // Allow unselected items
-                        selectedInventories[index] === item.inventoryID) // Allow reselecting current selection
-                  )
-                  .map((item) => (
-                    <option value={item.inventoryID} key={item.inventoryID}>
-                      {item.inventoryName} ({item.unitOfMeasure})
-                    </option>
-                  ))}
-              </select>
+          <label className="block mb-2 text-black">
+            Subitems{" "}
+            <span className="text-xs text-gray">
+              (Subitems in red are inactive.)
+            </span>
+          </label>
+          {subitems.map((subitem, index) => {
+            // Find the matching inventory data for the current subitem
+            const matchingInventory =
+              activeInventoryPlusInactiveSubitemsData.find(
+                (item) => item.inventoryID === subitem.inventoryID
+              );
 
-              <input
-                type="number"
-                name={`quantityNeeded-${index}`}
-                id={`quantityNeeded-${index}`}
-                placeholder="Quantity"
-                className="border border-gray rounded w-[30%] p-3 text-black"
-                defaultValue={subitem.quantityNeeded}
-                min={0}
-              />
-              <button
-                type="button"
-                onClick={() => handleDeleteSubitem(subitem.inventoryID)}
-                className="text-black ml-4"
+            console.log("matching inv: ", matchingInventory);
+
+            // Determine if the subitem is inactive
+            const isInactive = matchingInventory?.inventoryStatus === 0;
+
+            return (
+              <div
+                key={subitem.inventoryID}
+                className="flex justify-between items-center mb-4"
               >
-                <FaTrashAlt />
-              </button>
-            </div>
-          ))}
+                <select
+                  className={`border border-gray rounded w-[60%] p-3 mr-5 h-12 ${
+                    isInactive ? "text-red" : "text-black"
+                  }`}
+                  value={selectedInventories[index] || ""} // Bind only to state
+                  name={`subitem-${index}`}
+                  id={`subitem-${index}`}
+                  onChange={(e) => {
+                    handleInventoryChange(index, parseInt(e.target.value));
+                    console.log(
+                      "updated activeInventoryPlusInactiveSubitemsData after change: ",
+                      activeInventoryPlusInactiveSubitemsData
+                    );
+                  }}
+                >
+                  <option value="" disabled>
+                    Choose
+                  </option>
+                  {activeInventoryPlusInactiveSubitemsData
+                    ?.filter((item) => {
+                      const isUnselected = !selectedInventories.some(
+                        (id, i) => id === item.inventoryID && i !== index
+                      );
+                      console.log(
+                        "isUnselected:",
+                        isUnselected,
+                        "for item:",
+                        item.inventoryID
+                      );
+
+                      return (
+                        (item.inventoryCategory === "Produce" ||
+                          item.inventoryCategory === "Dairy and Eggs" ||
+                          item.inventoryCategory === "Meat and Poultry" ||
+                          item.inventoryCategory === "Seafood" ||
+                          item.inventoryCategory === "Canned Goods" ||
+                          item.inventoryCategory === "Beverages") &&
+                        isUnselected
+                      );
+                    })
+                    .map((item, index) => (
+                      <option value={item.inventoryID} key={index}>
+                        {item.inventoryName} ({item.unitOfMeasure})
+                      </option>
+                    ))}
+                </select>
+
+                <input
+                  type="number"
+                  name={`quantityNeeded-${index}`}
+                  id={`quantityNeeded-${index}`}
+                  placeholder="Quantity"
+                  className="border border-gray rounded w-[30%] p-3 text-black"
+                  defaultValue={subitem.quantityNeeded}
+                  min={0}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSubitem(subitem.inventoryID)}
+                  className="text-black ml-4"
+                >
+                  <FaTrashAlt />
+                </button>
+              </div>
+            );
+          })}
+
           <button
             type="button"
             onClick={handleAddSubitem}
@@ -446,7 +546,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
           <div className="mt-7 mb-5">
             <label htmlFor="imageUpload" className="block mb-2 text-black">
-              Upload Image <span className="text-gray">(PNG or JPEG format)</span>
+              Upload Image{" "}
+              <span className="text-gray">(PNG or JPEG format)</span>
             </label>
             <input
               id="imageUpload"
@@ -459,7 +560,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
                   const maxSizeInBytes = 2 * 1024 * 1024;
                   if (selectedFile.size > maxSizeInBytes) {
-                    alert("File size exceeds 2MB. Please upload a smaller file.");
+                    alert(
+                      "File size exceeds 2MB. Please upload a smaller file."
+                    );
                     e.target.value = ""; // Reset file input
                     return;
                   }
@@ -519,7 +622,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           message={successMessage}
           onClose={() => setSuccessMessage(null)}
         />
-      )}    
+      )}
     </>
   );
 };
