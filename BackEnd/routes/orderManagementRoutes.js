@@ -13,32 +13,40 @@ router.get('/getOrders', (req, res) => {
   // Fetch the orders with their total amounts
   const ordersQuery = `
     SELECT
-      o.orderID,
-      p.paymentID,
-      os.employeeID,
-      MAX(os.statusDateTime) AS date,  -- Latest status change date as the order date
-      os.orderStatus AS status,        -- Latest status of the order
-      SUM(pr.sellingPrice * oi.quantity) AS Total,
-      p.method                          -- Payment method from the payment table
+        o.orderID,
+        p.paymentID,
+        os.employeeID,
+        MAX(os.statusDateTime) AS date,  -- Latest status change date as the order date
+        os.orderStatus AS status,        -- Latest status of the order
+        SUM(pr.sellingPrice * oi.quantity) AS Total,
+        p.method                          -- Payment method from the payment table
     FROM
-      \`order\` o
+        \`order\` o
     JOIN orderitem oi ON o.orderID = oi.orderID
     JOIN price pr ON oi.productID = pr.productID
     JOIN orderstatus os ON o.orderID = os.orderID
     LEFT JOIN payment p ON os.orderStatusID = p.orderStatusID  -- Adjusted to reference orderstatusID
     WHERE
-      pr.priceID = (
-        SELECT MAX(pr2.priceID)
-        FROM price pr2
-        WHERE pr2.productID = oi.productID
-      )
-      AND os.statusDateTime = (
-        SELECT MAX(os2.statusDateTime)
-        FROM orderstatus os2
-        WHERE os2.orderID = o.orderID
-      )  -- Ensure we only get the latest status for each order
+        pr.priceID = (
+            SELECT MAX(pr2.priceID)
+            FROM price pr2
+            WHERE pr2.productID = oi.productID
+        )
+        AND os.statusDateTime = (
+            SELECT MAX(os2.statusDateTime)
+            FROM orderstatus os2
+            WHERE os2.orderID = o.orderID
+        )  -- Ensure we only get the latest status for each order
     GROUP BY o.orderID, p.paymentID, os.employeeID, os.orderStatus, p.method
-    ORDER BY date DESC;
+    ORDER BY
+        CASE os.orderStatus
+            WHEN 'Unpaid' THEN 1
+            WHEN 'Pending' THEN 2
+            WHEN 'Completed' THEN 3
+            WHEN 'Cancelled' THEN 4
+            ELSE 5  -- For any other statuses not explicitly listed
+        END,
+        date DESC;  -- Sort by earliest to oldest date
   `;
 
   db.query(ordersQuery, (err, ordersResult) => {

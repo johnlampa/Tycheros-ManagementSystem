@@ -832,7 +832,7 @@ router.get('/getStockInRecords', async (req, res) => {
     LEFT JOIN 
         unitofmeasurement uom ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
     ORDER BY 
-        po.purchaseOrderID ASC, 
+        po.purchaseOrderID DESC, 
         poi.expiryDate ASC;
   `;
 
