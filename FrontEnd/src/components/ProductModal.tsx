@@ -127,21 +127,27 @@ const ProductModal: React.FC<ProductModalProps> = ({
   }, []);
 
   useEffect(() => {
-    const updatedData: InventoryDataTypes[] =
-      activeInventoryPlusInactiveSubitemsData;
+    const updatedData: InventoryDataTypes[] = [
+      ...activeInventoryPlusInactiveSubitemsData,
+    ];
 
     subitems.forEach((subitem) => {
       const matchedInventory = inventoryData.find(
         (inventory) => inventory.inventoryID === subitem.inventoryID
       );
 
-      if (matchedInventory) {
+      if (
+        matchedInventory &&
+        !updatedData.some(
+          (item) => item.inventoryID === matchedInventory.inventoryID
+        )
+      ) {
         updatedData.push(matchedInventory);
       }
     });
 
     setActiveInventoryPlusInactiveSubitemsData(updatedData);
-  }, [inventoryData]);
+  }, [inventoryData, subitems]); // Include subitems in dependencies to handle updates properly
 
   useEffect(() => {
     console.log(
