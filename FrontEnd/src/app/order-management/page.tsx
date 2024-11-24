@@ -303,7 +303,7 @@ export default function Page() {
           </div>
         ) : (
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
-            {filteredOrders.toReversed().map((order, orderIndex) => (
+            {filteredOrders.map((order, orderIndex) => (
               <div key={orderIndex} className="mt-8 lg:mt-0">
                 <OrderManagementCard
                   order={order}
