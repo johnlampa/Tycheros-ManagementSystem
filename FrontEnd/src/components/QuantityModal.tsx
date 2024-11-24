@@ -25,6 +25,10 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   const [error, setError] = useState<Error | null>(null);
   const [correctType, setCorrectType] = useState(type);
 
+  useEffect(() => {
+    console.log("productToAdd: ", productToAdd);
+  }, []);
+
   // Fetch subitems for the given product
   useEffect(() => {
     axios
@@ -194,10 +198,14 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   let pathname = usePathname();
 
   const handleSave = () => {
+    console.log("Current cart before save:", cart);
+
     if (productToAdd.productID) {
       const itemIndex = cart.findIndex(
         (item) => item.productID === productToAdd.productID
       );
+
+      console.log("Item index in cart:", itemIndex);
 
       const updatedCart = [...cart];
 
@@ -205,31 +213,40 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         if (quantity === 0) {
           if (itemIndex !== -1) {
             updatedCart.splice(itemIndex, 1); // Remove item if quantity is 0
+            console.log("Item removed due to zero quantity:", updatedCart);
           }
         } else if (itemIndex !== -1) {
           updatedCart[itemIndex].quantity = quantity; // Update the quantity
+          console.log("Item quantity updated:", updatedCart);
         }
       } else {
         if (quantity > 0) {
           if (itemIndex !== -1) {
             updatedCart[itemIndex].quantity += quantity; // Add to existing quantity
+            console.log("Quantity added to existing item:", updatedCart);
           } else {
             const newOrderItem: OrderItemDataTypes = {
               productID: productToAdd.productID,
-              quantity: quantity ?? 0, // Fallback to 0 if undefined
+              quantity: quantity ?? 1, // Fallback to 0 if undefined
             };
             updatedCart.push(newOrderItem);
+            console.log("New item added:", updatedCart);
           }
         }
       }
 
       setCart(updatedCart);
+      console.log("Updated cart state:", updatedCart);
+
       localStorage.setItem("cart", JSON.stringify(updatedCart));
+      console.log(
+        "Cart saved to localStorage:",
+        JSON.parse(localStorage.getItem("cart") || "[]")
+      );
     }
 
     setQuantityModalVisibility(false);
     setQuantity(0);
-
     window.location.reload();
   };
 

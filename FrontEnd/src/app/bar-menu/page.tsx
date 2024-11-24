@@ -117,22 +117,15 @@ export default function Page() {
             pathname: "/order-summary",
           }}
         >
-          <div className="fixed bottom-4 right-4 w-min h-min flex flex-col items-center">
-            <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white shadow-lg hover:bg-blue-600 flex items-center justify-center overflow-hidden">
-              <Image
-                src="/assets/images/CheckOrder.png" // Replace with your image path
-                alt="Check Order"
-                className="h-full w-full object-cover"
-                width={3600}
-                height={3534}
-              />
-            </button>
-            <div className="mt-[3px] flex justify-center items-center">
-              <span className="text-[10px] text-center font-semibold bg-lightTealGreen border w-[70px] rounded">
-                Check Order
-              </span>
+          <Link href={{ pathname: "/order-summary" }}>
+            <div className="fixed bottom-4 right-5 w-min h-min flex flex-col items-center">
+              <div className="mt-[3px] flex justify-center items-center">
+                <span className="w-[200px] uppercase text-lg py-2 px-5 text-center font-semibold bg-cream border-2 border-white rounded-full text-primaryBrown">
+                  Check Order
+                </span>
+              </div>
             </div>
-          </div>
+          </Link>
         </Link>
       </div>
       <div className="w-[312px] p-4">
