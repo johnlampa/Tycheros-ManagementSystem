@@ -6,8 +6,6 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { InventoryDataTypes } from "../../../lib/types/InventoryDataTypes";
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import axios from "axios";
-import { FaArrowLeft } from "react-icons/fa";
-import Link from "next/link";
 import Header from "@/components/Header";
 import AddCategoryModal from "@/components/AddCategoryModal";
 import EditCategoryModal from "@/components/EditCategoryModal";
@@ -21,11 +19,8 @@ export default function Page() {
   const [menuProductHolder, setMenuProductHolder] =
     useState<ProductDataTypes | null>(null);
   const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
-
   const [categories, setCategories] = useState<CategoriesDataTypes[]>([]);
-
   const [sideBarVisibility, setSideBarVisibility] = useState(false);
-
   const [addCategoryModalIsVisible, setAddCategoryModalIsVisible] =
     useState(false);
   const [editCategoryModalIsVisible, setEditCategoryModalIsVisible] =
@@ -33,57 +28,67 @@ export default function Page() {
   const [categoryToEdit, setCategoryToEdit] = useState<
     CategoriesDataTypes | undefined
   >(undefined);
-
   const [priceRecordsModalIsVisible, setPriceRecordsModalIsVisible] =
     useState(false);
-
   const [productIDForPriceRecords, setProductIDForPriceRecords] = useState<
     number | undefined
   >(0);
 
-  const router = useRouter(); // Initialize the router
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Authentication state
+  const router = useRouter();
 
   // Check if the user is logged in
   useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-      if (!loggedInEmployeeID) {
-        router.push("/login"); // Redirect to login page if not logged in
+      if (loggedInEmployeeID) {
+        setIsAuthenticated(true); // Mark as authenticated
+      } else {
+        router.push("/login"); // Redirect to login immediately
       }
     }
   }, [router]);
 
+  // Fetch data only if authenticated
   useEffect(() => {
-    // Fetch Inventory Data
-    axios
-      .get("http://localhost:8081/menuManagement/getAllInventoryItems")
-      .then((response) => {
-        setInventoryData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching inventory data:", error);
-      });
+    if (isAuthenticated) {
+      // Fetch Inventory Data
+      axios
+        .get("http://localhost:8081/menuManagement/getAllInventoryItems")
+        .then((response) => {
+          setInventoryData(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching inventory data:", error);
+        });
 
-    // Fetch Menu Data
-    axios
-      .get("http://localhost:8081/menuManagement/getProduct")
-      .then((response) => {
-        setMenuData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching menu data:", error);
-      });
+      // Fetch Menu Data
+      axios
+        .get("http://localhost:8081/menuManagement/getProduct")
+        .then((response) => {
+          setMenuData(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching menu data:", error);
+        });
 
-    // Fetch Categories for Food
-    axios
-      .get("http://localhost:8081/menuManagement/getCategoriesBySystem/Food")
-      .then((response) => {
-        setCategories(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching categories for Food system:", error);
-      });
-  }, []);
+      // Fetch Categories for Food
+      axios
+        .get("http://localhost:8081/menuManagement/getCategoriesBySystem/Food")
+        .then((response) => {
+          setCategories(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching categories for Food system:", error);
+        });
+    }
+  }, [isAuthenticated]);
+
+  // Render nothing while checking authentication
+  if (!isAuthenticated) {
+    return null; // Prevent rendering until authentication is confirmed
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header text="Food Menu" color={"tealGreen"} type={"orders"}>
