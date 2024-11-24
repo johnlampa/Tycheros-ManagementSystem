@@ -13,8 +13,6 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   categoryName,
   menuProductHolder,
   setMenuProductHolder,
-  inventoryData,
-  setInventoryData,
   setProductIDForPriceRecords,
   setPriceRecordsModalIsVisible,
 }) => {
@@ -108,7 +106,6 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
           setProductModalVisibility={setProductModalVisibility}
           modalTitle={modalTitle}
           setMenuProductHolder={setMenuProductHolder}
-          inventoryData={inventoryData}
           menuProductToEdit={menuProductToEdit}
           type={modalType}
           categoryName={categoryName}
