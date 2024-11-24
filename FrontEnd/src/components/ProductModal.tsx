@@ -490,9 +490,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     );
                   }}
                 >
-                  <option value="" disabled>
-                    Choose
-                  </option>
+                  <option value="">Choose</option>
                   {activeInventoryPlusInactiveSubitemsData
                     ?.filter((item) => {
                       const isUnselected = !selectedInventories.some(
