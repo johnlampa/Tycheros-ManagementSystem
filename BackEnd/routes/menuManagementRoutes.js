@@ -85,8 +85,113 @@ router.get('/getAllInventoryItems', (req, res) => {
   });
 });
 
+router.get('/getAllInventoryItemsAdd', (req, res) => {
+  const query = `
+    SELECT 
+        i.inventoryID,
+        i.inventoryName,
+        i.inventoryCategory,
+        i.reorderPoint,
+        i.inventoryStatus,
+        i.unitOfMeasurementID,
+        c.categoryName AS uomCategory,
+        u.UoM AS unitOfMeasure,
+        u.type AS uomType,
+        u.ratio,
+        u.status AS uomStatus
+    FROM 
+        inventory i
+    JOIN 
+        unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
+    JOIN 
+        category c ON u.categoryID = c.categoryID
+	WHERE
+        i.inventoryStatus = 1
+    ORDER BY 
+        i.inventoryName ASC;
+  `;
 
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching inventory data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    res.json(result);
+  });
+});
 
+router.get('/getAllInventoryItemsEdit', (req, res) => {
+  const query = `
+    SELECT 
+        i.inventoryID,
+        i.inventoryName,
+        i.inventoryCategory,
+        i.reorderPoint,
+        i.inventoryStatus,
+        i.unitOfMeasurementID,
+        c.categoryName AS uomCategory,
+        u.UoM AS unitOfMeasure,
+        u.type AS uomType,
+        u.ratio,
+        u.status AS uomStatus
+    FROM 
+        inventory i
+    JOIN 
+        unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
+    JOIN 
+        category c ON u.categoryID = c.categoryID
+    ORDER BY 
+        i.inventoryName ASC;
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching inventory data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    res.json(result);
+  });
+});
+
+router.get('/getInventoryItemDetails/:inventoryID', (req, res) => {
+  const { inventoryID } = req.params; // Get the inventoryID from the route parameter
+
+  const query = `
+    SELECT 
+        i.inventoryID,
+        i.inventoryName,
+        i.inventoryCategory,
+        i.reorderPoint,
+        i.inventoryStatus,
+        i.unitOfMeasurementID,
+        c.categoryName AS uomCategory,
+        u.UoM AS unitOfMeasure,
+        u.type AS uomType,
+        u.ratio,
+        u.status AS uomStatus
+    FROM 
+        inventory i
+    JOIN 
+        unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
+    JOIN 
+        category c ON u.categoryID = c.categoryID
+    WHERE 
+        i.inventoryID = ?; -- Filter by inventoryID
+  `;
+
+  db.query(query, [inventoryID], (err, result) => {
+    if (err) {
+      console.error("Error fetching inventory item details:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Inventory item not found" });
+    }
+
+    res.json(result[0]); // Return the single item
+  });
+});
   
 //CREATE PRODUCT ENDPOINT //DONE
 router.post('/postProduct', (req, res) => {
@@ -164,7 +269,6 @@ router.get('/getSpecificSubitems/:productID', (req, res) => {
         unitofmeasurement u ON i.unitOfMeasurementID = u.unitOfMeasurementID
     WHERE 
         si.productID = ?
-        AND i.inventoryStatus = 1
   `;
 
   db.query(query, [productID], (err, result) => {
