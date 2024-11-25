@@ -70,45 +70,49 @@ export default function Page() {
         </div>
 
         <div className="p-6 flex flex-col justify-center items-center">
-          {categories
-            .filter((category) => category.status === 1) // Only include active categories
-            .map((category) => {
-              // Get menu items for this category
-              const categoryMenuItems = menuData.filter(
-                (item) => item.categoryName === category.categoryName
-              );
+          {categories.length > 0 ? (
+            categories
+              .filter((category) => category.status === 1) // Only include active categories
+              .map((category) => {
+                // Get menu items for this category
+                const categoryMenuItems = menuData.filter(
+                  (item) => item.categoryName === category.categoryName
+                );
 
-              // Only render the category if it has menu items
-              if (categoryMenuItems.length === 0) {
-                return null; // Skip this category
-              }
+                // Only render the category if it has menu items
+                if (categoryMenuItems.length === 0) {
+                  return null; // Skip this category
+                }
 
-              return (
-                <div
-                  key={category.categoryName}
-                  id={category.categoryName}
-                  className="mb-8"
-                >
-                  <p className="font-pattaya text-2xl mb-3 align-left">
-                    {category.categoryName}
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-12 content-center duration-150">
-                    {categoryMenuItems.map((item, index) => (
-                      <div key={index}>
-                        <MenuCard
-                          product={item}
-                          setProductToAdd={setProductToAdd}
-                          quantityModalIsVisible={quantityModalVisibility}
-                          setQuantityModalVisibility={
-                            setQuantityModalVisibility
-                          }
-                        />
-                      </div>
-                    ))}
+                return (
+                  <div
+                    key={category.categoryName}
+                    id={category.categoryName}
+                    className="mb-8"
+                  >
+                    <p className="font-pattaya text-2xl mb-3 align-left">
+                      {category.categoryName}
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-12 content-center duration-150">
+                      {categoryMenuItems.map((item, index) => (
+                        <div key={index}>
+                          <MenuCard
+                            product={item}
+                            setProductToAdd={setProductToAdd}
+                            quantityModalIsVisible={quantityModalVisibility}
+                            setQuantityModalVisibility={
+                              setQuantityModalVisibility
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+          ) : (
+            <div>No menu category found.</div>
+          )}
         </div>
 
         <Link href={{ pathname: "/order-summary" }}>
