@@ -252,7 +252,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     setQuantity(0);
     setTimeout(() => {
       window.location.reload();
-    }, 2000);
+    }, 500);
   };
 
   return (

@@ -218,7 +218,7 @@ router.post('/postProduct', (req, res) => {
       sellingPrice: productData.sellingPrice,
       productID: productID,
       priceDateTime: new Date(),
-      employeeID: 1,
+      employeeID: productData.employeeID,
     };
 
     db.query("INSERT INTO price SET ?", price, (err, priceResult) => {
