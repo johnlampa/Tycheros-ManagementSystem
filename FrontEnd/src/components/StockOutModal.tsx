@@ -54,7 +54,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
       } finally {
         setLoading(false);
       }
-    }; 
+    };
 
     fetchInventory();
   }, []);

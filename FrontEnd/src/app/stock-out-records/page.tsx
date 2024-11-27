@@ -182,19 +182,19 @@ export default function InventoryManagementPage() {
                   onClick={goToPreviousPage}
                   disabled={currentPage === 1}
                   className={`px-4 py-2 text-sm w-[65px] ${
-                    currentPage === 1 ? "text-primaryBrown" : "underline"
+                    currentPage === 1 ? "text-white" : "underline"
                   }`}
                 >
                   Back
                 </button>
-                <span className="text-sm text-primaryBrown">
+                <span className="text-sm">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
                   onClick={goToNextPage}
                   disabled={currentPage === totalPages}
                   className={`px-4 py-2 text-sm w-[65px] ${
-                    currentPage === totalPages ? "text-primaryBrown" : "underline"
+                    currentPage === totalPages ? "text-white" : "underline"
                   }`}
                 >
                   Next

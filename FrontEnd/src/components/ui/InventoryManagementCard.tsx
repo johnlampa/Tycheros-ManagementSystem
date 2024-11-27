@@ -138,7 +138,14 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                                     </div>
                                   </div>
 
-                                  <div className="flex items-center gap-x-1 mt-1">
+                                  <div
+                                    className={`flex items-center gap-x-1 mt-1 ${
+                                      detail.stockInDate &&
+                                      new Date(detail.expiryDate) < new Date()
+                                        ? "text-red"
+                                        : ""
+                                    }`}
+                                  >
                                     best before{" "}
                                     <div className="">
                                       <span className="font-semibold">
@@ -153,9 +160,9 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                                   </div>
                                 </div>
                                 <div className="flex flex-col justify-center items-center text-sm font-semibold border border-gray rounded-md p-1 w-fit">
-                                  <div>
-                                    {detail.quantityRemaining}{" "}
-                                    {inventoryItem.unitOfMeasure}
+                                  <div className="flex flex-col items-center">
+                                    <div>{detail.quantityRemaining}</div>
+                                    <div>{inventoryItem.unitOfMeasure}</div>
                                   </div>{" "}
                                   <span className="font-normal">in stock</span>
                                 </div>

@@ -37,6 +37,10 @@ export default function Page() {
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
   const router = useRouter(); // Initialize the router for redirection
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Adjust this as needed
+
   const [filterByDate, setFilterByDate] = useState("");
   const [filterByStatus, setFilterByStatus] = useState({
     Unpaid: false,
@@ -124,7 +128,11 @@ export default function Page() {
         const response = await axios.get(
           "http://localhost:8081/orderManagement/getPaymentDetails"
         );
-        if (response.status === 200 && response.data && response.data.length > 0) {
+        if (
+          response.status === 200 &&
+          response.data &&
+          response.data.length > 0
+        ) {
           setPayments(response.data);
         } else {
           setPayments([]); // Default to an empty array if no data is returned
@@ -150,7 +158,7 @@ export default function Page() {
           setError("An unknown error occurred.");
         }
       }
-    };    
+    };
 
     fetchOrders();
     fetchMenuData();
@@ -168,6 +176,23 @@ export default function Page() {
   const handleCancelOrder = (order: Order) => {
     setOrderToEdit(order);
     setCancelOrderModalVisibility(true);
+  };
+
+  // Calculate the data for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = filteredOrders.slice(startIndex, endIndex);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+
+  // Handle page navigation
+  const goToPreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   return (
@@ -302,25 +327,53 @@ export default function Page() {
             No orders available.
           </div>
         ) : (
-          <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
-            {filteredOrders.map((order, orderIndex) => (
-              <div key={orderIndex} className="mt-8 lg:mt-0">
-                <OrderManagementCard
-                  order={order}
-                  menuData={menuData}
-                  orders={filteredOrders}
-                  setOrders={setFilteredOrders}
-                  type={"management"}
-                  setCancelOrderModalVisibility={() => handleCancelOrder(order)}
-                  setOrderToEdit={setOrderToEdit}
-                  payments={payments}
-                  setOrderIDForStatusRecords={setOrderIDForStatusRecords}
-                  setStatusRecordsModalIsVisible={
-                    setStatusRecordsModalIsVisible
-                  }
-                />
-              </div>
-            ))}
+          <div>
+            <div className="lg:grid lg:grid-cols-2 lg:gap-x-28 xl:gap-x-36 lg:gap-y-14 lg:mt-10">
+              {currentData.map((order, orderIndex) => (
+                <div key={orderIndex} className="mt-8 lg:mt-0">
+                  <OrderManagementCard
+                    order={order}
+                    menuData={menuData}
+                    orders={filteredOrders}
+                    setOrders={setFilteredOrders}
+                    type={"management"}
+                    setCancelOrderModalVisibility={() =>
+                      handleCancelOrder(order)
+                    }
+                    setOrderToEdit={setOrderToEdit}
+                    payments={payments}
+                    setOrderIDForStatusRecords={setOrderIDForStatusRecords}
+                    setStatusRecordsModalIsVisible={
+                      setStatusRecordsModalIsVisible
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+            {/* Pagination Controls */}
+            <div className="flex justify-center items-center mt-6 space-x-4">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 text-sm w-[65px] ${
+                  currentPage === 1 ? "text-white" : "underline"
+                }`}
+              >
+                Back
+              </button>
+              <span className="text-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 text-sm w-[65px] ${
+                  currentPage === totalPages ? "text-white" : "underline"
+                }`}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
 
