@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import {
   InventoryItem,
@@ -7,6 +7,8 @@ import {
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 import { WiDirectionDown } from "react-icons/wi";
 import { FaTrashAlt } from "react-icons/fa";
+import { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
+import axios from "axios";
 
 interface StockOutModalProps {
   stockOutData: MultiItemStockOutData;
@@ -27,6 +29,21 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
   handleInventoryChange,
   employees,
 }) => {
+  const [inventoryDataWithUoM, setInventoryDataWithUoM] = useState<
+    InventoryDataTypes[]
+  >([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8081/menuManagement/getAllInventoryItemsEdit")
+      .then((response) => {
+        setInventoryDataWithUoM(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching inventory data:", error);
+      });
+  }, []);
+
   const [inventoryItems, setInventoryItems] = useState(
     stockOutData.inventoryItems.map((item) => ({
       ...item,
@@ -234,11 +251,24 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
                 <option value="0" disabled>
                   Select Inventory Item
                 </option>
-                {inventoryNames.map((inv) => (
-                  <option key={inv.inventoryID} value={inv.inventoryID}>
-                    {inv.inventoryName}
-                  </option>
-                ))}
+                {inventoryNames.map((inv) => {
+                  // Find the matching item in inventoryItems
+                  const matchingItem = inventoryDataWithUoM.find(
+                    (inventory) => inventory.inventoryID === inv.inventoryID
+                  );
+
+                  console.log("inv names: ", inventoryNames);
+                  console.log("inv w uom: ", inventoryDataWithUoM);
+                  console.log("matching item: ", matchingItem);
+
+                  const unitOfMeasure = matchingItem?.unitOfMeasure || "N/A"; // Default to "N/A"
+
+                  return (
+                    <option key={inv.inventoryID} value={inv.inventoryID}>
+                      {inv.inventoryName} ({unitOfMeasure})
+                    </option>
+                  );
+                })}
               </select>
 
               <button
