@@ -29,11 +29,15 @@ const StockOutRecordCard: React.FC<StockOutRecordCardProps> = ({
       <div className="p-3 w-[320px] rounded-md bg-cream">
         <div className="flex justify-between">
           <div className="flex flex-col text-black">
-            <div className="text-sm">Date: {stockOutData.stockOutDateTime}</div>
             <div className="text-sm">
-              Handled by: {stockOutData.employeeLastName},{" "}
-              {stockOutData.employeeFirstName}
+              Date: {new Date(stockOutData.stockOutDateTime).toLocaleDateString()}
             </div>
+              <div className="text-sm">
+                Handled by:  
+                {stockOutData.employeeFirstName === "Automatic" && stockOutData.employeeLastName === "Stock Out" 
+                  ? " Automatic Stock Out" 
+                  : ` ${stockOutData.employeeLastName}, ${stockOutData.employeeFirstName}`}
+              </div>
             {/* <div>
               Date:{" "}
               {detail.stockInDate

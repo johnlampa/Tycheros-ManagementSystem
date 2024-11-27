@@ -898,15 +898,16 @@ router.get('/getStockOutRecords', async (req, res) => {
       i.inventoryName AS stockOutItemName,
       CAST(so.reason AS CHAR) AS reason, -- Convert reason from BLOB to CHAR
       so.quantity,
-      uom.UoM AS unitOfMeasurement
+      uom.UoM AS unitOfMeasurement,
+      e.employeeID -- Include employeeID to check for null values
     FROM 
       stockout so
     JOIN 
       subinventory si ON so.subinventoryID = si.subinventoryID
     JOIN 
       inventory i ON si.inventoryID = i.inventoryID
-    JOIN 
-      employees e ON so.employeeID = e.employeeID
+    LEFT JOIN 
+      employees e ON so.employeeID = e.employeeID -- Use LEFT JOIN for cases of null employeeID
     JOIN 
       unitofmeasurement uom ON i.unitOfMeasurementID = uom.unitOfMeasurementID
     ORDER BY 
@@ -916,22 +917,43 @@ router.get('/getStockOutRecords', async (req, res) => {
   try {
     const [results] = await pool.query(query);
 
+    // Structure to group stock-out records by date and employee
     const groupedStockOutRecords = results.reduce((acc, record) => {
       const dateKey = record.stockOutDate;
 
+      // Handle default names for missing employee
+      const employeeFirstName = record.employeeID ? record.employeeFirstName : "Automatic";
+      const employeeLastName = record.employeeID ? record.employeeLastName : "Stock Out";
+      const employeeKey = `${employeeFirstName} ${employeeLastName}`;
+
+      // Initialize the date group if not already present
       if (!acc[dateKey]) {
-        acc[dateKey] = {
-          stockOutDate: dateKey,
-          stockOutDateTime: record.stockOutDateTime,
-          employeeFirstName: record.employeeFirstName,
-          employeeLastName: record.employeeLastName,
-          stockOutItems: [],
-        };
+        acc[dateKey] = [];
       }
 
-      acc[dateKey].stockOutItems.push({
+      // Check if there's already an entry for this employee within the date group
+      let employeeEntry = acc[dateKey].find(
+        (entry) =>
+          entry.employeeFirstName === employeeFirstName &&
+          entry.employeeLastName === employeeLastName
+      );
+
+      // If not found, create a new employee group
+      if (!employeeEntry) {
+        employeeEntry = {
+          stockOutDate: dateKey,
+          stockOutDateTime: record.stockOutDateTime, // Use the latest datetime for this group
+          employeeFirstName: employeeFirstName,
+          employeeLastName: employeeLastName,
+          stockOutItems: [],
+        };
+        acc[dateKey].push(employeeEntry);
+      }
+
+      // Add the stock-out item to the employee group
+      employeeEntry.stockOutItems.push({
         stockOutItemName: record.stockOutItemName,
-        reason: record.reason, // Now it's a readable string
+        reason: record.reason || 'N/A', // Default reason if null
         quantity: record.quantity,
         unitOfMeasurement: record.unitOfMeasurement,
       });
@@ -939,7 +961,8 @@ router.get('/getStockOutRecords', async (req, res) => {
       return acc;
     }, {});
 
-    const groupedStockOutArray = Object.values(groupedStockOutRecords);
+    // Transform the grouped data into the desired array structure
+    const groupedStockOutArray = Object.values(groupedStockOutRecords).flat();
 
     res.status(200).json(groupedStockOutArray);
   } catch (err) {

@@ -232,12 +232,10 @@ router.post('/getSubinventoryID', async (req, res) => {
 
 // UPDATE MULTIPLE SUBINVENTORY QUANTITIES
 router.put('/updateMultipleSubitemQuantities', (req, res) => {
-  const { updates } = req.body; // Array of updates, each with subinventoryID and quantity to reduce
+  const { updates, employeeID } = req.body; // Array of updates, each with subinventoryID and quantityToReduce
 
-  // Log the incoming updates array for debugging purposes
   console.log('Received updates for subinventory quantities:', updates);
 
-  // Start a transaction
   db.beginTransaction(err => {
     if (err) {
       console.error('Error starting transaction:', err);
@@ -249,20 +247,54 @@ router.put('/updateMultipleSubitemQuantities', (req, res) => {
       return new Promise((resolve, reject) => {
         const { subinventoryID, quantityToReduce } = update;
 
-        // Update the quantityRemaining, ensuring no value goes below zero
-        const updateQuery = `
-          UPDATE subinventory
-          SET quantityRemaining = GREATEST(quantityRemaining - ?, 0)
+        // Get current quantityRemaining and other details for the subinventoryID
+        const getSubinventoryQuery = `
+          SELECT quantityRemaining, inventoryID
+          FROM subinventory
           WHERE subinventoryID = ?
         `;
 
-        db.query(updateQuery, [quantityToReduce, subinventoryID], (err, result) => {
+        db.query(getSubinventoryQuery, [subinventoryID], (err, subinventoryResult) => {
           if (err) {
             return reject(err);
           }
 
-          console.log(`Updated subinventoryID ${subinventoryID}: reduced by ${quantityToReduce}`);
-          resolve();
+          if (subinventoryResult.length === 0) {
+            return reject(new Error(`SubinventoryID ${subinventoryID} not found.`));
+          }
+
+          const { quantityRemaining, inventoryID } = subinventoryResult[0];
+          const deductQuantity = Math.min(quantityRemaining, quantityToReduce);
+
+          // Update the quantityRemaining in subinventory
+          const updateQuery = `
+            UPDATE subinventory
+            SET quantityRemaining = GREATEST(quantityRemaining - ?, 0)
+            WHERE subinventoryID = ?
+          `;
+
+          db.query(updateQuery, [deductQuantity, subinventoryID], err => {
+            if (err) {
+              return reject(err);
+            }
+
+            console.log(`Updated subinventoryID ${subinventoryID}: reduced by ${deductQuantity}`);
+
+            // Insert a record into the stockout table with reason as "Ordering"
+            const insertStockoutQuery = `
+              INSERT INTO stockout (subinventoryID, quantity, reason, stockOutDateTime, employeeID)
+              VALUES (?, ?, 'Ordering', NOW(), ?)
+            `;
+
+            db.query(insertStockoutQuery, [subinventoryID, deductQuantity, employeeID], err => {
+              if (err) {
+                return reject(err);
+              }
+
+              console.log(`Recorded stockout for subinventoryID ${subinventoryID}, quantity: ${deductQuantity}`);
+              resolve();
+            });
+          });
         });
       });
     });
@@ -277,12 +309,12 @@ router.put('/updateMultipleSubitemQuantities', (req, res) => {
           }
 
           console.log('Transaction committed successfully.');
-          res.status(200).send('Subinventory quantities updated successfully');
+          res.status(200).send('Subinventory quantities updated and stockout records created successfully.');
         });
       })
       .catch(err => {
-        console.error('Error updating subinventory quantities:', err);
-        db.rollback(() => res.status(500).send("Error updating subinventory quantities"));
+        console.error('Error updating subinventory quantities or creating stockout records:', err);
+        db.rollback(() => res.status(500).send(`Error: ${err.message}`));
       });
   });
 });
