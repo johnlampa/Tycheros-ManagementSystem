@@ -209,6 +209,9 @@ export default function InventoryManagementPage() {
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setUnfilteredInventoryData(updatedInventory);
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);
