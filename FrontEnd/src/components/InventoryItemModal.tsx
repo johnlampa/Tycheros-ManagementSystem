@@ -115,7 +115,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
               Select Inventory Category
             </option>
             <option value="Produce">Produce</option>
-            <option value="Dairy and Eggs">Dairy and Eggs</option>
+            <option value="Dairy and Eggs">Dairy</option>
             <option value="Meat and Poultry">Meat and Poultry</option>
             <option value="Seafood">Seafood</option>
             <option value="Canned Goods">Canned Goods</option>
