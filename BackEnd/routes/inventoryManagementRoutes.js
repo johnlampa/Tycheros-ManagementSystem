@@ -370,56 +370,96 @@ router.put('/updateSubinventoryQuantity', async (req, res) => {
 
     console.log("Inventory Items:", inventoryItems); // Debugging
 
-    const replenishSubinventory = async (inventoryID, targetQuantity) => {
-      const getSubinventoryQuery = `
+    // Fetch total quantity of all subinventories for a given inventoryID
+    const fetchTotalQuantity = async (inventoryID) => {
+      const query = `
+        SELECT SUM(quantityRemaining) AS totalQty
+        FROM subinventory
+        WHERE inventoryID = ?
+      `;
+      const [result] = await connection.query(query, [inventoryID]);
+      return result[0].totalQty || 0; // Return 0 if no subinventory exists
+    };
+
+    // Fetch recently stocked out subinventories
+    const fetchRecentlyStockedOut = async (inventoryID) => {
+      const query = `
         SELECT 
-          si.subinventoryID, 
-          si.quantityRemaining, 
-          (poi.quantityOrdered * uom.ratio) AS quantityOrdered, 
-          poi.expiryDate
+          si.subinventoryID,
+          si.inventoryID,
+          si.quantityRemaining,
+          (poi.quantityOrdered * uom.ratio) AS quantityOrdered,
+          poi.expiryDate,
+          DATE(so.stockOutDateTime) AS stockOutDate, -- Extract only the date from stockOutDateTime
+          SUM(so.quantity) AS totalStockOutQuantity -- Sum up the quantity for the same subinventoryID
         FROM 
           subinventory si
         JOIN 
-          purchaseorderitem poi 
-          ON si.subinventoryID = poi.purchaseOrderItemID
+          stockout so ON si.subinventoryID = so.subinventoryID
         JOIN 
-          unitofmeasurement uom 
-          ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
+          purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
+        JOIN 
+          unitofmeasurement uom ON poi.unitOfMeasurementID = uom.unitOfMeasurementID
         WHERE 
-          si.inventoryID = ?
-          AND poi.expiryDate >= CURDATE() -- Only include subinventories with valid expiry dates
+          si.inventoryID = ? -- Filter by inventoryID
+          AND DATE(so.stockOutDateTime) = CURDATE() -- Match only today's stock-outs
+        GROUP BY 
+          si.subinventoryID, 
+          si.inventoryID, 
+          si.quantityRemaining, 
+          poi.quantityOrdered, 
+          poi.expiryDate, 
+          DATE(so.stockOutDateTime) -- Group by relevant columns
         ORDER BY 
-          CASE WHEN si.quantityRemaining > 0 THEN 0 ELSE 1 END, 
-          poi.expiryDate DESC;
+          poi.expiryDate DESC; -- Order by expiry date
       `;
 
-      const [subinventories] = await connection.query(getSubinventoryQuery, [inventoryID]);
+      const [stockedOutItems] = await connection.query(query, [inventoryID]);
+      return stockedOutItems;
+    };
+
+    // Replenish logic using the recently stocked out subinventories
+    const replenishSubinventory = async (inventoryID, quantityToUpdate) => {
+      // Fetch total quantity from all subinventories for the inventory item
+      const totalQty = await fetchTotalQuantity(inventoryID);
+
+      // Calculate the quantity to replenish
+      const quantityToReplenish = quantityToUpdate - totalQty;
+
+      if (quantityToReplenish <= 0) {
+        console.log(`No replenishment needed for inventoryID: ${inventoryID}`);
+        return;
+      }
+
+      // Fetch recently stocked out subinventories
+      const subinventories = await fetchRecentlyStockedOut(inventoryID);
 
       if (subinventories.length === 0) {
-        console.warn(`No subinventory found for inventoryID: ${inventoryID}`);
+        console.warn(`No recently stocked out subinventory found for inventoryID: ${inventoryID}`);
         return;
       }
 
-      // Calculate the difference between the target quantity and the current total stock
-      const currentTotalStock = subinventories.reduce(
-        (total, subinventory) => total + subinventory.quantityRemaining,
+      // Calculate the totalStockOutQuantity
+      const totalStockOutQuantity = subinventories.reduce(
+        (total, subinventory) => total + subinventory.totalStockOutQuantity,
         0
       );
-      const quantityToAdd = targetQuantity - currentTotalStock;
 
-      if (quantityToAdd <= 0) {
-        console.log(`No stock adjustment needed for inventoryID: ${inventoryID}`);
+      // Check the condition
+      if (quantityToReplenish > totalStockOutQuantity) {
+        console.warn(
+          `Replenishment quantity (${quantityToReplenish}) exceeds total stock-out quantity (${totalStockOutQuantity}) for inventoryID: ${inventoryID}`
+        );
         return;
       }
 
-      let remainingQuantity = quantityToAdd;
+      let remainingQuantity = quantityToReplenish;
 
       for (const subinventory of subinventories) {
         if (remainingQuantity <= 0) break;
 
         const { subinventoryID, quantityRemaining, quantityOrdered } = subinventory;
 
-        // Calculate the available space for replenishment
         const availableSpace = quantityOrdered - quantityRemaining;
         const replenishQuantity = Math.min(remainingQuantity, availableSpace);
 
@@ -441,6 +481,7 @@ router.put('/updateSubinventoryQuantity', async (req, res) => {
       }
     };
 
+    // Update subinventories based on inventory items
     const updateSubinventoryPromises = inventoryItems.map(({ inventoryID, quantityToUpdate }) =>
       replenishSubinventory(inventoryID, quantityToUpdate)
     );
@@ -448,7 +489,9 @@ router.put('/updateSubinventoryQuantity', async (req, res) => {
     await Promise.all(updateSubinventoryPromises);
 
     await connection.commit();
-    res.status(200).send("Subinventory quantities updated successfully.");
+    res.status(200).json({
+      message: "Subinventory quantities updated successfully.",
+    });
   } catch (err) {
     await connection.rollback();
     console.error("Error updating subinventory quantities:", err);
