@@ -55,7 +55,7 @@ const StockInRecordCard: React.FC<StockInRecordCardProps> = ({
             </IconContext.Provider>
           </div>
         </div>
-        <div className="mt-5">
+        <div className="mt-5 text-black">
           Supplier:{" "}
           <span className="font-semibold uppercase">
             {stockInData.supplierName}

@@ -209,7 +209,9 @@ export default function InventoryManagementPage() {
           "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setUnfilteredInventoryData(updatedInventory);
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);
@@ -277,6 +279,9 @@ export default function InventoryManagementPage() {
           },
         ],
       });
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (error) {
       console.error("Error stocking in inventory:", error);
     }
@@ -298,7 +303,9 @@ export default function InventoryManagementPage() {
 
       if (response.ok) {
         setSuccessMessage(`Item stocked out successfully`);
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 3000);
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);

@@ -103,7 +103,7 @@ const PriceRecordsModal: React.FC<PriceRecordsModal> = ({
           return (
             <div
               key={priceRecordIndex}
-              className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 gap-x-1"
+              className="grid grid-cols-[1fr_1fr_1fr] mt-2 text-sm gap-y-1 gap-x-1 text-black"
             >
               <div className="flex justify-center items-center">
                 &#8369; {priceRecord.sellingPrice}

@@ -99,24 +99,24 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
       <div className="text-primaryBrown">
         <aside
           id="separator-sidebar"
-          className="fixed bg-cream top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full translate-x-0"
+          className="fixed bg-cream top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full translate-x-0 "
           aria-label="Sidebar"
         >
-          <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-            <ul className="space-y-2 font-medium">
+          <div className="h-full px-3 py-4 dark:text-primaryBrown overflow-y-auto bg-gray-50 dark:bg-gray-800">
+            <ul className="space-y-2 font-medium dark:text-primaryBrown">
               <li>
                 <button
                   type="button"
-                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  className="flex items-center w-full p-2 text-base text-primaryBrown transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-primaryBrown dark:hover:bg-gray-700"
                   aria-controls="dropdown-example"
                   data-collapse-toggle="dropdown-example"
                   onClick={() => {
                     setSideBarVisibility(false);
                   }}
                 >
-                  <span className="flex-1 text-left ml-2 whitespace-nowrap"></span>
+                  <span className="flex-1 text-left ml-2 whitespace-nowrap dark:text-primaryBrown "></span>
                   <svg
-                    className="w-[18px] h-[18px] text-gray-800 dark:text-white mr-[-2px]"
+                    className="w-[18px] h-[18px] text-primaryBrown dark:text-primaryBrown mr-[-2px]"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -137,20 +137,20 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
               <li>
                 <button
                   type="button"
-                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  className="flex items-center w-full p-2 text-base text-primaryBrown transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                   aria-controls="dropdown-example"
-                  data-collapse-toggle="dropdown-example"
+                  data-collapse-toggle="dropdown-example "
                 >
-                  <span className="flex-1 text-left ml-2 whitespace-nowrap"></span>
+                  <span className="flex-1 text-left ml-2 whitespace-nowrap "></span>
                 </button>
               </li>
               <li>
                 <Link
                   href="/order-management"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                  className="flex items-center p-2 text-primaryBrown rounded-lg dark:text-white hover:bg-secondaryBrown dark:hover:bg-secondaryBrown group"
                 >
                   <svg
-                    className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                    className="flex-shrink-0 w-5 h-5 text-primaryBrown transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="currentColor"
@@ -160,14 +160,14 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
                     <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
                   </svg>
-                  <span className="flex-1 ms-3 whitespace-nowrap">Orders</span>
+                  <span className="flex-1 ms-3 whitespace-nowrap text-primaryBrown">Orders</span>
                 </Link>
               </li>
 
               <li>
                 <button
                   type="button"
-                  className="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                  className="flex items-center w-full p-2 text-base text-primaryBrown transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                   aria-controls="dropdown-example"
                   data-collapse-toggle="dropdown-example"
                   onClick={() => {
@@ -177,7 +177,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                   }}
                 >
                   <svg
-                    className="w-[24px] h-[24px] text-gray-800 dark:text-white"
+                    className="flex-shrink-0 w-[24px] h-[24px] text-primaryBrown transition duration-75 dark:text-gray-400 group-hover:text-secondaryBrown dark:group-hover:text-primaryBrown"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -192,12 +192,12 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     />
                   </svg>
 
-                  <span className="flex-1 text-left ml-2 whitespace-nowrap">
+                  <span className="flex-1 text-left ml-2 whitespace-nowrap text-primaryBrown">
                     Menu
                   </span>
                   {menuSubCatsVisibility ? (
                     <svg
-                      className="w-[18px] h-[18px] text-gray-800 dark:text-white"
+                      className="w-[18px] h-[18px] text-primaryBrown dark:text-primaryBrown"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       width="24"
@@ -215,7 +215,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     </svg>
                   ) : (
                     <svg
-                      className="w-3 h-3"
+                      className="w-3 h-3 text-primaryBrown"
                       aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -232,14 +232,14 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                   )}
                 </button>
                 {menuSubCatsVisibility && (
-                  <ul id="dropdown-example" className=" py-2 space-y-2">
+                  <ul id="dropdown-example" className=" py-2 space-y-2 text-primaryBrown">
                     <li>
                       <Link
                         href="/food-menu-management"
-                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-secondaryBrown dark:text-primaryBrown dark:hover:bg-gray-700"
                       >
                         <svg
-                          className="w-[24px] h-[24px] text-gray-800 dark:text-white"
+                          className="w-[24px] h-[24px] text-primaryBrown dark:text-primaryBrown dark:group-hover:text-white"
                           aria-hidden="true"
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -260,10 +260,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <li>
                       <Link
                         href="/bar-menu-management"
-                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-secondaryBrown dark:text-primaryBrown dark:hover:bg-gray-700"
                       >
                         <svg
-                          className="w-[24px] h-[24px] text-gray-800 dark:text-white"
+                          className="w-[24px] h-[24px] text-primaryBrown dark:text-primaryBrown dark:group-hover:text-white"
                           aria-hidden="true"
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -278,16 +278,16 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                           />
                         </svg>
 
-                        <div className="ml-2">Bar Menu</div>
+                        <div className="ml-2 text-primaryBrown">Bar Menu</div>
                       </Link>
                     </li>
                   </ul>
                 )}
               </li>
               <li>
-                <div className="w-full flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                <div className="w-full flex items-center p-2 text-gray-900 rounded-lg dark:text-primaryBrown hover:bg-secondaryBrown dark:hover:bg-secondaryBrown group">
                   <svg
-                    className="w-6 h-6 text-gray-800 dark:text-white"
+                    className="w-6 h-6 text-primaryBrown dark:text-primaryBrown dark:group-hover:text-white"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -304,7 +304,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                   </svg>
                   <Link
                     href="/inventory-management"
-                    className="flex-1 ml-2 whitespace-nowrap"
+                    className="flex-1 ml-2 whitespace-nowrap text-primaryBrown"
                   >
                     Inventory
                   </Link>
@@ -320,7 +320,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                   >
                     {inventorySubCatsVisibility ? (
                       <svg
-                        className="w-[18px] h-[18px] text-gray-800 dark:text-white"
+                        className="w-[18px] h-[18px] text-primaryBrown dark:text-primaryBrown"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -361,10 +361,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <li>
                       <Link
                         href="/uom-management"
-                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-secondaryBrown text-primaryBrown dark:text-primaryBrown dark:hover:bg-secondaryBrown"
                       >
                         <svg
-                          className="w-6 h-6 text-gray-800 dark:text-white"
+                          className="w-6 h-6 text-gray-800 dark:text-primaryBrown dark:group-hover:text-white"
                           aria-hidden="true"
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -380,10 +380,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <li>
                       <Link
                         href="/stock-in-records"
-                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-secondaryBrown dark:text-primaryBrown dark:hover:bg-gray-700"
                       >
                         <svg
-                          className="w-[24px] h-[24px] text-gray-800 dark:text-white"
+                          className="w-[24px] h-[24px] text-gray-800 dark:text-primaryBrown dark:group-hover:text-white"
                           aria-hidden="true"
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -404,10 +404,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     <li>
                       <Link
                         href="/stock-out-records"
-                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        className=" text-sm flex items-center w-full p-2 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-primaryBrown dark:hover:bg-secondaryBrown"
                       >
                         <svg
-                          className="w-[24px] h-[24px] text-gray-800 dark:text-white"
+                          className="w-[24px] h-[24px] text-gray-800 dark:text-primaryBrown dark:group-hover:text-white"
                           aria-hidden="true"
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"
@@ -428,7 +428,7 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                 <li>
                   <Link
                     href="/employee-management"
-                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                    className="flex items-center p-2 text-gray-900 rounded-lg dark:text-primaryBrown hover:bg-gray-100 dark:hover:bg-secondaryBrown group"
                   >
                     <svg
                       className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -450,10 +450,10 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
               <li>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-secondaryBrown group"
                 >
                   <svg
-                    className="w-6 h-6 text-gray-800 dark:text-white"
+                    className="w-6 h-6 text-gray-800 dark:text-primaryBrown dark:group-hover:text-white"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -470,11 +470,11 @@ const FlowBiteSideBar: React.FC<FlowBiteSideBarProps> = ({
                     />
                   </svg>
 
-                  <span className="flex-1 ms-3 whitespace-nowrap">Log Out</span>
+                  <span className="flex-1 ms-3 whitespace-nowrap text-primaryBrown">Log Out</span>
                 </button>
               </li>
               <li>
-                <div className="flex-1 ms-3 whitespace-nowrap text-xs">
+                <div className="flex-1 ms-3 whitespace-nowrap text-xs text-primaryBrown">
                   Logged in as:{" "}
                   <span className="font-semibold">{loggedInEmployeeName}</span>
                 </div>

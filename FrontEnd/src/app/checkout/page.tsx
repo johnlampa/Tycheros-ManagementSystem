@@ -124,7 +124,7 @@ function OrderSummaryPage() {
         <div className="w-full h-[105px] flex justify-center items-center p-8  bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] fixed bottom-0">
           <div className="w-full flex justify-center items-center ml-[2.5px] mb-2">
             <span className="text-[20px] text-black font-semibold text-center">
-              Please proceed to counter to finalize payment
+              Please proceed to the counter to finalize payment
             </span>
           </div>
         </div>

@@ -157,7 +157,9 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                 )}
               </div>
             </>
-          ) : null}
+          ) : (
+            <div className="h-[28px]"></div>
+          )}
 
           <div className="rounded-md p-3 bg-cream text-black">
             <div className="py-1 px-2 rounded-md bg-primaryBrown w-min text-xs text-white mb-2">

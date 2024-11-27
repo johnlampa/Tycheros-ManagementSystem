@@ -67,7 +67,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
   return (
     <>
       <div
-        className={`md:w-[620px] ${type === "summary" ? "lg:w-[745px]" : "lg:w-[620px]"} ${type === "summary" ? "h-min" : "lg:h-[200px]"}  lg: flex flex-col items-center rounded-lg bg-cream p-2 md:p-4`}
+        className={`md:w-[620px] ${type === "summary" ? "lg:w-[745px]" : "lg:w-[620px]"} h-min  flex flex-col items-center rounded-lg bg-cream p-4`}
       >
         <div
           className={`w-[303.75px] md:w-[580px] ${type === "summary" ? "lg:w-[698px]" : "lg:w-[580px]"} md:h-12 rounded-md p-2 grid text-[13px] md:text-sm ${
