@@ -192,7 +192,7 @@ function PaymentDetailsPage() {
       }, 500);
     } catch (error) {
       console.error("Error:", error);
-      alert("Error processing payment or updating order status");
+      setValidationMessage("Error processing payment or updating order status");
     }
   };
 

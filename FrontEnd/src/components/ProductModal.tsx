@@ -564,7 +564,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
                   const maxSizeInBytes = 2 * 1024 * 1024;
                   if (selectedFile.size > maxSizeInBytes) {
-                    alert(
+                    setValidationMessage(
                       "File size exceeds 2MB. Please upload a smaller file."
                     );
                     e.target.value = ""; // Reset file input
