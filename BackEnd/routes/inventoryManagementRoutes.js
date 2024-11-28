@@ -104,7 +104,10 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
       si.inventoryID = ?
       AND si.quantityRemaining > 0
     ORDER BY 
-      poi.expiryDate ASC;  -- Order by expiryDate, earliest first
+      -- Place rows with expiryDate first, then sort by expiryDate ASC and stockInDate ASC
+      CASE WHEN poi.expiryDate IS NULL THEN 1 ELSE 0 END, 
+      poi.expiryDate ASC,
+      po.stockInDateTime ASC;
   `;
 
   try {
@@ -802,17 +805,27 @@ router.put('/editUoM/:unitOfMeasurementID', async (req, res) => {
   }
 
   try {
+    // Define a small tolerance value
+    const EPSILON = 1e-9; // You can adjust this value as needed
+
     // Determine the `type` based on the ratio
     let type = '';
-    if (ratio >= 1) {
-      type = 'bigger';
-    } else if (ratio > 0) {
-      type = 'smaller';
+
+    if (ratio > 0) {
+      if (Math.abs(ratio - 1) < EPSILON) {
+        type = 'reference'; // Ratio is effectively 1
+      } else if (ratio > 1) {
+        type = 'bigger'; // Ratio is greater than 1
+      } else if (ratio < 1) {
+        type = 'smaller'; // Ratio is less than 1 but greater than 0
+      }
     } else {
-      return res
-        .status(400)
-        .json({ error: 'Ratio must be greater than 0' });
+      // Handle invalid ratio (<= 0)
+      return res.status(400).json({ error: 'Ratio must be greater than 0' });
     }
+
+    // Proceed with further logic using `type`
+    console.log('Determined Type:', type);
 
     // Update the UoM in the database
     const updateUOMQuery = `

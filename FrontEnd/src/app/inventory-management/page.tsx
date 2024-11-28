@@ -214,11 +214,11 @@ export default function InventoryManagementPage() {
         }, 500);
       } else {
         const errorData = await response.json();
-        alert("Error: " + errorData.message);
+        setValidationMessage("Error: " + errorData.message);
       }
     } catch (err) {
       console.error("Error updating stock:", err);
-      alert("Error updating stock");
+      setValidationMessage("Error updating stock");
     }
   };
 
@@ -308,11 +308,11 @@ export default function InventoryManagementPage() {
         }, 500);
       } else {
         const errorData = await response.json();
-        alert("Error: " + errorData.message);
+        setValidationMessage("Error: " + errorData.message);
       }
     } catch (err) {
       console.error("Error during stock-out:", err);
-      alert("Error during stock-out");
+      setValidationMessage("Error during stock-out");
     }
   };
 
@@ -480,7 +480,7 @@ export default function InventoryManagementPage() {
       setShowEditOverlay(true);
       console.log("page, item.inventoryID: ", item.inventoryID);
     } else {
-      alert("Item not found");
+      setValidationMessage("Item not found");
     }
   };
 
@@ -578,7 +578,7 @@ export default function InventoryManagementPage() {
       );
     } catch (error) {
       console.error("Error updating inventory status:", error);
-      alert("Failed to update inventory status");
+      setValidationMessage("Failed to update inventory status");
     }
   };
 
@@ -856,19 +856,19 @@ export default function InventoryManagementPage() {
                 <button
                   onClick={goToPreviousPage}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 text-sm w-[65px] ${
+                  className={`px-4 py-2 text-sm w-[65px] dark:text-black ${
                     currentPage === 1 ? "text-white" : "underline"
                   }`}
                 >
                   Back
                 </button>
-                <span className="text-sm">
+                <span className="text-sm dark:text-black">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
                   onClick={goToNextPage}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 text-sm w-[65px] ${
+                  className={`px-4 py-2 text-sm w-[65px] dark:text-black ${
                     currentPage === totalPages ? "text-white" : "underline"
                   }`}
                 >

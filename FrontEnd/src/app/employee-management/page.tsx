@@ -363,7 +363,7 @@ if (!isAuthenticated) {
           </option>
           <option value="Owner">Owner</option>
           <option value="Manager">Manager</option>
-          <option value="Cashier">Staff</option>
+          <option value="Staff">Staff</option>
         </select>
 
        {/* Status Toggle */}
@@ -529,7 +529,7 @@ if (!isAuthenticated) {
                 </option>
                 <option value="Owner">Owner</option>
                 <option value="Manager">Manager</option>
-                <option value="Cashier">Staff</option>
+                <option value="Staff">Staff</option>
               </select>
               <input
                 type="text"

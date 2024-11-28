@@ -148,10 +148,6 @@ const StockInModal: React.FC<StockInModalProps> = ({
       if (!item.pricePerPOUoM || item.pricePerPOUoM <= 0) {
         missingFields.push(`Price Per PO UoM for ${inventoryName}`);
       }
-
-      if (!item.expiryDate || item.expiryDate.trim() === "") {
-        missingFields.push(`Expiry Date for ${inventoryName}`);
-      }
     });
 
     if (missingFields.length > 0) {
