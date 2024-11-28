@@ -319,7 +319,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
           ))}
           <button
             onClick={addInventoryItem}
-            className="bg-tealGreen text-black py-2 px-4 rounded mb-4 border-none cursor-pointer mx-auto block"
+            className="bg-white border border-black text-black py-2 px-4 rounded mb-4 w-full cursor-pointer mx-auto block"
           >
             Add Inventory Item
           </button>
@@ -332,7 +332,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="bg-tealGreen text-black py-2 px-4 rounded border-none cursor-pointer"
+              className="bg-red text-white py-2 px-4 rounded border-none cursor-pointer"
             >
               Cancel
             </button>

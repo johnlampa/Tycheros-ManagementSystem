@@ -7,6 +7,7 @@ import {
 import ValidationDialog from "@/components/ValidationDialog"; // Importing your ValidationDialog for validation messages
 import axios from "axios";
 import { FaTrashAlt } from "react-icons/fa";
+import { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
 
 interface UpdateStockModalProps {
   updateStockData: MultiItemUpdateStockData;
@@ -50,6 +51,21 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
     };
 
     fetchInventory();
+  }, []);
+
+  const [inventoryDataWithUoM, setInventoryDataWithUoM] = useState<
+    InventoryDataTypes[]
+  >([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8081/menuManagement/getAllInventoryItemsEdit")
+      .then((response) => {
+        setInventoryDataWithUoM(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching inventory data:", error);
+      });
   }, []);
 
   const updateInventoryItem = (index: number, updatedItem: any) => {
@@ -266,11 +282,24 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
               <option value="0" disabled>
                 Select Inventory Item
               </option>
-              {inventoryNames.map((inv) => (
-                <option key={inv.inventoryID} value={inv.inventoryID}>
-                  {inv.inventoryName}
-                </option>
-              ))}
+              {inventoryNames.map((inv) => {
+                // Find the matching item in inventoryItems
+                const matchingItem = inventoryDataWithUoM.find(
+                  (inventory) => inventory.inventoryID === inv.inventoryID
+                );
+
+                console.log("inv names: ", inventoryNames);
+                console.log("inv w uom: ", inventoryDataWithUoM);
+                console.log("matching item: ", matchingItem);
+
+                const unitOfMeasure = matchingItem?.unitOfMeasure || "N/A"; // Default to "N/A"
+
+                return (
+                  <option key={inv.inventoryID} value={inv.inventoryID}>
+                    {inv.inventoryName} ({unitOfMeasure})
+                  </option>
+                );
+              })}
             </select>
 
             {item.expanded && (
@@ -297,20 +326,20 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
         ))}
         <button
           onClick={addInventoryItem}
-          className="bg-tealGreen text-black py-2 px-4 rounded mb-4 w-full"
+          className="bg-white border border-black text-black py-2 px-4 rounded mb-4 w-full"
         >
           Add Inventory Item
         </button>
         <div className="flex justify-between">
           <button
             onClick={handleSubmit}
-            className="bg-tealGreen text-black py-2 px-4 rounded"
+            className="bg-tealGreen text-white py-2 px-4 rounded"
           >
             Update Stock
           </button>
           <button
             onClick={onClose}
-            className="bg-tealGreen text-black py-2 px-4 rounded"
+            className="bg-red text-white py-2 px-4 rounded"
           >
             Cancel
           </button>

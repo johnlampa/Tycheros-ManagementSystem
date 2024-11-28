@@ -188,13 +188,13 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({
           <div className="flex justify-between">
             <button
               onClick={handleSave}
-              className="bg-black text-white py-2 px-4 rounded cursor-pointer"
+              className="bg-tealGreen text-white py-2 px-4 rounded cursor-pointer"
             >
               Save
             </button>
             <button
               onClick={onCancel}
-              className="bg-black text-white py-2 px-4 rounded cursor-pointer"
+              className="bg-red text-white py-2 px-4 rounded cursor-pointer"
             >
               Cancel
             </button>
