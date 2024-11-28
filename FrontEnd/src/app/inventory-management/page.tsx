@@ -211,7 +211,7 @@ export default function InventoryManagementPage() {
         setUnfilteredInventoryData(updatedInventory);
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
+        }, 500);
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);
@@ -281,7 +281,7 @@ export default function InventoryManagementPage() {
       });
       setTimeout(() => {
         window.location.reload();
-      }, 3000);
+      }, 500);
     } catch (error) {
       console.error("Error stocking in inventory:", error);
     }
@@ -305,7 +305,7 @@ export default function InventoryManagementPage() {
         setSuccessMessage(`Item stocked out successfully`);
         setTimeout(() => {
           window.location.reload();
-        }, 3000);
+        }, 500);
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);

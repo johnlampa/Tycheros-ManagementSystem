@@ -189,7 +189,7 @@ function PaymentDetailsPage() {
       setSuccessMessage(`Payment processed and order status updated successfully`);
       setTimeout(() => {
         router.push("/order-management");
-      }, 3000);
+      }, 500);
     } catch (error) {
       console.error("Error:", error);
       alert("Error processing payment or updating order status");
