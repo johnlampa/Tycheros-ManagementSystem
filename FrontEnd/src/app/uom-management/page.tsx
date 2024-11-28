@@ -95,7 +95,7 @@ export default function Page() {
   );
   const handleAddUOMModal = (isVisible: boolean, categoryID: number) => {
     setAddUOMModalIsVisible(isVisible); // Pass boolean here
-    setSelectedCategoryID(categoryID); // Set the categoryID
+    setSelectedCategoryID(categoryID); // Set the categoryid here
   };
 
   return (
