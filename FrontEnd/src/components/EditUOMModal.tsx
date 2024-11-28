@@ -51,7 +51,7 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
       ratio,
       status: isChecked ? 1 : 0,
     };
-
+    console.log("Updated UoM", updatedUOM);
     try {
       const response = await axios.put(
         `http://localhost:8081/inventoryManagement/editUoM/${UOMToEdit?.unitOfMeasurementID}`,
@@ -62,7 +62,7 @@ const EditUOMModal: React.FC<EditUOMModalProps> = ({
         setSuccessMessage(`UoM updated successfully`);
         setEditUOMModalVisibility(false);
         setTimeout(() => {
-          window.location.reload();
+          //window.location.reload();
         }, 3000);
       }
     } catch (error) {
