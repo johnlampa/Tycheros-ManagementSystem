@@ -35,7 +35,6 @@ export default function Page() {
   >(0);
 
   const [loggedInEmployeeID, setLoggedInEmployeeID] = useState(-1);
-  const router = useRouter(); // Initialize the router for redirection
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,23 +79,23 @@ export default function Page() {
     applyFilters();
   }, [filterByDate, filterByStatus, unfilteredOrders]);
 
-  // Check if the user is logged in
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Authentication state
+  const router = useRouter();
+  // Check if the user is logged inz`
   useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
-
-      if (!loggedInEmployeeID) {
-        // Redirect to login if not logged in
-        router.push("/login");
-        return; // Exit the useEffect if not logged in
+      if (loggedInEmployeeID) {
+        setIsAuthenticated(true); // Mark as authenticated
+      } else {
+        router.push("/login"); // Redirect to login immediately
       }
-
-      setLoggedInEmployeeID(parseInt(loggedInEmployeeID)); // Set the logged-in employee ID
     }
   }, [router]);
 
-  // Fetch data only if the user is logged in
+  // Fetch data only if authenticated
   useEffect(() => {
+    if (isAuthenticated) {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
@@ -163,7 +162,13 @@ export default function Page() {
     fetchOrders();
     fetchMenuData();
     fetchPayments();
-  }, []); // Empty dependency ensures the fetch only runs once on page load
+  }
+}, [isAuthenticated]);
+
+// Render nothing while checking authentication
+if (!isAuthenticated) {
+  return null; // Prevent rendering until authentication is confirmed
+}
 
   if (loading) {
     return <div>Loading...</div>;
