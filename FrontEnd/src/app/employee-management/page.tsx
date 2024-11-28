@@ -43,11 +43,18 @@ export default function EmployeeManagement() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
+      const loggedInEmployeeIDDesignation =localStorage.getItem("designation");
+      console.log("local storage designation: ", loggedInEmployeeIDDesignation)
       if (loggedInEmployeeID) {
-        setIsAuthenticated(true); // Mark as authenticated
+        if (loggedInEmployeeIDDesignation === "Staff") {
+          router.push("/order-management"); // Redirect to order-management if designation is Staff
+        } else {
+          setIsAuthenticated(true); // Mark as authenticated for non-staff
+        }
       } else {
-        router.push("/login"); // Redirect to login immediately
+        router.push("/login"); // Redirect to login if not logged in
       }
+      
     }
   }, [router]);
 

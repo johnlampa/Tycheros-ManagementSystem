@@ -322,7 +322,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
           <div className="flex justify-between">
             <button
               onClick={handleSubmit}
-              className="bg-tealGreen text-black py-2 px-4 rounded border-none cursor-pointer"
+              className="bg-tealGreen text-white py-2 px-4 rounded border-none cursor-pointer"
             >
               Stock In
             </button>

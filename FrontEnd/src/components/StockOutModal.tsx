@@ -331,7 +331,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
         <div className="flex justify-between">
           <button
             onClick={handleSubmit}
-            className="bg-tealGreen text-black py-2 px-4 rounded"
+            className="bg-tealGreen text-white py-2 px-4 rounded"
           >
             Stock Out
           </button>
