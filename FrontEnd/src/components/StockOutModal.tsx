@@ -323,7 +323,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
         <button
           onClick={addInventoryItem}
-          className="bg-tealGreen text-black py-2 px-4 rounded mb-4 w-full"
+          className="bg-white border border-black text-black py-2 px-4 rounded mb-4 w-full"
         >
           Add Inventory Item
         </button>
@@ -337,7 +337,7 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
           </button>
           <button
             onClick={onClose}
-            className="bg-tealGreen text-black py-2 px-4 rounded"
+            className="bg-red text-white py-2 px-4 rounded"
           >
             Cancel
           </button>
