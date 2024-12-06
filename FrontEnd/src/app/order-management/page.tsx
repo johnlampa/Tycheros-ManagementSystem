@@ -86,6 +86,8 @@ export default function Page() {
     if (typeof window !== "undefined") {
       const loggedInEmployeeID = localStorage.getItem("loggedInEmployeeID");
       if (loggedInEmployeeID) {
+        setLoggedInEmployeeID(parseInt(loggedInEmployeeID));
+        console.log("Employee ID: ", loggedInEmployeeID);
         setIsAuthenticated(true); // Mark as authenticated
       } else {
         router.push("/login"); // Redirect to login immediately

@@ -294,7 +294,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     }
                     className="mb-2 p-2 w-full text-black border border-black rounded"
                   />
-                  <label className="text-black">Expiry Date </label>
+                  <label className="text-black">Expiry Date (Optional)</label>
                   <input
                     type="date"
                     min={new Date().toISOString().split("T")[0]}

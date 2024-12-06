@@ -327,7 +327,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       setProductModalVisibility(false);
       setTimeout(() => {
         window.location.reload();
-      }, 3000);
+      }, 500);
     } catch (error) {
       console.error("Error submitting product:", error);
     } finally {

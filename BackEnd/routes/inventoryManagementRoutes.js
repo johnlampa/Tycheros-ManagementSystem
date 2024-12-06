@@ -271,12 +271,13 @@ router.post('/stockInInventoryItem', async (req, res) => {
 
       const conversionRatio = unitResult[0].ratio;
       const convertedQuantity = quantityOrdered * conversionRatio;
+      const expiryDateValue = expiryDate || null;
 
       // Insert into the purchaseorderitem table
       const [purchaseOrderItemResult] = await connection.query(
         `INSERT INTO purchaseorderitem (quantityOrdered, pricePerPOUoM, expiryDate, unitOfMeasurementID, purchaseOrderID) 
          VALUES (?, ?, ?, ?, ?)`,
-        [quantityOrdered, pricePerPOUoM, expiryDate, unitOfMeasurementID, purchaseOrderID]
+        [quantityOrdered, pricePerPOUoM, expiryDateValue, unitOfMeasurementID, purchaseOrderID]
       );
       const purchaseOrderItemID = purchaseOrderItemResult.insertId;
 

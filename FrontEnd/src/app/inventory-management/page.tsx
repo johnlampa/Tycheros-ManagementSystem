@@ -281,7 +281,7 @@ export default function InventoryManagementPage() {
       });
       setTimeout(() => {
         window.location.reload();
-      }, 500);
+      }, 300);
     } catch (error) {
       console.error("Error stocking in inventory:", error);
     }

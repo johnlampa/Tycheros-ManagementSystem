@@ -307,7 +307,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
                 <div className="mb-2">
                   <input
                     type="number"
-                    placeholder="Quantity"
+                    placeholder="Total Quantity"
                     value={
                       item.quantityToUpdate === 0 ? "" : item.quantityToUpdate
                     }

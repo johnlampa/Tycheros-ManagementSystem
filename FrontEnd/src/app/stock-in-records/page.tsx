@@ -178,7 +178,7 @@ export default function InventoryManagementPage() {
         <input
           type="search"
           placeholder="&#x1F50D; Search Supplier Name"
-          className="border border-black py-2 px-3 text-sm rounded w-[320px] mt-5"
+          className="border border-black py-2 px-3 text-sm text-black rounded w-[320px] mt-5"
           onChange={(e) => setSearchBySupplierName(e.target.value)}
         ></input>
 

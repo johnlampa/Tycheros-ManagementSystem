@@ -276,10 +276,19 @@ if (!isAuthenticated) {
               >
                 {/* Status and Designation Section */}
                 <div className="flex gap-x-1 mb-2">
-                  {/* Designation */}
-                  <div className="py-1 px-2 rounded-md bg-tealGreen w-min text-xs text-white">
+                    {/* Designation */}
+                    <div className="py-1 px-2 rounded-md bg-black w-min text-xs text-white">
                     {employee.designation}
                   </div>
+                  {employee.status === "Active" ? (
+                    <div className="py-1 px-2 rounded-md bg-tealGreen w-min text-xs text-white">
+                      Active
+                    </div>
+                  ) : (
+                    <div className="py-1 px-2 rounded-md bg-gray w-min text-xs text-white">
+                      Inactive
+                    </div>
+                  )}
                 </div>
   
                 {/* Header Section */}
